@@ -155,10 +155,8 @@ class _WalletScreenState extends State<WalletScreen> {
                 ],
                 savingsHistory:      wallet.savingsHistory,
                 monthlySpendHistory: wallet.monthlySpendHistory,
-                academicsBalance:    wallet.remainingForCategory(WalletExpenseCategory.school),
-                discretionaryBalance: wallet.totalForCategory(WalletExpenseCategory.other) +
-                                      wallet.totalForCategory(WalletExpenseCategory.food) +
-                                      wallet.totalForCategory(WalletExpenseCategory.transport),
+                schoolTotal: wallet.totalForCategory(WalletExpenseCategory.school),
+                healthTotal: wallet.totalForCategory(WalletExpenseCategory.health),
               ),
             ),
           ),
@@ -224,6 +222,8 @@ class _WalletScreenState extends State<WalletScreen> {
                         WalletStore.instance.removeExpense(index),
                     onAddToSavings: (amount, note) =>
                         WalletStore.instance.addToSavings(amount, note: note),
+                    onWithdrawFromSavings: (amount, note) =>
+                        WalletStore.instance.withdrawFromSavings(amount, note: note),
                     onClearSavingsLog: () =>
                         WalletStore.instance.clearSavingsLog(),
                   ),
@@ -264,9 +264,8 @@ class _WalletBackground extends StatelessWidget {
   final List<_HighPriorityBreakdown> highPriorityBreakdown;
   final List<SavingsPoint> savingsHistory;
   final List<MonthlySpendPoint> monthlySpendHistory;
-  // Academics and discretionary remaining balances
-  final double academicsBalance;
-  final double discretionaryBalance;
+  final double schoolTotal;
+  final double healthTotal;
 
   const _WalletBackground({
     required this.dailyAllowance,
@@ -278,8 +277,8 @@ class _WalletBackground extends StatelessWidget {
     required this.highPriorityBreakdown,
     required this.savingsHistory,
     required this.monthlySpendHistory,
-    required this.academicsBalance,
-    required this.discretionaryBalance,
+    required this.schoolTotal,
+    required this.healthTotal,
   });
 
   @override
@@ -360,8 +359,8 @@ class _WalletBackground extends StatelessWidget {
             title: 'High Priority Expenses Breakdown',
             child: _HighPrioritySection(
               items: highPriorityBreakdown,
-              academicsBalance: academicsBalance,
-              discretionaryBalance: discretionaryBalance,
+              schoolTotal: schoolTotal,
+              healthTotal: healthTotal,
             ),
           ),
 
@@ -450,33 +449,45 @@ class _SummaryCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          if (showProgress) ...[
-            ClipRRect(
-              borderRadius: BorderRadius.circular(3),
-              child: LinearProgressIndicator(
-                value: progressValue,
-                minHeight: 4,
-                backgroundColor: kWhite.withOpacity(0.12),
-                valueColor: AlwaysStoppedAnimation<Color>(
-                    progressColor ?? const Color(0xFFE87070)),
-              ),
-            ),
-            const SizedBox(height: 3),
-            Text(
-              progressLabel ?? '',
-              style: TextStyle(
-                color: kWhite.withOpacity(0.5),
-                fontSize: 9,
-              ),
-            ),
-          ] else
-            Text(
-              subtitle ?? '',
-              style: TextStyle(
-                color: kWhite.withOpacity(0.5),
-                fontSize: 10,
-              ),
-            ),
+          // Fixed-height bottom section keeps all three cards the same height.
+          SizedBox(
+            height: 24,
+            child: showProgress
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(3),
+                        child: LinearProgressIndicator(
+                          value: progressValue,
+                          minHeight: 4,
+                          backgroundColor: kWhite.withOpacity(0.12),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              progressColor ?? const Color(0xFFE87070)),
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        progressLabel ?? '',
+                        style: TextStyle(
+                          color: kWhite.withOpacity(0.5),
+                          fontSize: 9,
+                        ),
+                      ),
+                    ],
+                  )
+                : Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      subtitle ?? '',
+                      style: TextStyle(
+                        color: kWhite.withOpacity(0.5),
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+          ),
         ],
       ),
     );
@@ -730,13 +741,13 @@ class _MonthlySpendLinePainter extends CustomPainter {
 // ─────────────────────────────────────────────────────────────
 class _HighPrioritySection extends StatelessWidget {
   final List<_HighPriorityBreakdown> items;
-  final double academicsBalance;
-  final double discretionaryBalance;
+  final double schoolTotal;
+  final double healthTotal;
 
   const _HighPrioritySection({
     required this.items,
-    required this.academicsBalance,
-    required this.discretionaryBalance,
+    required this.schoolTotal,
+    required this.healthTotal,
   });
 
   @override
@@ -745,22 +756,26 @@ class _HighPrioritySection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Expanded(
-          flex: 5,
+          flex: 7,
           child: _HighPriorityDonut(items: items),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 8),
         Expanded(
           flex: 3,
           child: Column(
             children: [
               _BalanceCard(
-                label: 'Academics',
-                balance: academicsBalance > 0 ? academicsBalance : null,
+                label: 'School',
+                icon: Icons.school_rounded,
+                color: const Color(0xFF9B88E8),
+                total: schoolTotal > 0 ? schoolTotal : null,
               ),
               const SizedBox(height: 10),
               _BalanceCard(
-                label: 'Discretionary',
-                balance: discretionaryBalance > 0 ? discretionaryBalance : null,
+                label: 'Health',
+                icon: Icons.favorite_rounded,
+                color: const Color(0xFF3BBFA3),
+                total: healthTotal > 0 ? healthTotal : null,
               ),
             ],
           ),
@@ -775,16 +790,23 @@ class _HighPrioritySection extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────
 class _BalanceCard extends StatelessWidget {
   final String label;
-  final double? balance;
+  final IconData icon;
+  final Color color;
+  final double? total;
 
-  const _BalanceCard({required this.label, this.balance});
+  const _BalanceCard({
+    required this.label,
+    required this.icon,
+    required this.color,
+    this.total,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final isEmpty = balance == null;
+    final isEmpty = total == null;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
         color: kNavyDark.withOpacity(0.35),
         borderRadius: BorderRadius.circular(14),
@@ -793,26 +815,32 @@ class _BalanceCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: const TextStyle(
-              color: kWhite,
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-            ),
+          Row(
+            children: [
+              Icon(icon, size: 11, color: color),
+              const SizedBox(width: 5),
+              Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 4),
           Text(
-            isEmpty ? '—' : '₱${balance!.toStringAsFixed(2)}',
+            isEmpty ? '—' : '₱${total!.toStringAsFixed(2)}',
             style: TextStyle(
               color: isEmpty ? kWhite.withOpacity(0.25) : kWhite,
-              fontSize: 18,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 2),
           Text(
-            'Balance',
+            'Total spent',
             style: TextStyle(
               color: kWhite.withOpacity(0.4),
               fontSize: 10,
@@ -850,19 +878,15 @@ class _HighPriorityDonut extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    isEmpty
-                        ? '0%'
-                        : '${(items.reduce((a, b) => a.amount > b.amount ? a : b).amount / total * 100).round()}%',
+                    isEmpty ? '₱0' : '₱${total.toStringAsFixed(0)}',
                     style: const TextStyle(
                       color: kWhite,
-                      fontSize: 18,
+                      fontSize: 15,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    isEmpty
-                        ? 'No data'
-                        : items.reduce((a, b) => a.amount > b.amount ? a : b).label,
+                    'Total',
                     style: TextStyle(
                       color: kWhite.withOpacity(0.6),
                       fontSize: 9,
@@ -876,7 +900,7 @@ class _HighPriorityDonut extends StatelessWidget {
 
         const SizedBox(width: 10),
 
-        Flexible(
+        Expanded(
           child: isEmpty
               ? Text(
                   'No expenses\nadded yet',
@@ -901,25 +925,29 @@ class _HighPriorityDonut extends StatelessWidget {
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      item.label,
-                                      style: const TextStyle(
-                                        color: kWhite,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        item.label,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color: kWhite,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      '₱${item.amount.toStringAsFixed(2)}',
-                                      style: TextStyle(
-                                        color: kWhite.withOpacity(0.5),
-                                        fontSize: 11,
+                                      Text(
+                                        '₱${item.amount.toStringAsFixed(0)}  ·  ${(item.amount / total * 100).round()}%',
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: kWhite.withOpacity(0.5),
+                                          fontSize: 11,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),

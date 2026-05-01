@@ -158,15 +158,7 @@ class _AppDrawerState extends State<AppDrawer>
                           const SizedBox(height: 2),
                           // Secondary identity: Discord-style username#tag.
                           () {
-                            final tag      = AuthStore.instance.userTag;
-                            final username = AuthStore.instance.username;
-                            if (username.isNotEmpty && tag.isNotEmpty) {
-                              return Text(
-                                '$username$tag',
-                                style: const TextStyle(
-                                    color: kWhite, fontSize: 12),
-                              );
-                            }
+                            final tag      = AuthStore.instance.userTag;                           
                             if (tag.isNotEmpty) {
                               return Text(tag,
                                   style: const TextStyle(

@@ -27,7 +27,7 @@ Future<void> showBudgetEditSheet(BuildContext context) =>
 // ─────────────────────────────────────────────────────────────
 // Entry type
 // ─────────────────────────────────────────────────────────────
-enum _EntryType { expense, allowance, savings, budget }
+enum _EntryType { expense, allowance, budget }
 
 // ─────────────────────────────────────────────────────────────
 // Sheet
@@ -135,9 +135,6 @@ class _CreateWalletEntrySheetState extends State<_CreateWalletEntrySheet>
         break;
       case _EntryType.allowance:
         await WalletStore.instance.setDailyAllowance(amount);
-        break;
-      case _EntryType.savings:
-        await WalletStore.instance.setSavings(amount);
         break;
       case _EntryType.budget:
         await WalletStore.instance.setMonthlyBudget(amount);
@@ -476,7 +473,6 @@ class _SimpleSection extends StatelessWidget {
 
     final double current = switch (entryType) {
       _EntryType.allowance => store.dailyAllowance,
-      _EntryType.savings   => store.savings,
       _EntryType.budget    => store.monthlyBudget,
       _EntryType.expense   => 0,
     };
@@ -697,14 +693,6 @@ const _tabConfig = <_EntryType, _TabConfig>{
     icon:  Icons.credit_card_rounded,
     color: Color(0xFF4A90D9),
   ),
-  _EntryType.savings: _TabConfig(
-    fieldLabel:   'Savings Amount',
-    currentLabel: 'CURRENT SAVINGS',
-    valueSuffix:  '',
-    tip: 'Update your total saved amount. Useful for tracking a savings goal or a separate fund.',
-    icon:  Icons.savings_rounded,
-    color: Color(0xFF3BBFA3),
-  ),
   _EntryType.budget: _TabConfig(
     fieldLabel:   'Monthly Budget',
     currentLabel: 'CURRENT BUDGET',
@@ -727,7 +715,6 @@ class _TypeSelector extends StatelessWidget {
   static const _tabs = [
     (type: _EntryType.expense,   label: 'Expense',   icon: Icons.receipt_rounded),
     (type: _EntryType.allowance, label: 'Allowance', icon: Icons.credit_card_rounded),
-    (type: _EntryType.savings,   label: 'Savings',   icon: Icons.savings_rounded),
     (type: _EntryType.budget,    label: 'Budget',    icon: Icons.account_balance_wallet_rounded),
   ];
 

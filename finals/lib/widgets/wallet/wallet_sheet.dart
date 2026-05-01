@@ -52,6 +52,11 @@ enum WalletExpenseCategory {
   }
 }
 
+// ─────────────────────────────────────────────────────────────
+// Sort options for expense lists
+// ─────────────────────────────────────────────────────────────
+enum _WalletSortBy { dueDate, amount, status, category }
+
 class WalletExpense {
   final String name;
   final double amount;
@@ -161,7 +166,7 @@ class WalletExpense {
 // ─────────────────────────────────────────────────────────────
 // WalletSheet
 // ─────────────────────────────────────────────────────────────
-class WalletSheet extends StatelessWidget {
+class WalletSheet extends StatefulWidget {
   final ScrollController scrollController;
 
   final double dailyAllowance;
@@ -176,6 +181,7 @@ class WalletSheet extends StatelessWidget {
   final void Function(int index)? onTogglePaid;
   final void Function(int index)? onDeleteExpense;
   final void Function(double amount, String? note)? onAddToSavings;
+  final void Function(double amount, String? note)? onWithdrawFromSavings;
   final VoidCallback? onClearSavingsLog;
 
   const WalletSheet({
@@ -191,15 +197,83 @@ class WalletSheet extends StatelessWidget {
     this.onTogglePaid,
     this.onDeleteExpense,
     this.onAddToSavings,
+    this.onWithdrawFromSavings,
     this.onClearSavingsLog,
   });
 
+  @override
+  State<WalletSheet> createState() => _WalletSheetState();
+}
+
+class _WalletSheetState extends State<WalletSheet> {
   static const double _headerHeight = 147.0;
+
+  _WalletSortBy _upcomingSort = _WalletSortBy.dueDate;
+  _WalletSortBy _recentSort   = _WalletSortBy.dueDate;
+
+  List<WalletExpense> _sorted(List<WalletExpense> list, _WalletSortBy sort) {
+    final copy = List<WalletExpense>.from(list);
+    switch (sort) {
+      case _WalletSortBy.dueDate:
+        copy.sort((a, b) {
+          if (a.dueDate == null && b.dueDate == null) return 0;
+          if (a.dueDate == null) return 1;
+          if (b.dueDate == null) return -1;
+          return a.dueDate!.compareTo(b.dueDate!);
+        });
+        break;
+      case _WalletSortBy.amount:
+        copy.sort((a, b) => b.amount.compareTo(a.amount));
+        break;
+      case _WalletSortBy.status:
+        const order = {
+          WalletExpenseStatus.overdue: 0,
+          WalletExpenseStatus.unpaid:  1,
+          WalletExpenseStatus.paid:    2,
+        };
+        copy.sort((a, b) => order[a.status]!.compareTo(order[b.status]!));
+        break;
+      case _WalletSortBy.category:
+        copy.sort((a, b) => a.category.label.compareTo(b.category.label));
+        break;
+    }
+    return copy;
+  }
+
+  String _sortLabel(_WalletSortBy s) {
+    switch (s) {
+      case _WalletSortBy.dueDate:  return 'Due Date';
+      case _WalletSortBy.amount:   return 'Amount';
+      case _WalletSortBy.status:   return 'Status';
+      case _WalletSortBy.category: return 'Category';
+    }
+  }
+
+  void _showSortSheet({
+    required _WalletSortBy current,
+    required ValueChanged<_WalletSortBy> onChanged,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => _WalletSortSheet(
+        currentSort: current,
+        onSortChanged: (s) {
+          setState(() => onChanged(s));
+          Navigator.pop(context);
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final sortedUpcoming = _sorted(widget.upcoming, _upcomingSort);
+    final sortedRecent   = _sorted(widget.recent,   _recentSort);
+
     return CustomScrollView(
-      controller: scrollController,
+      controller: widget.scrollController,
       physics: const ClampingScrollPhysics(),
       slivers: [
         // ── Pinned header ────────────────────────────────────────────────
@@ -214,12 +288,12 @@ class WalletSheet extends StatelessWidget {
           flexibleSpace: FlexibleSpaceBar(
             collapseMode: CollapseMode.none,
             background: _WalletSheetHeader(
-              dailyAllowance: dailyAllowance,
-              savings: savings,
-              monthlyBudget: monthlyBudget,
-              budgetUsed: budgetUsed,
-              upcomingCount: upcoming.length,
-              onAddToSavings: onAddToSavings,
+              dailyAllowance: widget.dailyAllowance,
+              savings: widget.savings,
+              monthlyBudget: widget.monthlyBudget,
+              budgetUsed: widget.budgetUsed,
+              upcomingCount: widget.upcoming.length,
+              onAddToSavings: widget.onAddToSavings,
             ),
           ),
         ),
@@ -228,12 +302,18 @@ class WalletSheet extends StatelessWidget {
         SliverToBoxAdapter(
           child: _SheetSectionHeader(
             title: 'Upcoming Expenses',
-            onSort: () {},
+            sortLabel: _sortLabel(_upcomingSort),
+            onSort: widget.upcoming.isNotEmpty
+                ? () => _showSortSheet(
+                    current: _upcomingSort,
+                    onChanged: (s) => _upcomingSort = s,
+                  )
+                : null,
           ),
         ),
         SliverToBoxAdapter(child: const SizedBox(height: 8)),
 
-        if (upcoming.isEmpty)
+        if (sortedUpcoming.isEmpty)
           SliverToBoxAdapter(
             child: _SheetEmptyState(
               icon: Icons.event_available_rounded,
@@ -247,19 +327,19 @@ class WalletSheet extends StatelessWidget {
                 // Cast to IndexedExpense so we read the real store index.
                 // Extension getters are resolved statically in Dart and cannot
                 // be overridden, so _storeIndex always returned null before.
-                final item = upcoming[i] as IndexedExpense;
+                final item = sortedUpcoming[i] as IndexedExpense;
                 final idx  = item.storeIndex;
                 return _ExpenseItem(
                   expense: item,
-                  onTogglePaid: onTogglePaid != null
-                      ? () => onTogglePaid!(idx)
+                  onTogglePaid: widget.onTogglePaid != null
+                      ? () => widget.onTogglePaid!(idx)
                       : null,
-                  onDelete: onDeleteExpense != null
-                      ? () => onDeleteExpense!(idx)
+                  onDelete: widget.onDeleteExpense != null
+                      ? () => widget.onDeleteExpense!(idx)
                       : null,
                 );
               },
-              childCount: upcoming.length,
+              childCount: sortedUpcoming.length,
             ),
           ),
 
@@ -268,12 +348,18 @@ class WalletSheet extends StatelessWidget {
         SliverToBoxAdapter(
           child: _SheetSectionHeader(
             title: 'Recent Expenses',
-            onSort: () {},
+            sortLabel: _sortLabel(_recentSort),
+            onSort: widget.recent.isNotEmpty
+                ? () => _showSortSheet(
+                    current: _recentSort,
+                    onChanged: (s) => _recentSort = s,
+                  )
+                : null,
           ),
         ),
         SliverToBoxAdapter(child: const SizedBox(height: 8)),
 
-        if (recent.isEmpty)
+        if (sortedRecent.isEmpty)
           SliverToBoxAdapter(
             child: _SheetEmptyState(
               icon: Icons.receipt_long_rounded,
@@ -284,19 +370,19 @@ class WalletSheet extends StatelessWidget {
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, i) {
-                final item = recent[i] as IndexedExpense;
+                final item = sortedRecent[i] as IndexedExpense;
                 final idx  = item.storeIndex;
                 return _ExpenseItem(
                   expense: item,
-                  onTogglePaid: onTogglePaid != null
-                      ? () => onTogglePaid!(idx)
+                  onTogglePaid: widget.onTogglePaid != null
+                      ? () => widget.onTogglePaid!(idx)
                       : null,
-                  onDelete: onDeleteExpense != null
-                      ? () => onDeleteExpense!(idx)
+                  onDelete: widget.onDeleteExpense != null
+                      ? () => widget.onDeleteExpense!(idx)
                       : null,
                 );
               },
-              childCount: recent.length,
+              childCount: sortedRecent.length,
             ),
           ),
 
@@ -309,7 +395,7 @@ class WalletSheet extends StatelessWidget {
               action: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (onClearSavingsLog != null && savingsLog.isNotEmpty)
+                  if (widget.onClearSavingsLog != null && widget.savingsLog.isNotEmpty)
                     GestureDetector(
                       onTap: () async {
                         final confirmed = await showModalBottomSheet<bool>(
@@ -441,7 +527,7 @@ class WalletSheet extends StatelessWidget {
                             ),
                           ),
                         );
-                        if (confirmed == true) onClearSavingsLog!();
+                        if (confirmed == true) widget.onClearSavingsLog!();
                       },
                       child: const Row(
                         children: [
@@ -456,10 +542,41 @@ class WalletSheet extends StatelessWidget {
                         ],
                       ),
                     ),
-                  if (onClearSavingsLog != null && savingsLog.isNotEmpty &&
-                      onAddToSavings != null)
+                  if (widget.onClearSavingsLog != null && widget.savingsLog.isNotEmpty &&
+                      widget.onAddToSavings != null)
                     const SizedBox(width: 12),
-                  if (onAddToSavings != null)
+                  if (widget.onWithdrawFromSavings != null && widget.savings > 0)
+                    GestureDetector(
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (_) => _WithdrawSheet(
+                            savings: widget.savings,
+                            onWithdraw: (amount, note) {
+                              widget.onWithdrawFromSavings!(amount, note);
+                            },
+                          ),
+                        );
+                      },
+                      child: const Row(
+                        children: [
+                          Text('Withdraw',
+                              style: TextStyle(
+                                  color: Color(0xFF9B88E8),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600)),
+                          SizedBox(width: 3),
+                          Icon(Icons.arrow_circle_down_rounded,
+                              color: Color(0xFF9B88E8), size: 16),
+                        ],
+                      ),
+                    ),
+                  if (widget.onWithdrawFromSavings != null && widget.savings > 0 &&
+                      widget.onAddToSavings != null)
+                    const SizedBox(width: 12),
+                  if (widget.onAddToSavings != null)
                     GestureDetector(
                       onTap: () {
                         final amountController = TextEditingController();
@@ -557,7 +674,7 @@ class WalletSheet extends StatelessWidget {
                                             ? null
                                             : noteController.text.trim();
                                         Navigator.pop(context);
-                                        onAddToSavings!(amount, note);
+                                        widget.onAddToSavings!(amount, note);
                                       },
                                       child: const Text('Save',
                                           style: TextStyle(
@@ -591,7 +708,7 @@ class WalletSheet extends StatelessWidget {
         ),
         SliverToBoxAdapter(child: const SizedBox(height: 8)),
 
-        if (savingsLog.isEmpty)
+        if (widget.savingsLog.isEmpty)
           SliverToBoxAdapter(
             child: _SheetEmptyState(
               icon: Icons.savings_rounded,
@@ -602,10 +719,10 @@ class WalletSheet extends StatelessWidget {
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, i) {
-                final entry = savingsLog[savingsLog.length - 1 - i]; // newest first
+                final entry = widget.savingsLog[widget.savingsLog.length - 1 - i]; // newest first
                 return _SavingsLogItem(entry: entry);
               },
-              childCount: savingsLog.length,
+              childCount: widget.savingsLog.length,
             ),
           ),
 
@@ -929,10 +1046,11 @@ class _CompactStat extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────
 class _SheetSectionHeader extends StatelessWidget {
   final String title;
+  final String? sortLabel;
   final VoidCallback? onSort;
   final Widget? action;
 
-  const _SheetSectionHeader({required this.title, this.onSort, this.action});
+  const _SheetSectionHeader({required this.title, this.sortLabel, this.onSort, this.action});
 
   @override
   Widget build(BuildContext context) {
@@ -954,17 +1072,217 @@ class _SheetSectionHeader extends StatelessWidget {
           else
             GestureDetector(
               onTap: onSort,
-              child: const Row(
-                children: [
-                  Text('Sorted by',
-                      style: TextStyle(color: Color(0xFF6B7A99), fontSize: 12)),
-                  SizedBox(width: 3),
-                  Icon(Icons.arrow_drop_down,
-                      color: Color(0xFF6B7A99), size: 18),
-                ],
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 150),
+                opacity: onSort != null ? 1.0 : 0.35,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF6B7A99).withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFF6B7A99).withOpacity(0.18)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.sort_rounded, size: 12, color: Color(0xFF6B7A99)),
+                      const SizedBox(width: 4),
+                      Text(
+                        sortLabel ?? 'Sort',
+                        style: const TextStyle(color: Color(0xFF6B7A99), fontSize: 11, fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(width: 3),
+                      const Icon(Icons.keyboard_arrow_down_rounded, size: 12, color: Color(0xFF6B7A99)),
+                    ],
+                  ),
+                ),
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Sort sheet — mirrors _ManageSheet from task_home_sheet (sort only)
+// ─────────────────────────────────────────────────────────────
+class _WalletSortSheet extends StatelessWidget {
+  final _WalletSortBy currentSort;
+  final ValueChanged<_WalletSortBy> onSortChanged;
+
+  const _WalletSortSheet({
+    required this.currentSort,
+    required this.onSortChanged,
+  });
+
+  static const _sorts = [
+    (_WalletSortBy.dueDate,  Icons.schedule_rounded,          'Due Date',  'Earliest first'),
+    (_WalletSortBy.amount,   Icons.attach_money_rounded,       'Amount',    'Highest first'),
+    (_WalletSortBy.status,   Icons.timelapse_rounded,          'Status',    'Overdue → Paid'),
+    (_WalletSortBy.category, Icons.label_rounded,              'Category',  'Food → Transport'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final maxH = MediaQuery.of(context).size.height * 0.70;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
+      constraints: BoxConstraints(maxHeight: maxH),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1B2D5B),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 40, offset: const Offset(0, -4))],
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle
+            Container(
+              width: 36, height: 4,
+              margin: const EdgeInsets.only(top: 14, bottom: 18),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.18),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 22),
+              child: Row(children: [
+                Container(
+                  width: 42, height: 42,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF3BBFA3).withOpacity(0.14),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: const Color(0xFF3BBFA3).withOpacity(0.3), width: 1.5),
+                  ),
+                  child: const Icon(Icons.tune_rounded, color: Color(0xFF3BBFA3), size: 21),
+                ),
+                const SizedBox(width: 13),
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  const Text('Sort Expenses', style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold)),
+                  Text('Choose how to order the list', style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 12)),
+                ]),
+              ]),
+            ),
+
+            const SizedBox(height: 16),
+            Divider(color: Colors.white.withOpacity(0.07), thickness: 1, indent: 22, endIndent: 22),
+            const SizedBox(height: 6),
+
+            // Sort by label
+            Padding(
+              padding: const EdgeInsets.fromLTRB(22, 2, 22, 10),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text('SORT BY', style: TextStyle(color: Colors.white.withOpacity(0.28), fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.2)),
+              ),
+            ),
+
+            // Sort options
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 0, 14, 22),
+              child: Column(
+                children: _sorts.map((s) {
+                  final selected = s.$1 == currentSort;
+                  const c = Color(0xFF3BBFA3);
+                  return _WalletSortRow(
+                    icon: s.$2,
+                    iconColor: selected ? c : Colors.white.withOpacity(0.4),
+                    label: s.$3,
+                    subtitle: s.$4,
+                    selected: selected,
+                    accentColor: c,
+                    onTap: () => onSortChanged(s.$1),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Single sort row ───────────────────────────────────────────
+class _WalletSortRow extends StatefulWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String label;
+  final String subtitle;
+  final bool selected;
+  final Color accentColor;
+  final VoidCallback? onTap;
+
+  const _WalletSortRow({
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+    required this.subtitle,
+    required this.selected,
+    required this.accentColor,
+    this.onTap,
+  });
+
+  @override
+  State<_WalletSortRow> createState() => _WalletSortRowState();
+}
+
+class _WalletSortRowState extends State<_WalletSortRow> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = widget.accentColor;
+    final active = widget.selected || _pressed;
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) { setState(() => _pressed = false); widget.onTap?.call(); },
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 120),
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        decoration: BoxDecoration(
+          color: active ? c.withOpacity(0.10) : Colors.white.withOpacity(0.04),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: active ? c.withOpacity(0.45) : Colors.white.withOpacity(0.07),
+            width: 1.2,
+          ),
+        ),
+        child: Row(children: [
+          Container(
+            width: 38, height: 38,
+            decoration: BoxDecoration(
+              color: widget.iconColor.withOpacity(active ? 0.18 : 0.10),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(widget.icon, color: widget.iconColor, size: 18),
+          ),
+          const SizedBox(width: 12),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(widget.label, style: TextStyle(
+              color: Colors.white,
+              fontSize: 14, fontWeight: FontWeight.w600,
+            )),
+            const SizedBox(height: 2),
+            Text(widget.subtitle, style: TextStyle(color: Colors.white.withOpacity(0.35), fontSize: 11)),
+          ])),
+          if (widget.selected)
+            Container(
+              width: 22, height: 22,
+              decoration: BoxDecoration(color: c, shape: BoxShape.circle),
+              child: const Icon(Icons.check_rounded, color: Colors.white, size: 14),
+            )
+          else
+            Icon(Icons.chevron_right_rounded, color: Colors.white.withOpacity(0.18), size: 18),
+        ]),
       ),
     );
   }
@@ -1265,6 +1583,7 @@ class _SavingsLogItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final dateStr =
         '${entry.date.day}/${entry.date.month}/${entry.date.year}';
+    final isWithdrawal = entry.amount < 0;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
       child: Row(
@@ -1273,11 +1592,20 @@ class _SavingsLogItem extends StatelessWidget {
             width: 34,
             height: 34,
             decoration: BoxDecoration(
-              color: const Color(0xFF3BBFA3).withOpacity(0.12),
+              color: isWithdrawal
+                  ? const Color(0xFF9B88E8).withOpacity(0.12)
+                  : const Color(0xFF3BBFA3).withOpacity(0.12),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.savings_rounded,
-                color: Color(0xFF3BBFA3), size: 17),
+            child: Icon(
+              isWithdrawal
+                  ? Icons.arrow_circle_down_rounded
+                  : Icons.savings_rounded,
+              color: isWithdrawal
+                  ? const Color(0xFF9B88E8)
+                  : const Color(0xFF3BBFA3),
+              size: 17,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1288,7 +1616,7 @@ class _SavingsLogItem extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      entry.note ?? 'Savings',
+                      entry.note ?? (isWithdrawal ? 'Withdrawal' : 'Savings'),
                       style: const TextStyle(
                         color: kNavyDark,
                         fontSize: 14,
@@ -1296,9 +1624,11 @@ class _SavingsLogItem extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '+₱${entry.amount.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        color: Color(0xFF3BBFA3),
+                      '${isWithdrawal ? "–" : "+"}₱${entry.amount.abs().toStringAsFixed(2)}',
+                      style: TextStyle(
+                        color: isWithdrawal
+                            ? const Color(0xFF9B88E8)
+                            : const Color(0xFF3BBFA3),
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1361,4 +1691,178 @@ class IndexedExpense extends WalletExpense {
 
   @override
   int? get _storeIndex => storeIndex;
+}
+// ─────────────────────────────────────────────────────────────
+// Withdraw sheet — StatefulWidget so we can show inline errors
+// ─────────────────────────────────────────────────────────────
+class _WithdrawSheet extends StatefulWidget {
+  final double savings;
+  final void Function(double amount, String? note) onWithdraw;
+
+  const _WithdrawSheet({required this.savings, required this.onWithdraw});
+
+  @override
+  State<_WithdrawSheet> createState() => _WithdrawSheetState();
+}
+
+class _WithdrawSheetState extends State<_WithdrawSheet> {
+  final _amountController = TextEditingController();
+  final _noteController   = TextEditingController();
+  String? _amountError;
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final raw    = _amountController.text.trim();
+    final amount = double.tryParse(raw);
+
+    if (amount == null || amount <= 0) {
+      setState(() => _amountError = 'Enter a valid amount');
+      return;
+    }
+    if (amount > widget.savings) {
+      setState(() => _amountError =
+          'Exceeds your savings (₱${widget.savings.toStringAsFixed(2)})');
+      return;
+    }
+
+    final note = _noteController.text.trim().isEmpty
+        ? null
+        : _noteController.text.trim();
+    Navigator.pop(context);
+    widget.onWithdraw(amount, note);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1B2D5B),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Drag handle
+            Center(
+              child: Container(
+                width: 36, height: 4,
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.18),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const Text(
+              'Withdraw from Savings',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // ── Amount field with inline error ──────────────────────────
+            TextField(
+              controller: _amountController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              style: const TextStyle(color: Colors.white),
+              onChanged: (_) {
+                if (_amountError != null) setState(() => _amountError = null);
+              },
+              decoration: InputDecoration(
+                hintText: 'Amount (₱)',
+                hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
+                prefixText: '₱ ',
+                prefixStyle: const TextStyle(color: Color(0xFF9B88E8)),
+                errorText: _amountError,
+                errorStyle: const TextStyle(
+                  color: Color(0xFFE87070),
+                  fontSize: 12,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: _amountError != null
+                        ? const Color(0xFFE87070)
+                        : Colors.white.withOpacity(0.15),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: _amountError != null
+                        ? const Color(0xFFE87070)
+                        : const Color(0xFF9B88E8),
+                  ),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFE87070)),
+                ),
+                focusedErrorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFE87070)),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // ── Note field ──────────────────────────────────────────────
+            TextField(
+              controller: _noteController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: 'Note (optional)',
+                hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.white.withOpacity(0.15)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFF9B88E8)),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF9B88E8),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                ),
+                onPressed: _submit,
+                child: const Text(
+                  'Withdraw',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

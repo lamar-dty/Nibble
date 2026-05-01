@@ -499,6 +499,18 @@ class WalletStore extends ChangeNotifier {
     await save();
   }
 
+  Future<void> withdrawFromSavings(double amount, {String? note}) async {
+    _savings = (_savings - amount).clamp(0.0, double.infinity);
+    _savingsLog.add(SavingsEntry(
+      amount: -amount,
+      date: DateTime.now(),
+      note: note ?? 'Withdrawal',
+    ));
+    _appendSavingsSnapshot();
+    notifyListeners();
+    await save();
+  }
+
   Future<void> clearSavingsLog() async {
     _savingsLog.clear();
     notifyListeners();
