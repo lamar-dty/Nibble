@@ -4,6 +4,7 @@ import '../constants/colors.dart';
 import 'create_task_sheet.dart';
 import 'create_event_sheet.dart';
 import 'create_space_sheet.dart';
+import 'create_wallet_entry_sheet.dart';
 
 class DashboardBottomNav extends StatelessWidget {
   final int selectedIndex;
@@ -321,6 +322,11 @@ class _AddMenuSheetState extends State<_AddMenuSheet>
                                   widget.onSpaceSaved?.call(result);
                                   widget.onNavigateToSpaces?.call();
                                 });
+                              });
+                            } else if (i == 3) {
+                              // Log Transaction
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                showCreateWalletEntrySheet(context);
                               });
                             }
                           },

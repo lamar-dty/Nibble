@@ -2,29 +2,19 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import '../constants/colors.dart';
 import '../widgets/wallet/wallet_sheet.dart';
+import '../store/wallet_store.dart'; // also imports SavingsPoint
+import '../widgets/create_wallet_entry_sheet.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Re-export public types so call-sites that imported them from
 // wallet_screen.dart continue to compile without changes.
 // ─────────────────────────────────────────────────────────────
 export '../widgets/wallet/wallet_sheet.dart'
-    show WalletExpense, WalletExpenseStatus;
+    show WalletExpense, WalletExpenseStatus, WalletExpenseCategory;
 
 // ─────────────────────────────────────────────────────────────
 // Private background-only data models
 // ─────────────────────────────────────────────────────────────
-class _BudgetCategory {
-  final String label;
-  final double amount;
-  final Color color;
-
-  const _BudgetCategory({
-    required this.label,
-    required this.amount,
-    required this.color,
-  });
-}
-
 class _SavingsPoint {
   final String month;
   final double value;
@@ -38,21 +28,7 @@ class _HighPriorityBreakdown {
   const _HighPriorityBreakdown(this.label, this.amount, this.color);
 }
 
-// ─────────────────────────────────────────────────────────────
-// Sample data
-// ─────────────────────────────────────────────────────────────
-const _kDailyAllowance = 0.0;
-const _kSavings        = 0.0;
-const _kMonthlyBudget  = 0.0;
-const _kBudgetUsed     = 0.0;
-
-const List<_BudgetCategory> _kBudgetCategories = [];
-const List<_HighPriorityBreakdown> _kHighPriorityBreakdown = [];
-final List<_SavingsPoint> _kSavingsHistory = [];
-
-const List<WalletExpense> _kUpcoming   = [];
-const List<WalletExpense> _kRecent     = [];
-const List<WalletExpense> _kDeductions = [];
+// (All data now comes from WalletStore.instance — no hardcoded constants.)
 
 // ─────────────────────────────────────────────────────────────
 // Screen
@@ -94,6 +70,7 @@ class _WalletScreenState extends State<WalletScreen> {
   @override
   void initState() {
     super.initState();
+    WalletStore.instance.load();
     _sheetController = DraggableScrollableController();
     _sheetController.addListener(() {
       if (mounted) setState(() => _sheetSize = _sheetController.size);
@@ -147,6 +124,11 @@ class _WalletScreenState extends State<WalletScreen> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
 
+    return ListenableBuilder(
+      listenable: WalletStore.instance,
+      builder: (context, _) {
+        final wallet = WalletStore.instance;
+
     return Stack(
       children: [
         // ── BACKGROUND ────────────────────────────────────────
@@ -155,7 +137,29 @@ class _WalletScreenState extends State<WalletScreen> {
             physics: const ClampingScrollPhysics(),
             child: Padding(
               padding: EdgeInsets.only(bottom: screenHeight * _sheetSize),
-              child: const _WalletBackground(),
+              child: _WalletBackground(
+                dailyAllowance:    wallet.dailyAllowance,
+                dailyRemaining:    wallet.dailyRemaining,
+                savings:           wallet.savings,
+                monthlyBudget:     wallet.monthlyBudget,
+                budgetUsedFraction: wallet.budgetUsedFraction,
+                monthlySpent:      wallet.monthlySpent,
+                highPriorityBreakdown: [
+                  for (final cat in WalletExpenseCategory.values)
+                    if (cat.isHighPriority && wallet.totalForCategory(cat) > 0)
+                      _HighPriorityBreakdown(
+                        cat.label,
+                        wallet.totalForCategory(cat),
+                        cat.color,
+                      ),
+                ],
+                savingsHistory:      wallet.savingsHistory,
+                monthlySpendHistory: wallet.monthlySpendHistory,
+                academicsBalance:    wallet.remainingForCategory(WalletExpenseCategory.school),
+                discretionaryBalance: wallet.totalForCategory(WalletExpenseCategory.other) +
+                                      wallet.totalForCategory(WalletExpenseCategory.food) +
+                                      wallet.totalForCategory(WalletExpenseCategory.transport),
+              ),
             ),
           ),
         ),
@@ -196,13 +200,32 @@ class _WalletScreenState extends State<WalletScreen> {
                   color: kWhite,
                   child: WalletSheet(
                     scrollController: scrollController,
-                    dailyAllowance: _kDailyAllowance,
-                    savings: _kSavings,
-                    monthlyBudget: _kMonthlyBudget,
-                    budgetUsed: _kBudgetUsed,
-                    upcoming: _kUpcoming,
-                    recent: _kRecent,
-                    deductions: _kDeductions,
+                    dailyAllowance: wallet.dailyAllowance,
+                    savings: wallet.savings,
+                    monthlyBudget: wallet.monthlyBudget,
+                    budgetUsed: wallet.budgetUsedFraction,
+                    // Tag each expense with its original store index so the
+                    // filtered sub-lists can still address the right item.
+                    upcoming: [
+                      for (int i = 0; i < wallet.expenses.length; i++)
+                        if (wallet.expenses[i].status == WalletExpenseStatus.unpaid ||
+                            wallet.expenses[i].status == WalletExpenseStatus.overdue)
+                          IndexedExpense(expense: wallet.expenses[i], storeIndex: i),
+                    ],
+                    recent: [
+                      for (int i = 0; i < wallet.expenses.length; i++)
+                        if (wallet.expenses[i].status == WalletExpenseStatus.paid)
+                          IndexedExpense(expense: wallet.expenses[i], storeIndex: i),
+                    ],
+                    savingsLog: wallet.savingsLog,
+                    onTogglePaid: (index) =>
+                        WalletStore.instance.toggleExpensePaidUnpaid(index),
+                    onDeleteExpense: (index) =>
+                        WalletStore.instance.removeExpense(index),
+                    onAddToSavings: (amount, note) =>
+                        WalletStore.instance.addToSavings(amount, note: note),
+                    onClearSavingsLog: () =>
+                        WalletStore.instance.clearSavingsLog(),
                   ),
                 ),
               ),
@@ -223,6 +246,8 @@ class _WalletScreenState extends State<WalletScreen> {
         ),
       ],
     );
+      },
+    );
   }
 }
 
@@ -230,7 +255,32 @@ class _WalletScreenState extends State<WalletScreen> {
 // Background: summary cards + bar chart + donut + savings graph
 // ─────────────────────────────────────────────────────────────
 class _WalletBackground extends StatelessWidget {
-  const _WalletBackground();
+  final double dailyAllowance;
+  final double dailyRemaining;
+  final double savings;
+  final double monthlyBudget;
+  final double budgetUsedFraction;
+  final double monthlySpent;
+  final List<_HighPriorityBreakdown> highPriorityBreakdown;
+  final List<SavingsPoint> savingsHistory;
+  final List<MonthlySpendPoint> monthlySpendHistory;
+  // Academics and discretionary remaining balances
+  final double academicsBalance;
+  final double discretionaryBalance;
+
+  const _WalletBackground({
+    required this.dailyAllowance,
+    required this.dailyRemaining,
+    required this.savings,
+    required this.monthlyBudget,
+    required this.budgetUsedFraction,
+    required this.monthlySpent,
+    required this.highPriorityBreakdown,
+    required this.savingsHistory,
+    required this.monthlySpendHistory,
+    required this.academicsBalance,
+    required this.discretionaryBalance,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -247,8 +297,10 @@ class _WalletBackground extends StatelessWidget {
                   icon: Icons.credit_card_rounded,
                   iconColor: const Color(0xFF4A90D9),
                   title: 'Daily Allowance',
-                  value: '₱${_kDailyAllowance.toStringAsFixed(2)}',
-                  subtitle: 'Current Balance',
+                  value: '₱${dailyAllowance.toStringAsFixed(2)}',
+                  subtitle: dailyRemaining >= 0
+                      ? '₱${dailyRemaining.toStringAsFixed(2)} left today'
+                      : '₱${(-dailyRemaining).toStringAsFixed(2)} over today',
                 ),
               ),
               const SizedBox(width: 8),
@@ -257,21 +309,32 @@ class _WalletBackground extends StatelessWidget {
                   icon: Icons.savings_rounded,
                   iconColor: const Color(0xFF3BBFA3),
                   title: 'Savings',
-                  value: '₱${_kSavings.toStringAsFixed(2)}',
-                  subtitle: 'Saved',
+                  value: '₱${savings.toStringAsFixed(2)}',
+                  subtitle: 'Total saved',
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: _SummaryCard(
                   icon: Icons.account_balance_wallet_rounded,
-                  iconColor: const Color(0xFF9B88E8),
+                  iconColor: budgetUsedFraction >= 1.0
+                      ? const Color(0xFFE87070)
+                      : budgetUsedFraction >= 0.8
+                          ? const Color(0xFFF5A623)
+                          : const Color(0xFF9B88E8),
                   title: 'Monthly Budget',
-                  value: '₱${_kMonthlyBudget.toStringAsFixed(2)}',
+                  value: '₱${monthlyBudget.toStringAsFixed(2)}',
                   subtitle: null,
                   showProgress: true,
-                  progressValue: _kBudgetUsed,
-                  progressLabel: '${(_kBudgetUsed * 100).round()}% Used',
+                  progressValue: budgetUsedFraction,
+                  progressColor: budgetUsedFraction >= 1.0
+                      ? const Color(0xFFE87070)
+                      : budgetUsedFraction >= 0.8
+                          ? const Color(0xFFF5A623)
+                          : const Color(0xFF9B88E8),
+                  progressLabel: monthlyBudget > 0
+                      ? '₱${monthlySpent.toStringAsFixed(2)} spent'
+                      : 'Not set',
                 ),
               ),
             ],
@@ -279,16 +342,15 @@ class _WalletBackground extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // ── Budget Allocation bar chart ───────────────────
+          // ── Monthly Spending History line chart ───────────
           _SectionCard(
-            title: 'Budget Allocation',
-            action: 'Edit',
-            child: _kBudgetCategories.isEmpty
+            title: 'Monthly Spending History',
+            child: monthlySpendHistory.isEmpty
                 ? const _EmptyState(
                     icon: Icons.bar_chart_rounded,
-                    message: 'No budget set yet',
+                    message: 'History builds at each month rollover',
                   )
-                : _BarChart(categories: _kBudgetCategories),
+                : _MonthlySpendLineChart(points: monthlySpendHistory),
           ),
 
           const SizedBox(height: 16),
@@ -296,7 +358,11 @@ class _WalletBackground extends StatelessWidget {
           // ── High Priority breakdown donut ─────────────────
           _SectionCard(
             title: 'High Priority Expenses Breakdown',
-            child: _HighPrioritySection(items: _kHighPriorityBreakdown),
+            child: _HighPrioritySection(
+              items: highPriorityBreakdown,
+              academicsBalance: academicsBalance,
+              discretionaryBalance: discretionaryBalance,
+            ),
           ),
 
           const SizedBox(height: 16),
@@ -304,12 +370,12 @@ class _WalletBackground extends StatelessWidget {
           // ── Savings overview line graph ───────────────────
           _SectionCard(
             title: 'Savings Overview',
-            child: _kSavingsHistory.isEmpty
+            child: savingsHistory.isEmpty
                 ? const _EmptyState(
                     icon: Icons.show_chart_rounded,
                     message: 'No savings recorded yet',
                   )
-                : _SavingsChart(points: _kSavingsHistory),
+                : _SavingsLineChart(points: savingsHistory),
           ),
 
           const SizedBox(height: 12),
@@ -332,6 +398,8 @@ class _SummaryCard extends StatelessWidget {
   final double progressValue;
   final String? progressLabel;
 
+  final Color? progressColor;
+
   const _SummaryCard({
     required this.icon,
     required this.iconColor,
@@ -341,6 +409,7 @@ class _SummaryCard extends StatelessWidget {
     this.showProgress = false,
     this.progressValue = 0,
     this.progressLabel,
+    this.progressColor,
   });
 
   @override
@@ -388,8 +457,8 @@ class _SummaryCard extends StatelessWidget {
                 value: progressValue,
                 minHeight: 4,
                 backgroundColor: kWhite.withOpacity(0.12),
-                valueColor: const AlwaysStoppedAnimation<Color>(
-                    Color(0xFFE87070)),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                    progressColor ?? const Color(0xFFE87070)),
               ),
             ),
             const SizedBox(height: 3),
@@ -420,12 +489,14 @@ class _SummaryCard extends StatelessWidget {
 class _SectionCard extends StatelessWidget {
   final String title;
   final String? action;
+  final VoidCallback? onAction;
   final Widget child;
 
   const _SectionCard({
     required this.title,
     required this.child,
     this.action,
+    this.onAction,
   });
 
   @override
@@ -453,13 +524,16 @@ class _SectionCard extends StatelessWidget {
                 ),
               ),
               if (action != null)
-                Text(
-                  action!,
-                  style: const TextStyle(
-                    color: kTeal,
-                    fontSize: 12,
-                    decoration: TextDecoration.underline,
-                    decorationColor: kTeal,
+                GestureDetector(
+                  onTap: onAction,
+                  child: Text(
+                    action!,
+                    style: const TextStyle(
+                      color: kTeal,
+                      fontSize: 12,
+                      decoration: TextDecoration.underline,
+                      decorationColor: kTeal,
+                    ),
                   ),
                 ),
             ],
@@ -473,120 +547,182 @@ class _SectionCard extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Bar chart (Budget Allocation)
+// Monthly Spending History line chart
 // ─────────────────────────────────────────────────────────────
-class _BarChart extends StatelessWidget {
-  final List<_BudgetCategory> categories;
+class _MonthlySpendLineChart extends StatelessWidget {
+  final List<MonthlySpendPoint> points;
 
-  const _BarChart({required this.categories});
+  const _MonthlySpendLineChart({required this.points});
 
   @override
   Widget build(BuildContext context) {
-    const maxVal = 60.0;
-    const chartH = 120.0;
-    const gridLines = [0.0, 15.0, 30.0, 45.0, 60.0];
-
     return SizedBox(
-      height: 170,
-      child: Column(
-        children: [
-          SizedBox(
-            height: chartH,
-            child: Stack(
-              children: [
-                ...gridLines.map((v) {
-                  final y = chartH - (v / maxVal) * chartH;
-                  return Positioned(
-                    top: y,
-                    left: 0,
-                    right: 0,
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 24,
-                          child: Text(
-                            '${v.toInt()}',
-                            style: TextStyle(
-                              color: kWhite.withOpacity(0.3),
-                              fontSize: 8,
-                            ),
-                            textAlign: TextAlign.right,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Container(
-                            height: 1,
-                            color: kWhite.withOpacity(0.08),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
-                Positioned.fill(
-                  left: 28,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: categories.map((cat) {
-                      final barH = (cat.amount / maxVal) * chartH;
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            '₱${cat.amount.toStringAsFixed(0)}',
-                            style: const TextStyle(
-                              color: kWhite,
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Container(
-                            width: 36,
-                            height: barH,
-                            decoration: BoxDecoration(
-                              color: cat.color,
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(5),
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.only(left: 28),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: categories
-                  .map((cat) => SizedBox(
-                        width: 60,
-                        child: Text(
-                          cat.label,
-                          style: TextStyle(
-                            color: kWhite.withOpacity(0.55),
-                            fontSize: 9,
-                          ),
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ))
-                  .toList(),
-            ),
-          ),
-        ],
+      height: 150,
+      child: CustomPaint(
+        painter: _MonthlySpendLinePainter(points: points),
+        child: Container(),
       ),
     );
   }
+}
+
+class _MonthlySpendLinePainter extends CustomPainter {
+  final List<MonthlySpendPoint> points;
+
+  const _MonthlySpendLinePainter({required this.points});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (points.isEmpty) return;
+
+    const leftPad   = 36.0;
+    const bottomPad = 20.0;
+    final chartW = size.width - leftPad;
+    final chartH = size.height - bottomPad;
+
+    // Determine max value across spent + budget for Y axis.
+    double maxVal = 0;
+    for (final p in points) {
+      if (p.spent  > maxVal) maxVal = p.spent;
+      if (p.budget > maxVal) maxVal = p.budget;
+    }
+    if (maxVal <= 0) maxVal = 1000;
+    // Round up to a nice ceiling.
+    maxVal = (maxVal * 1.15).ceilToDouble();
+
+    double yOf(double v) =>
+        chartH - (v / maxVal * chartH).clamp(0.0, chartH);
+
+    double xOf(int i) => points.length == 1
+        ? leftPad + chartW / 2
+        : leftPad + (i / (points.length - 1)) * chartW;
+
+    final gridPaint = Paint()
+      ..color = kWhite.withOpacity(0.08)
+      ..strokeWidth = 1;
+
+    final labelStyle = TextStyle(
+      color: kWhite.withOpacity(0.35),
+      fontSize: 8,
+    );
+
+    // ── 4 grid lines ────────────────────────────────────────
+    for (int g = 0; g <= 4; g++) {
+      final v = maxVal * g / 4;
+      final y = yOf(v);
+      canvas.drawLine(Offset(leftPad, y), Offset(size.width, y), gridPaint);
+      final label = v >= 1000
+          ? '${(v / 1000).toStringAsFixed(1)}k'
+          : v.toStringAsFixed(0);
+      final tp = TextPainter(
+        text: TextSpan(text: label, style: labelStyle),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      tp.paint(canvas, Offset(0, y - 5));
+    }
+
+    // ── Month labels on X axis ───────────────────────────────
+    for (int i = 0; i < points.length; i++) {
+      final tp = TextPainter(
+        text: TextSpan(text: points[i].month, style: labelStyle),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      tp.paint(canvas, Offset(xOf(i) - tp.width / 2, size.height - 14));
+    }
+
+    // ── Budget line (dashed purple) ──────────────────────────
+    final budgetPts = <Offset>[
+      for (int i = 0; i < points.length; i++)
+        Offset(xOf(i), yOf(points[i].budget)),
+    ];
+    final budgetPaint = Paint()
+      ..color = const Color(0xFF9B88E8).withOpacity(0.55)
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+    const dashLen = 5.0;
+    const gapLen  = 4.0;
+    for (int i = 0; i < budgetPts.length - 1; i++) {
+      final a = budgetPts[i];
+      final b = budgetPts[i + 1];
+      final dx = b.dx - a.dx;
+      final dy = b.dy - a.dy;
+      final dist = math.sqrt(dx * dx + dy * dy);
+      double drawn = 0;
+      bool drawing = true;
+      while (drawn < dist) {
+        final seg = math.min(drawing ? dashLen : gapLen, dist - drawn);
+        final t0 = drawn / dist;
+        final t1 = (drawn + seg) / dist;
+        if (drawing) {
+          canvas.drawLine(
+            Offset(a.dx + dx * t0, a.dy + dy * t0),
+            Offset(a.dx + dx * t1, a.dy + dy * t1),
+            budgetPaint,
+          );
+        }
+        drawn += seg;
+        drawing = !drawing;
+      }
+    }
+
+    // ── Spent line (solid teal) ──────────────────────────────
+    final spentPts = <Offset>[
+      for (int i = 0; i < points.length; i++)
+        Offset(xOf(i), yOf(points[i].spent)),
+    ];
+
+    final fillPath = Path();
+    final linePath = Path();
+
+    fillPath.moveTo(spentPts[0].dx, chartH);
+    fillPath.lineTo(spentPts[0].dx, spentPts[0].dy);
+    linePath.moveTo(spentPts[0].dx, spentPts[0].dy);
+
+    for (int i = 1; i < spentPts.length; i++) {
+      final cp1 = Offset(
+          (spentPts[i - 1].dx + spentPts[i].dx) / 2, spentPts[i - 1].dy);
+      final cp2 =
+          Offset((spentPts[i - 1].dx + spentPts[i].dx) / 2, spentPts[i].dy);
+      linePath.cubicTo(
+          cp1.dx, cp1.dy, cp2.dx, cp2.dy, spentPts[i].dx, spentPts[i].dy);
+      fillPath.cubicTo(
+          cp1.dx, cp1.dy, cp2.dx, cp2.dy, spentPts[i].dx, spentPts[i].dy);
+    }
+    fillPath.lineTo(spentPts.last.dx, chartH);
+    fillPath.close();
+
+    canvas.drawPath(
+      fillPath,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [kTeal.withOpacity(0.30), kTeal.withOpacity(0.0)],
+        ).createShader(Rect.fromLTWH(0, 0, size.width, size.height)),
+    );
+    canvas.drawPath(
+      linePath,
+      Paint()
+        ..color = kTeal
+        ..strokeWidth = 2.5
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round,
+    );
+    for (final pt in spentPts) {
+      canvas.drawCircle(pt, 3, Paint()..color = kTeal);
+      canvas.drawCircle(
+          pt,
+          3,
+          Paint()
+            ..color = kWhite
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.5);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter _) => true;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -594,8 +730,14 @@ class _BarChart extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────
 class _HighPrioritySection extends StatelessWidget {
   final List<_HighPriorityBreakdown> items;
+  final double academicsBalance;
+  final double discretionaryBalance;
 
-  const _HighPrioritySection({required this.items});
+  const _HighPrioritySection({
+    required this.items,
+    required this.academicsBalance,
+    required this.discretionaryBalance,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -610,10 +752,16 @@ class _HighPrioritySection extends StatelessWidget {
         Expanded(
           flex: 3,
           child: Column(
-            children: const [
-              _BalanceCard(label: 'Academics', balance: null),
-              SizedBox(height: 10),
-              _BalanceCard(label: 'Discretionary', balance: null),
+            children: [
+              _BalanceCard(
+                label: 'Academics',
+                balance: academicsBalance > 0 ? academicsBalance : null,
+              ),
+              const SizedBox(height: 10),
+              _BalanceCard(
+                label: 'Discretionary',
+                balance: discretionaryBalance > 0 ? discretionaryBalance : null,
+              ),
             ],
           ),
         ),
@@ -827,10 +975,10 @@ class _HighPriorityDonutPainter extends CustomPainter {
 // ─────────────────────────────────────────────────────────────
 // Savings line chart
 // ─────────────────────────────────────────────────────────────
-class _SavingsChart extends StatelessWidget {
-  final List<_SavingsPoint> points;
+class _SavingsLineChart extends StatelessWidget {
+  final List<SavingsPoint> points;
 
-  const _SavingsChart({required this.points});
+  const _SavingsLineChart({required this.points});
 
   @override
   Widget build(BuildContext context) {
@@ -845,7 +993,7 @@ class _SavingsChart extends StatelessWidget {
 }
 
 class _SavingsLinePainter extends CustomPainter {
-  final List<_SavingsPoint> points;
+  final List<SavingsPoint> points;
 
   const _SavingsLinePainter({required this.points});
 
@@ -891,7 +1039,9 @@ class _SavingsLinePainter extends CustomPainter {
     }
 
     for (int i = 0; i < points.length; i++) {
-      final x = leftPad + (i / (points.length - 1)) * chartW;
+      final x = points.length == 1
+          ? leftPad + chartW / 2
+          : leftPad + (i / (points.length - 1)) * chartW;
       final tp = TextPainter(
         text: TextSpan(text: points[i].month, style: labelStyle),
         textDirection: TextDirection.ltr,
@@ -904,7 +1054,9 @@ class _SavingsLinePainter extends CustomPainter {
     final pts = <Offset>[];
 
     for (int i = 0; i < points.length; i++) {
-      final x = leftPad + (i / (points.length - 1)) * chartW;
+      final x = points.length == 1
+          ? leftPad + chartW / 2
+          : leftPad + (i / (points.length - 1)) * chartW;
       final y = logY(points[i].value);
       pts.add(Offset(x, y));
     }

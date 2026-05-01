@@ -13,6 +13,7 @@ import 'store/task_store.dart';
 import 'store/space_store.dart';
 import 'store/space_chat_store.dart';
 import 'store/auth_store.dart';
+import 'store/wallet_store.dart';
 import 'services/notification_router.dart';
 
 class ScrollBehaviorNoGlow extends ScrollBehavior {
@@ -41,11 +42,13 @@ void main() async {
       await SpaceChatStore.instance.reload(
         SpaceStore.instance.spaces.map((s) => s.inviteCode).toList(),
       );
+      await WalletStore.instance.reload();
     },
     onLogout: () async {
       await TaskStore.instance.reload();
       await SpaceStore.instance.reload();
       await SpaceChatStore.instance.reload([]);
+      await WalletStore.instance.clear();
     },
   );
 
@@ -137,8 +140,8 @@ class _MainScaffoldState extends State<MainScaffold> {
   @override
   void dispose() {
     NotificationRouter.instance.unregisterTabSwitcher();
-    _tabNotifier.dispose();
     super.dispose();
+    _tabNotifier.dispose();
   }
 
   @override
