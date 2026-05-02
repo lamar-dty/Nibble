@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../constants/colors.dart';
-import '../store/auth_store.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Result model (returned to caller)
@@ -14,9 +12,6 @@ class SpaceResult {
   final DateTime endDate;
   final TimeOfDay? startTime;
   final TimeOfDay? endTime;
-  final List<String> members;
-  final List<String> checklistTitles;
-  final List<String> checklistNotes;
 
   const SpaceResult({
     required this.name,
@@ -26,9 +21,6 @@ class SpaceResult {
     required this.endDate,
     this.startTime,
     this.endTime,
-    required this.members,
-    required this.checklistTitles,
-    this.checklistNotes = const [],
   });
 }
 
@@ -43,23 +35,6 @@ void showCreateSpaceSheet(BuildContext context, {void Function(SpaceResult)? onS
     enableDrag: true,
     builder: (_) => CreateSpaceSheet(onSaved: onSaved),
   );
-}
-
-// ─────────────────────────────────────────────────────────────
-// Models
-// ─────────────────────────────────────────────────────────────
-class _ChecklistItem {
-  final String id;
-  String title;
-  String? note;
-  bool done;
-
-  _ChecklistItem({
-    required this.id,
-    required this.title,
-    this.note,
-    this.done = false,
-  });
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -96,12 +71,6 @@ class _CreateSpaceSheetState extends State<CreateSpaceSheet>
   DateTime _endDate   = DateTime.now();
   TimeOfDay? _startTime;
   TimeOfDay? _endTime;
-
-  // Members
-  final List<String> _members = [];
-
-  // Checklist
-  final List<_ChecklistItem> _checklist = [];
 
   Color get _accent => _palette[_colorIdx];
 
@@ -186,236 +155,6 @@ class _CreateSpaceSheetState extends State<CreateSpaceSheet>
       builder: (_) => _IosTimePickerSheet(initial: initial),
     );
   }
-
-  // ── Add Member Dialog ──────────────────────────────────────
-  void _showAddMemberDialog() {
-    final ctrl = TextEditingController();
-    String? error;
-
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDlg) => Dialog(
-          backgroundColor: const Color(0xFF1A2D5A),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(children: [
-                  Icon(Icons.person_add_alt_1_rounded, color: _accent, size: 20),
-                  const SizedBox(width: 10),
-                  const Text('Add Member',
-                    style: TextStyle(color: kWhite, fontSize: 16, fontWeight: FontWeight.bold)),
-                ]),
-                const SizedBox(height: 16),
-                Text('Enter User ID',
-                  style: TextStyle(color: kWhite.withOpacity(0.5), fontSize: 11,
-                    letterSpacing: 0.6, fontWeight: FontWeight.w700)),
-                const SizedBox(height: 4),
-                Text('Ask the user to share their #ID from the drawer.',
-                  style: TextStyle(color: kWhite.withOpacity(0.3), fontSize: 11)),
-                const SizedBox(height: 6),
-                TextField(
-                  controller: ctrl,
-                  autofocus: false,
-                  maxLength: 9,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[#0-9a-fA-F]')),
-                  ],
-                  style: const TextStyle(color: kWhite, fontSize: 14,
-                    letterSpacing: 1.5, fontWeight: FontWeight.w600),
-                  decoration: InputDecoration(
-                    hintText: '#a1b2c3d4',
-                    counterText: '',
-                    hintStyle: TextStyle(color: kWhite.withOpacity(0.25)),
-                    filled: true,
-                    fillColor: kWhite.withOpacity(0.06),
-                    prefixIcon: Icon(Icons.alternate_email_rounded,
-                      color: kWhite.withOpacity(0.35), size: 16),
-                    errorText: error,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: kWhite.withOpacity(0.1))),
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: kWhite.withOpacity(0.1))),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: _accent, width: 1.5)),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      child: Text('Cancel', style: TextStyle(color: kWhite.withOpacity(0.45))),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _accent,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      onPressed: () {
-                        final raw = ctrl.text.trim();
-                        if (raw.isEmpty) {
-                          setDlg(() => error = 'Please enter a User ID');
-                          return;
-                        }
-                        final cleaned = raw.startsWith('#') ? raw.substring(1) : raw;
-                        if (!RegExp(r'^[0-9a-fA-F]{8}$').hasMatch(cleaned)) {
-                          setDlg(() => error = 'Enter a valid User ID (e.g. #a1b2c3d4)');
-                          return;
-                        }
-                        final resolvedName = AuthStore.instance.nameForId(cleaned);
-                        if (resolvedName == null) {
-                          setDlg(() => error = 'No user found with that ID');
-                          return;
-                        }
-                        if (resolvedName == AuthStore.instance.displayName) {
-                          setDlg(() => error = "That's you!");
-                          return;
-                        }
-                        if (_members.contains(resolvedName)) {
-                          setDlg(() => error = 'Already added');
-                          return;
-                        }
-                        Navigator.pop(ctx);
-                        setState(() => _members.add(resolvedName));
-                      },
-                      child: const Text('Add'),
-                    ),
-                  ),
-                ]),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _removeMember(String uid) => setState(() => _members.remove(uid));
-
-  // ── Add Checklist Dialog ───────────────────────────────────
-  void _showAddChecklistDialog() {
-    final titleCtrl = TextEditingController();
-    final noteCtrl  = TextEditingController();
-    String? error;
-
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDlg) => Dialog(
-          backgroundColor: const Color(0xFF1A2D5A),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(children: [
-                  Icon(Icons.checklist_rounded, color: _accent, size: 20),
-                  const SizedBox(width: 10),
-                  const Text('New Task',
-                    style: TextStyle(color: kWhite, fontSize: 16, fontWeight: FontWeight.bold)),
-                ]),
-                const SizedBox(height: 16),
-                Text('Task Title',
-                  style: TextStyle(color: kWhite.withOpacity(0.5), fontSize: 11,
-                    letterSpacing: 0.6, fontWeight: FontWeight.w700)),
-                const SizedBox(height: 6),
-                TextField(
-                  controller: titleCtrl,
-                  autofocus: false,
-                  style: const TextStyle(color: kWhite, fontSize: 14),
-                  decoration: InputDecoration(
-                    hintText: 'e.g. Research references',
-                    hintStyle: TextStyle(color: kWhite.withOpacity(0.25)),
-                    filled: true,
-                    fillColor: kWhite.withOpacity(0.06),
-                    errorText: error,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: kWhite.withOpacity(0.1))),
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: kWhite.withOpacity(0.1))),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: _accent, width: 1.5)),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text('Note (Optional)',
-                  style: TextStyle(color: kWhite.withOpacity(0.5), fontSize: 11,
-                    letterSpacing: 0.6, fontWeight: FontWeight.w700)),
-                const SizedBox(height: 6),
-                TextField(
-                  controller: noteCtrl,
-                  maxLines: 2,
-                  style: const TextStyle(color: kWhite, fontSize: 13),
-                  decoration: InputDecoration(
-                    hintText: 'Add a short note…',
-                    hintStyle: TextStyle(color: kWhite.withOpacity(0.25)),
-                    filled: true,
-                    fillColor: kWhite.withOpacity(0.06),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: kWhite.withOpacity(0.1))),
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: kWhite.withOpacity(0.1))),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: _accent, width: 1.5)),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      child: Text('Cancel', style: TextStyle(color: kWhite.withOpacity(0.45))),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _accent,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      onPressed: () {
-                        final title = titleCtrl.text.trim();
-                        if (title.isEmpty) {
-                          setDlg(() => error = 'Title is required');
-                          return;
-                        }
-                        Navigator.pop(ctx);
-                        setState(() => _checklist.add(_ChecklistItem(
-                          id: DateTime.now().millisecondsSinceEpoch.toString(),
-                          title: title,
-                          note: noteCtrl.text.trim().isEmpty ? null : noteCtrl.text.trim(),
-                        )));
-                      },
-                      child: const Text('Add Task'),
-                    ),
-                  ),
-                ]),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _removeChecklistItem(String id) =>
-      setState(() => _checklist.removeWhere((c) => c.id == id));
 
   @override
   void dispose() {
@@ -571,219 +310,6 @@ class _CreateSpaceSheetState extends State<CreateSpaceSheet>
                     onClearEndTime:   () => setState(() => _endTime = null),
                   ),
 
-                  const SizedBox(height: 18),
-
-                  // Members
-                  Row(
-                    children: [
-                      _FieldLabel(label: 'Members', icon: Icons.group_rounded),
-                      if (_members.isNotEmpty) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: _accent.withOpacity(0.18),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text('${_members.length}',
-                            style: TextStyle(color: _accent, fontSize: 10, fontWeight: FontWeight.w700)),
-                        ),
-                      ],
-                      const Spacer(),
-                      GestureDetector(
-                        onTap: _showAddMemberDialog,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: _accent.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: _accent.withOpacity(0.3)),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.person_add_alt_1_rounded, color: _accent, size: 13),
-                              const SizedBox(width: 5),
-                              Text('Add Member',
-                                style: TextStyle(color: _accent, fontSize: 12, fontWeight: FontWeight.w700)),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  if (_members.isNotEmpty) ...[
-                    const SizedBox(height: 10),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: kWhite.withOpacity(0.04),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: kWhite.withOpacity(0.08)),
-                      ),
-                      child: Column(
-                        children: _members.asMap().entries.map((entry) {
-                          final i      = entry.key;
-                          final uid    = entry.value;
-                          final isLast = i == _members.length - 1;
-                          return Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 30, height: 30,
-                                      decoration: BoxDecoration(
-                                        color: _accent.withOpacity(0.15),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          uid.replaceAll('#', '').substring(0, 1).toUpperCase(),
-                                          style: TextStyle(color: _accent, fontSize: 13, fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Text(uid,
-                                        style: const TextStyle(color: kWhite, fontSize: 13, fontWeight: FontWeight.w500)),
-                                    ),
-                                    GestureDetector(
-                                      onTap: () => _removeMember(uid),
-                                      child: Icon(Icons.close_rounded,
-                                        color: kWhite.withOpacity(0.3), size: 16),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              if (!isLast)
-                                Divider(height: 1, color: kWhite.withOpacity(0.06), indent: 14, endIndent: 14),
-                            ],
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ],
-
-                  const SizedBox(height: 18),
-
-                  // Task Checklist
-                  Row(
-                    children: [
-                      _FieldLabel(label: 'Task Checklist', icon: Icons.checklist_rounded),
-
-                      const Spacer(),
-                      GestureDetector(
-                        onTap: _showAddChecklistDialog,
-                        child: Container(
-                          width: 28, height: 28,
-                          decoration: BoxDecoration(
-                            color: _accent.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: _accent.withOpacity(0.3)),
-                          ),
-                          child: Icon(Icons.add_rounded, color: _accent, size: 17),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  if (_checklist.isEmpty)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      decoration: BoxDecoration(
-                        color: kWhite.withOpacity(0.03),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: kWhite.withOpacity(0.06)),
-                      ),
-                      child: Column(
-                        children: [
-                          Icon(Icons.task_alt_rounded, color: kWhite.withOpacity(0.15), size: 28),
-                          const SizedBox(height: 6),
-                          Text('No tasks yet',
-                            style: TextStyle(color: kWhite.withOpacity(0.25), fontSize: 13)),
-                          const SizedBox(height: 2),
-                          Text('Tap + to add a checklist item',
-                            style: TextStyle(color: kWhite.withOpacity(0.15), fontSize: 11)),
-                        ],
-                      ),
-                    )
-                  else
-                    Container(
-                      decoration: BoxDecoration(
-                        color: kWhite.withOpacity(0.04),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: kWhite.withOpacity(0.08)),
-                      ),
-                      child: Column(
-                        children: _checklist.asMap().entries.map((entry) {
-                          final i      = entry.key;
-                          final item   = entry.value;
-                          final isLast = i == _checklist.length - 1;
-                          return Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      width: 22, height: 22,
-                                      margin: const EdgeInsets.only(top: 1),
-                                      decoration: BoxDecoration(
-                                        color: _accent.withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      alignment: Alignment.center,
-                                      child: Text('${i + 1}',
-                                        style: TextStyle(
-                                          color: _accent,
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(item.title,
-                                            style: const TextStyle(
-                                              color: kWhite,
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                          if (item.note != null) ...[
-                                            const SizedBox(height: 2),
-                                            Text(item.note!,
-                                              style: TextStyle(color: kWhite.withOpacity(0.35), fontSize: 11)),
-                                          ],
-                                        ],
-                                      ),
-                                    ),
-                                    GestureDetector(
-                                      onTap: () => _removeChecklistItem(item.id),
-                                      child: Icon(Icons.close_rounded,
-                                        color: kWhite.withOpacity(0.25), size: 15),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              if (!isLast)
-                                Divider(height: 1, color: kWhite.withOpacity(0.06), indent: 44, endIndent: 12),
-                            ],
-                          );
-                        }).toList(),
-                      ),
-                    ),
-
                   const SizedBox(height: 24),
                 ],
               ),
@@ -813,16 +339,13 @@ class _CreateSpaceSheetState extends State<CreateSpaceSheet>
                     onTap: () {
                       if (_nameCtrl.text.trim().isEmpty) return;
                       final result = SpaceResult(
-                        name:            _nameCtrl.text.trim(),
-                        description:     _descCtrl.text.trim(),
-                        accentColor:     _accent,
-                        startDate:       _startDate,
-                        endDate:         _endDate,
-                        startTime:       _startTime,
-                        endTime:         _endTime,
-                        members:         List.from(_members),
-                        checklistTitles: _checklist.map((c) => c.title).toList(),
-                        checklistNotes:  _checklist.map((c) => c.note ?? '').toList(),
+                        name:        _nameCtrl.text.trim(),
+                        description: _descCtrl.text.trim(),
+                        accentColor: _accent,
+                        startDate:   _startDate,
+                        endDate:     _endDate,
+                        startTime:   _startTime,
+                        endTime:     _endTime,
                       );
                       Navigator.pop(context);
                       widget.onSaved?.call(result);

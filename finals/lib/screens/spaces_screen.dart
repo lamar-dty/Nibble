@@ -58,6 +58,8 @@ class SpacesScreenState extends State<SpacesScreen>
       vsync: this,
       duration: const Duration(milliseconds: 280),
     );
+    // Rebuild whenever SpaceStore mutates (cancel invite, kick, etc.)
+    SpaceStore.instance.addListener(_onSpaceStoreChanged);
     // Register deep-link callbacks so NotificationRouter can open spaces,
     // tasks, and chat panels from notification taps.
     NotificationRouter.instance.registerSpaceCallbacks(
@@ -65,6 +67,13 @@ class SpacesScreenState extends State<SpacesScreen>
       onOpenSpaceChat: openSpaceChatByCode,
       onOpenSpaceTask: openSpaceTaskByCode,
     );
+  }
+
+  void _onSpaceStoreChanged() {
+    if (!mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
@@ -79,17 +88,17 @@ class SpacesScreenState extends State<SpacesScreen>
         SpaceChatStore.instance.deleteMessagesFor(code);
         TaskStore.instance.clearSpaceNotifications(code);
       }
-      if (mounted) setState(() {});
+      if (mounted) WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) setState(() {}); });
     });
 
     // ── Step 2: Pull latest patches for spaces that still exist.
     SpaceStore.instance.syncFromSharedPatches().then((_) {
-      if (mounted) setState(() {});
+      if (mounted) WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) setState(() {}); });
     });
 
     // ── Step 3: Accept any new space invites pushed to this user.
     SpaceStore.instance.drainPendingInvites().then((_) {
-      if (mounted) setState(() {});
+      if (mounted) WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) setState(() {}); });
     });
 
     // ── Step 4: Drain remaining cross-user notifications (assignments etc).
@@ -105,6 +114,7 @@ class SpacesScreenState extends State<SpacesScreen>
   void dispose() {
     NotificationRouter.instance.unregisterSpaceCallbacks();
     widget.tabNotifier.removeListener(_onTabChanged);
+    SpaceStore.instance.removeListener(_onSpaceStoreChanged);
     _sheetController.dispose();
     _switchAnim.dispose();
     super.dispose();
@@ -448,6 +458,12 @@ class SpacesScreenState extends State<SpacesScreen>
         });
         _saveSpaces();
         TaskStore.instance.notifyMemberRemoved(space, member);
+        // Push a space-deletion notice into the kicked user's inbox so the
+        // space disappears from their list on their next drain.
+        final kickedId = AuthStore.instance.userIdForName(member);
+        if (kickedId != null && kickedId.isNotEmpty) {
+          SpaceStore.instance.pushKickNotice(space.inviteCode, kickedId);
+        }
       },
     );
   }
@@ -544,7 +560,7 @@ class SpacesScreenState extends State<SpacesScreen>
           r.description.isEmpty ? 'No description.' : r.description,
       dateRange: '${fmt(r.startDate)} - ${fmt(r.endDate)}',
       dueDate: '${r.endDate.month}/${r.endDate.day}/${r.endDate.year}',
-      members: List<String>.from(r.members),
+      members: [],
       isCreator: true,
       creatorName: AuthStore.instance.displayName,
       status: 'Not Started',
@@ -552,14 +568,7 @@ class SpacesScreenState extends State<SpacesScreen>
       accentColor: r.accentColor,
       progress: 0.0,
       completedTasks: 0,
-      tasks: r.checklistTitles.asMap().entries.map((e) => SpaceTask(
-            title: e.value,
-            description: r.checklistNotes.length > e.key
-                ? r.checklistNotes[e.key]
-                : '',
-            status: 'Not Started',
-            statusColor: const Color(0xFFB0BAD3),
-          )).toList(),
+      tasks: [],
     );
   }
 

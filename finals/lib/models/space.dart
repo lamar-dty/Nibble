@@ -183,6 +183,10 @@ class Space {
   /// Must contain only canonical display names — never sentinel strings.
   final List<String> members;
 
+  /// Members who have been invited but have not yet accepted.
+  /// Must contain only canonical display names — never sentinel strings.
+  final List<String> pendingMembers;
+
   /// True when the current user created this space.
   final bool isCreator;
 
@@ -204,6 +208,7 @@ class Space {
     required this.dateRange,
     required this.dueDate,
     required this.members,
+    List<String>? pendingMembers,
     required this.isCreator,
     required this.creatorName,
     required this.status,
@@ -223,6 +228,7 @@ class Space {
           'Space.creatorName must be a real display name, not a sentinel '
           'string ("$creatorName").',
         ),
+        pendingMembers = pendingMembers ?? <String>[],
         inviteCode = inviteCode ?? _generateCode();
 
   // ── Sentinel guard ─────────────────────────────────────────
@@ -337,6 +343,7 @@ class Space {
         'dateRange':      dateRange,
         'dueDate':        dueDate,
         'members':        members,
+        'pendingMembers': pendingMembers,
         'isCreator':      isCreator,
         'creatorName':    creatorName,
         'status':         status,
@@ -403,6 +410,7 @@ class Space {
       dateRange:      _normaliseDateRange((j['dateRange'] as String?) ?? ''),
       dueDate:        (j['dueDate']     as String?) ?? '',
       members:        members,
+      pendingMembers: _sanitiseMembers(j['pendingMembers'] as List?),
       isCreator:      (j['isCreator']   as bool?)   ?? false,
       // Fall back to a non-empty placeholder only in release builds; in debug
       // the Space constructor assert will fire to surface the root cause.

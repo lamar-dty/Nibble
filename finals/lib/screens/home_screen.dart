@@ -54,7 +54,12 @@ class _HomeScreenState extends State<HomeScreen> {
   // always visible after the sheet collapses.
   void _onTabChanged() {
     if (!mounted) return;
-    if (widget.tabNotifier.value == 0) return; // staying on home tab — no-op
+    // Re-drain inbox whenever the user navigates TO the home tab (index 0)
+    // so invite notifications pushed while on another tab appear immediately.
+    if (widget.tabNotifier.value == 0) {
+      TaskStore.instance.drainSharedInbox();
+      return;
+    }
     if (!_sheetController.isAttached) return;
 
     // Reset the notification list scroll to top before collapsing.
@@ -450,16 +455,20 @@ class _NotificationSheetState extends State<_NotificationSheet> {
             case NotificationType.spaceCreated:       return 16;
             // Space - lifecycle
             case NotificationType.spaceDeleted:       return 17;
+            case NotificationType.spaceInviteReceived: return 18;
+            case NotificationType.spaceInviteDeclined: return 19;
             // Wallet
-            case NotificationType.walletExpenseOverdue:    return 18;
-            case NotificationType.walletExpenseDueSoon:    return 19;
-            case NotificationType.walletBudgetExceeded:    return 20;
-            case NotificationType.walletDailyExceeded:     return 21;
-            case NotificationType.walletBudgetWarning:     return 22;
-            case NotificationType.walletDailyWarning:      return 23;
-            case NotificationType.walletExpenseAdded:      return 24;
-            case NotificationType.walletExpensePaid:       return 25;
-            case NotificationType.walletLinkedExpensePaid: return 26;
+            case NotificationType.walletExpenseOverdue:    return 20;
+            case NotificationType.walletExpenseDueSoon:    return 21;
+            case NotificationType.walletBudgetExceeded:    return 22;
+            case NotificationType.walletDailyExceeded:     return 23;
+            case NotificationType.walletBudgetWarning:     return 24;
+            case NotificationType.walletDailyWarning:      return 25;
+            case NotificationType.walletExpenseAdded:      return 26;
+            case NotificationType.walletExpensePaid:       return 27;
+            case NotificationType.walletLinkedExpensePaid: return 28;
+            // Class
+            case NotificationType.classReminder:           return 29;
           }
         }
         list.sort((a, b) => rank(a.type).compareTo(rank(b.type)));

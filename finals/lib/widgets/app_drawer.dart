@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
+import '../models/space.dart';
 import '../screens/login_screen.dart';
 import '../store/auth_store.dart';
+import '../store/space_store.dart';
+import 'spaces/space_dialogs.dart';
+import 'faq_sheet.dart';
+import 'contact_support_sheet.dart';
+import 'language_sheet.dart';
+import 'reminder_settings_sheet.dart';
+import 'class_alerts_sheet.dart';
+import '../store/task_store.dart';
+import '../store/space_chat_store.dart';
 
 class AppDrawer extends StatefulWidget {
   const AppDrawer({super.key});
@@ -21,7 +31,11 @@ class _AppDrawerState extends State<AppDrawer>
   late Animation<double> _logoutFade;
   late Animation<Offset> _logoutSlide;
 
-  final List<_DrawerSection> _sections = const [
+  List<Space> _pendingInvites = [];
+  bool _invitesExpanded = true;
+  bool _loadingInvites = true;
+
+  final List<_DrawerSection> _sections = [
     _DrawerSection(title: 'Account', items: [
       _DrawerItem(icon: Icons.edit_outlined,            label: 'Edit Profile'),
       _DrawerItem(icon: Icons.key_outlined,              label: 'Change Password'),
@@ -34,10 +48,6 @@ class _AppDrawerState extends State<AppDrawer>
     _DrawerSection(title: 'App Settings', items: [
       _DrawerItem(icon: Icons.dark_mode_outlined,       label: 'Dark Mode'),
       _DrawerItem(icon: Icons.language_outlined,        label: 'Language'),
-    ]),
-    _DrawerSection(title: 'Spaces', items: [
-      _DrawerItem(icon: Icons.mail_outline_rounded,     label: 'Invites'),
-      _DrawerItem(icon: Icons.link_rounded,             label: 'Join Space'),
     ]),
     _DrawerSection(title: 'Help & Support', items: [
       _DrawerItem(icon: Icons.help_outline_rounded,     label: 'FAQ'),
@@ -64,7 +74,9 @@ class _AppDrawerState extends State<AppDrawer>
       curve: const Interval(0.0, 0.3, curve: Curves.easeOut),
     ));
 
-    _sectionFades = List.generate(_sections.length, (i) {
+    // +1 for the Spaces section which is built separately
+    final totalSections = _sections.length + 1;
+    _sectionFades = List.generate(totalSections, (i) {
       final start = 0.2 + (i * 0.1);
       final end = (start + 0.25).clamp(0.0, 1.0);
       return Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(
@@ -73,7 +85,7 @@ class _AppDrawerState extends State<AppDrawer>
       ));
     });
 
-    _sectionSlides = List.generate(_sections.length, (i) {
+    _sectionSlides = List.generate(totalSections, (i) {
       final start = 0.2 + (i * 0.1);
       final end = (start + 0.25).clamp(0.0, 1.0);
       return Tween<Offset>(
@@ -96,6 +108,22 @@ class _AppDrawerState extends State<AppDrawer>
     ));
 
     _controller.forward();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadInvites());
+  }
+
+  Future<void> _loadInvites() async {
+    final invites = await SpaceStore.instance.getPendingInvites();
+    if (mounted) setState(() { _pendingInvites = invites; _loadingInvites = false; });
+  }
+
+  Future<void> _accept(Space invite) async {
+    await SpaceStore.instance.acceptInvite(invite);
+    if (mounted) setState(() => _pendingInvites.remove(invite));
+  }
+
+  Future<void> _decline(Space invite) async {
+    await SpaceStore.instance.declineInvite(invite);
+    if (mounted) setState(() => _pendingInvites.remove(invite));
   }
 
   @override
@@ -106,6 +134,28 @@ class _AppDrawerState extends State<AppDrawer>
 
   @override
   Widget build(BuildContext context) {
+    // Build the full section list: static sections + Spaces section inserted at index 3
+    final allSectionWidgets = <Widget>[];
+    for (int i = 0; i < _sections.length; i++) {
+      // Insert Spaces section before Help & Support (last static section)
+      if (i == _sections.length - 1) {
+        allSectionWidgets.add(FadeTransition(
+          opacity: _sectionFades[i],
+          child: SlideTransition(
+            position: _sectionSlides[i],
+            child: _buildSpacesSection(),
+          ),
+        ));
+      }
+      allSectionWidgets.add(FadeTransition(
+        opacity: _sectionFades[i == _sections.length - 1 ? i + 1 : i],
+        child: SlideTransition(
+          position: _sectionSlides[i == _sections.length - 1 ? i + 1 : i],
+          child: _buildSection(_sections[i]),
+        ),
+      ));
+    }
+
     return Drawer(
       backgroundColor: kTeal,
       width: MediaQuery.of(context).size.width * 0.78,
@@ -145,7 +195,6 @@ class _AppDrawerState extends State<AppDrawer>
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Primary identity: username only.
                           Text(
                             AuthStore.instance.username.isNotEmpty
                                 ? AuthStore.instance.username
@@ -156,9 +205,8 @@ class _AppDrawerState extends State<AppDrawer>
                                 fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 2),
-                          // Secondary identity: Discord-style username#tag.
                           () {
-                            final tag      = AuthStore.instance.userTag;                           
+                            final tag = AuthStore.instance.userTag;
                             if (tag.isNotEmpty) {
                               return Text(tag,
                                   style: const TextStyle(
@@ -186,21 +234,11 @@ class _AppDrawerState extends State<AppDrawer>
             const SizedBox(height: 8),
 
             // ── SCROLLABLE MENU ──────────────────────────
-            // Key fix: Expanded + ListView with no shrinkWrap
-            // so it scrolls naturally without stretching
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 physics: const ClampingScrollPhysics(),
-                children: List.generate(_sections.length, (i) {
-                  return FadeTransition(
-                    opacity: _sectionFades[i],
-                    child: SlideTransition(
-                      position: _sectionSlides[i],
-                      child: _buildSection(_sections[i]),
-                    ),
-                  );
-                }),
+                children: allSectionWidgets,
               ),
             ),
 
@@ -250,6 +288,155 @@ class _AppDrawerState extends State<AppDrawer>
     );
   }
 
+  // ── Spaces section with live invite cards ────────────────
+  Widget _buildSpacesSection() {
+    final count = _pendingInvites.length;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Spaces',
+              style: const TextStyle(
+                  color: kWhite,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold)),
+          const SizedBox(height: 4),
+
+          // ── Invites row (expandable) ──────────────────
+          InkWell(
+            onTap: () => setState(() => _invitesExpanded = !_invitesExpanded),
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+              child: Row(
+                children: [
+                  const Icon(Icons.mail_outline_rounded, color: kWhite, size: 20),
+                  const SizedBox(width: 12),
+                  Text('Invites',
+                      style: TextStyle(
+                          color: kWhite.withOpacity(0.9), fontSize: 14)),
+                  if (count > 0) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: kNavyDark,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text('$count',
+                          style: const TextStyle(
+                              color: kWhite,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                  const Spacer(),
+                  Icon(
+                    _invitesExpanded
+                        ? Icons.keyboard_arrow_up_rounded
+                        : Icons.keyboard_arrow_down_rounded,
+                    color: kWhite.withOpacity(0.6),
+                    size: 18,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // ── Invite cards ─────────────────────────────
+          if (_invitesExpanded) ...[
+            if (_loadingInvites)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Center(
+                  child: SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: kWhite.withOpacity(0.5),
+                    ),
+                  ),
+                ),
+              )
+            else if (_pendingInvites.isEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4, 4, 0, 8),
+                child: Text('No pending invites',
+                    style: TextStyle(
+                        color: kWhite.withOpacity(0.45), fontSize: 12)),
+              )
+            else
+              ...(_pendingInvites.map((invite) => _InviteCard(
+                    invite: invite,
+                    onAccept: () => _accept(invite),
+                    onDecline: () => _decline(invite),
+                  ))),
+            const SizedBox(height: 4),
+          ],
+
+          // ── Join Space ────────────────────────────────
+          _buildItem(_DrawerItem(
+              icon: Icons.link_rounded,
+              label: 'Join Space',
+              onTap: () {
+                Navigator.pop(context); // close drawer first
+                showJoinSpaceDialog(
+                  context,
+                  isAlreadyJoined: (code) =>
+                      SpaceStore.instance.spaces.any((s) => s.inviteCode == code),
+                  onJoin: (code) async {
+                    final found = await SpaceStore.instance.lookupByCode(code);
+                    if (found == null) return 'No space found with that invite code';
+
+                    final joined = Space(
+                      name: found.name,
+                      description: found.description,
+                      dateRange: found.dateRange,
+                      dueDate: found.dueDate,
+                      members: List<String>.from(found.members)
+                        ..add(AuthStore.instance.displayName),
+                      isCreator: false,
+                      creatorName: found.creatorName,
+                      status: found.status,
+                      statusColor: found.statusColor,
+                      accentColor: found.accentColor,
+                      progress: found.progress,
+                      completedTasks: found.completedTasks,
+                      tasks: found.tasks,
+                      inviteCode: found.inviteCode,
+                    );
+
+                    await SpaceStore.instance.addSpace(joined);
+                    await SpaceStore.instance.patchMembersInRegistry(
+                      joined.inviteCode,
+                      joined.members,
+                    );
+                    TaskStore.instance.notifySpaceJoined(joined);
+                    await TaskStore.instance.notifyMemberJoined(
+                      joined,
+                      AuthStore.instance.displayName,
+                      joined.creatorName,
+                    );
+                    TaskStore.instance.generateSpaceTaskDeadlineAlerts(joined);
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      SpaceChatStore.instance.addSystemMessage(
+                        joined.inviteCode,
+                        '${AuthStore.instance.displayName} joined the space.',
+                      );
+                    });
+                    return null;
+                  },
+                );
+              })),
+
+          const SizedBox(height: 4),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSection(_DrawerSection section) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -270,8 +457,39 @@ class _AppDrawerState extends State<AppDrawer>
   }
 
   Widget _buildItem(_DrawerItem item) {
+    VoidCallback? tap = item.onTap;
+    if (tap == null && item.label == 'FAQ') {
+      tap = () {
+        Navigator.pop(context);
+        showFaqSheet(context);
+      };
+    }
+    if (tap == null && item.label == 'Contact Support') {
+      tap = () {
+        Navigator.pop(context);
+        showContactSupportSheet(context);
+      };
+    }
+    if (tap == null && item.label == 'Language') {
+      tap = () {
+        Navigator.pop(context);
+        showLanguageSheet(context);
+      };
+    }
+    if (tap == null && item.label == 'Reminder Settings') {
+      tap = () {
+        Navigator.pop(context);
+        showReminderSettingsSheet(context);
+      };
+    }
+    if (tap == null && item.label == 'Class Alerts') {
+      tap = () {
+        Navigator.pop(context);
+        showClassAlertsSheet(context);
+      };
+    }
     return InkWell(
-      onTap: () {},
+      onTap: tap ?? () {},
       borderRadius: BorderRadius.circular(8),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
@@ -289,6 +507,115 @@ class _AppDrawerState extends State<AppDrawer>
   }
 }
 
+// ─────────────────────────────────────────────────────────────
+// Invite card
+// ─────────────────────────────────────────────────────────────
+class _InviteCard extends StatelessWidget {
+  final Space invite;
+  final VoidCallback onAccept;
+  final VoidCallback onDecline;
+
+  const _InviteCard({
+    required this.invite,
+    required this.onAccept,
+    required this.onDecline,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: kNavyDark.withOpacity(0.55),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: invite.accentColor.withOpacity(0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Space name + accent dot
+          Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: invite.accentColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  invite.name,
+                  style: const TextStyle(
+                      color: kWhite,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          // Invited by
+          Text(
+            'Invited by ${invite.creatorName}',
+            style: TextStyle(
+                color: kWhite.withOpacity(0.5), fontSize: 11),
+          ),
+          const SizedBox(height: 10),
+          // Accept / Decline buttons
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: onDecline,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 7),
+                    decoration: BoxDecoration(
+                      color: kWhite.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: Text('Decline',
+                          style: TextStyle(
+                              color: kWhite.withOpacity(0.55),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: GestureDetector(
+                  onTap: onAccept,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 7),
+                    decoration: BoxDecoration(
+                      color: invite.accentColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Center(
+                      child: Text('Accept',
+                          style: TextStyle(
+                              color: kWhite,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700)),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _DrawerSection {
   final String title;
   final List<_DrawerItem> items;
@@ -298,5 +625,6 @@ class _DrawerSection {
 class _DrawerItem {
   final IconData icon;
   final String label;
-  const _DrawerItem({required this.icon, required this.label});
+  final VoidCallback? onTap;
+  const _DrawerItem({required this.icon, required this.label, this.onTap});
 }

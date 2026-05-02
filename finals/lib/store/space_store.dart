@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/space.dart';
+import '../models/app_notification.dart';
 import 'auth_store.dart';
 import 'storage_keys.dart';
+import 'task_store.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Key accessors — resolved via StorageKeys so no raw strings
@@ -194,10 +196,19 @@ class SpaceStore extends ChangeNotifier {
         continue; // corrupt patch for this space — skip
       }
 
+      // Build a fingerprint of every task's assignee list so that a pure
+      // assignment change (no task count / status / member count change)
+      // still triggers a sync for user B.
+      String assignFingerprint(List<SpaceTask> tasks) => tasks
+          .map((t) => '${t.title}:${(List<String>.from(t.assignedTo)..sort()).join(',')}')
+          .join('|');
+
       final needsUpdate = patched.tasks.length != space.tasks.length ||
           patched.status != space.status ||
           patched.progress != space.progress ||
-          patched.members.length != space.members.length;
+          patched.members.length != space.members.length ||
+          patched.pendingMembers.length != space.pendingMembers.length ||
+          assignFingerprint(patched.tasks) != assignFingerprint(space.tasks);
 
       if (needsUpdate) {
         // Validate member names: strip assignedTo entries for any member no
@@ -217,6 +228,7 @@ class SpaceStore extends ChangeNotifier {
           dateRange: patched.dateRange,
           dueDate: patched.dueDate,
           members: patched.members,
+          pendingMembers: patched.pendingMembers,
           isCreator: space.isCreator, // always keep local flag
           creatorName: patched.creatorName,
           status: patched.status,
@@ -252,6 +264,8 @@ class SpaceStore extends ChangeNotifier {
 
   // ── Pending invites ───────────────────────────────────────
 
+  /// Writes a pending invite into [recipientUserId]'s inbox.
+  /// Does NOT auto-join — the recipient must explicitly accept.
   Future<void> pushPendingInvite(String recipientUserId, Space space) async {
     if (recipientUserId.isEmpty) return;
     final prefs = await SharedPreferences.getInstance();
@@ -261,7 +275,7 @@ class SpaceStore extends ChangeNotifier {
       final raw = prefs.getString(key);
       list = raw != null ? (jsonDecode(raw) as List) : [];
     } catch (_) {
-      list = []; // corrupt inbox — start fresh rather than drop the invite
+      list = [];
     }
     if (!list.any((e) => (e as Map)['inviteCode'] == space.inviteCode)) {
       list.add(space.toJson());
@@ -269,57 +283,214 @@ class SpaceStore extends ChangeNotifier {
     }
   }
 
-  Future<void> drainPendingInvites() async {
+  /// Returns all pending invite [Space] objects waiting for the current user.
+  /// Does not remove them — call [acceptInvite] or [declineInvite] to act.
+  Future<List<Space>> getPendingInvites() async {
     final uid = AuthStore.instance.userId;
+    if (uid.isEmpty) return [];
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(kInboxSpaceInvites(uid));
+    if (raw == null) return [];
+    try {
+      final list = jsonDecode(raw) as List;
+      final result = <Space>[];
+      for (final e in list) {
+        try {
+          final space = Space.fromJson(Map<String, dynamic>.from(e as Map));
+          // Skip if already joined.
+          if (_spaces.any((s) => s.inviteCode == space.inviteCode)) continue;
+          result.add(space);
+        } catch (_) {}
+      }
+      return result;
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Accept a pending invite: adds the space, moves B into members on creator's
+  /// side via shared patches, and notifies the creator.
+  Future<void> acceptInvite(Space invite) async {
+    final uid = AuthStore.instance.userId;
+    final myName = AuthStore.instance.displayName;
+
+    // 1. Remove from inbox.
+    await _removeFromInviteInbox(uid, invite.inviteCode);
+
+    // 2. Fetch latest space state from registry.
+    final latest = await lookupByCode(invite.inviteCode) ?? invite;
+
+    // 3. Add to local spaces as a non-creator member.
+    if (!_spaces.any((s) => s.inviteCode == latest.inviteCode)) {
+      final members = List<String>.from(latest.members);
+      if (!members.contains(myName)) members.add(myName);
+      final joined = Space(
+        name:           latest.name,
+        description:    latest.description,
+        dateRange:      latest.dateRange,
+        dueDate:        latest.dueDate,
+        members:        members,
+        isCreator:      false,
+        creatorName:    latest.creatorName,
+        status:         latest.status,
+        statusColor:    latest.statusColor,
+        accentColor:    latest.accentColor,
+        progress:       latest.progress,
+        completedTasks: latest.completedTasks,
+        tasks:          latest.tasks,
+        inviteCode:     latest.inviteCode,
+      );
+      _spaces.add(joined);
+      notifyListeners();
+      await _save();
+    }
+
+    // 4. Patch registry: move B from pendingMembers → members.
+    await _acceptMemberInRegistry(latest.inviteCode, myName);
+
+    // 5. Notify the creator.
+    final creatorId = AuthStore.instance.userIdForName(latest.creatorName);
+    if (creatorId != null && creatorId.isNotEmpty) {
+      final notif = AppNotification(
+        id:               'invite_accepted_${latest.inviteCode}_$myName',
+        type:             NotificationType.spaceMemberJoined,
+        sourceId:         latest.inviteCode,
+        spaceInviteCode:  latest.inviteCode,
+        spaceAccentColor: latest.accentColor,
+        title:            latest.name,
+        subtitle:         '$myName accepted your invite 🎉',
+        detail:           '$myName has joined "${latest.name}".',
+      );
+      await TaskStore.instance.pushInviteNotification(creatorId, notif);
+    }
+  }
+
+  /// Decline a pending invite: clears it from inbox, removes B from
+  /// pendingMembers on creator's side, and notifies the creator.
+  Future<void> declineInvite(Space invite) async {
+    final uid = AuthStore.instance.userId;
+    final myName = AuthStore.instance.displayName;
+
+    // 1. Remove from inbox.
+    await _removeFromInviteInbox(uid, invite.inviteCode);
+
+    // 2. Patch registry: remove B from pendingMembers.
+    await _declineMemberInRegistry(invite.inviteCode, myName);
+
+    // 3. Notify the creator.
+    final creatorId = AuthStore.instance.userIdForName(invite.creatorName);
+    if (creatorId != null && creatorId.isNotEmpty) {
+      final notif = AppNotification(
+        id:               'invite_declined_${invite.inviteCode}_$myName',
+        type:             NotificationType.spaceInviteDeclined,
+        sourceId:         invite.inviteCode,
+        spaceInviteCode:  invite.inviteCode,
+        spaceAccentColor: invite.accentColor,
+        title:            invite.name,
+        subtitle:         '$myName declined your invite',
+        detail:           '$myName chose not to join "${invite.name}".',
+      );
+      await TaskStore.instance.pushInviteNotification(creatorId, notif);
+    }
+  }
+
+  /// Reads pending invites on load — but does NOT auto-join anymore.
+  /// Just used to ensure the inbox is accessible after a reload.
+  Future<void> drainPendingInvites() async {
+    // No-op: invites now sit in inbox until accepted/declined by the user.
+    // getPendingInvites() is used by the UI to surface them.
+  }
+
+  // ── Invite inbox helpers ──────────────────────────────────
+
+  Future<void> _removeFromInviteInbox(String uid, String inviteCode) async {
     if (uid.isEmpty) return;
     final prefs = await SharedPreferences.getInstance();
     final key = kInboxSpaceInvites(uid);
     final raw = prefs.getString(key);
     if (raw == null) return;
     try {
-      final list = jsonDecode(raw) as List;
-      bool changed = false;
-      for (final e in list) {
-        Space incoming;
-        try {
-          incoming =
-              Space.fromJson(Map<String, dynamic>.from(e as Map));
-        } catch (_) {
-          continue; // corrupt entry — skip
-        }
-        if (_spaces.any((s) => s.inviteCode == incoming.inviteCode)) {
-          continue; // already joined
-        }
-        // Always use the latest state from the global registry so the
-        // invitee sees the most up-to-date tasks and member list.
-        final latest = await lookupByCode(incoming.inviteCode) ?? incoming;
-        final joined = Space(
-          name: latest.name,
-          description: latest.description,
-          dateRange: latest.dateRange,
-          dueDate: latest.dueDate,
-          members: List<String>.from(latest.members),
-          isCreator: false,
-          creatorName: latest.creatorName,
-          status: latest.status,
-          statusColor: latest.statusColor,
-          accentColor: latest.accentColor,
-          progress: latest.progress,
-          completedTasks: latest.completedTasks,
-          tasks: latest.tasks,
-          inviteCode: latest.inviteCode,
-        );
-        _spaces.add(joined);
-        changed = true;
-      }
-      await prefs.remove(key);
-      if (changed) {
-        notifyListeners();
-        await _save();
-      }
+      final list = (jsonDecode(raw) as List)
+          .where((e) => (e as Map)['inviteCode'] != inviteCode)
+          .toList();
+      await prefs.setString(key, jsonEncode(list));
     } catch (_) {
-      await prefs.remove(key); // corrupt inbox — clear it
+      await prefs.remove(key);
     }
+  }
+
+  Future<void> _acceptMemberInRegistry(
+      String inviteCode, String memberName) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(kSpaceGlobalRegistry);
+    if (raw == null) return;
+    try {
+      final registry =
+          Map<String, dynamic>.from(jsonDecode(raw) as Map);
+      final entry = registry[inviteCode];
+      if (entry == null) return;
+      final updated = Map<String, dynamic>.from(entry as Map);
+      final members = List<String>.from(updated['members'] as List? ?? []);
+      final pending = List<String>.from(updated['pendingMembers'] as List? ?? []);
+      pending.remove(memberName);
+      if (!members.contains(memberName)) members.add(memberName);
+      updated['members'] = members;
+      updated['pendingMembers'] = pending;
+      registry[inviteCode] = updated;
+      await prefs.setString(kSpaceGlobalRegistry, jsonEncode(registry));
+      // Also update shared patches so the creator's UI reflects the change.
+      await _patchRegistryIntoSharedPatches(inviteCode, updated);
+    } catch (_) {}
+  }
+
+  Future<void> _declineMemberInRegistry(
+      String inviteCode, String memberName) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(kSpaceGlobalRegistry);
+    if (raw == null) return;
+    try {
+      final registry =
+          Map<String, dynamic>.from(jsonDecode(raw) as Map);
+      final entry = registry[inviteCode];
+      if (entry == null) return;
+      final updated = Map<String, dynamic>.from(entry as Map);
+      final pending = List<String>.from(updated['pendingMembers'] as List? ?? []);
+      pending.remove(memberName);
+      updated['pendingMembers'] = pending;
+      registry[inviteCode] = updated;
+      await prefs.setString(kSpaceGlobalRegistry, jsonEncode(registry));
+      await _patchRegistryIntoSharedPatches(inviteCode, updated);
+    } catch (_) {}
+  }
+
+  /// Called by User A to cancel a pending invite they sent to [memberName].
+  /// Removes [memberName] from the space's in-memory pendingMembers,
+  /// persists, patches the registry + shared patches, and clears B's inbox.
+  Future<void> cancelInvite(Space space, String memberName) async {
+    // 1. Mutate in-memory immediately so A's UI updates.
+    space.pendingMembers.remove(memberName);
+    save();
+
+    // 2. Patch registry so it's consistent.
+    await _declineMemberInRegistry(space.inviteCode, memberName);
+
+    // 3. Clear B's invite inbox entry so the card disappears in their drawer.
+    final invitedId = AuthStore.instance.userIdForName(memberName);
+    if (invitedId != null && invitedId.isNotEmpty) {
+      await _removeFromInviteInbox(invitedId, space.inviteCode);
+    }
+  }
+
+  Future<void> _patchRegistryIntoSharedPatches(
+      String inviteCode, Map<String, dynamic> data) async {
+    final prefs = await SharedPreferences.getInstance();
+    try {
+      final raw = prefs.getString(kSpaceSharedPatches);
+      final patches =
+          raw != null ? Map<String, dynamic>.from(jsonDecode(raw) as Map) : {};
+      patches[inviteCode] = data;
+      await prefs.setString(kSpaceSharedPatches, jsonEncode(patches));
+    } catch (_) {}
   }
 
   // ── CRUD ──────────────────────────────────────────────────
@@ -385,6 +556,12 @@ class SpaceStore extends ChangeNotifier {
       await prefs.setString(key, jsonEncode(list));
     }
   }
+
+  /// Push a space-removal notice into [kickedUserId]'s deletion inbox so
+  /// that when they next open the app, drainDeletionNotices() removes the
+  /// space from their local list automatically.
+  Future<void> pushKickNotice(String inviteCode, String kickedUserId) =>
+      _pushDeletionNotice(inviteCode, kickedUserId);
 
   /// Drain the deletion inbox for the current user.
   ///

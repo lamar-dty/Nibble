@@ -521,6 +521,21 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
                 '${space.memberCount} ${space.memberCount == 1 ? 'Person' : 'People'}',
                 style: const TextStyle(color: kSubtitle, fontSize: 12),
               ),
+              if (space.pendingMembers.isNotEmpty) ...[
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE8A870).withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFFE8A870).withOpacity(0.35)),
+                  ),
+                  child: Text(
+                    '${space.pendingMembers.length} pending',
+                    style: const TextStyle(color: Color(0xFFE8A870), fontSize: 10),
+                  ),
+                ),
+              ],
               if (space.isCreator) ...[
                 const Spacer(),
                 GestureDetector(
@@ -559,6 +574,14 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
         canKick: space.isCreator,
         onKick:
             space.isCreator ? () => widget.onKickMember(m) : null,
+      ),
+    ),
+    ...space.pendingMembers.map(
+      (m) => _PendingMemberChip(
+        name: m,
+        onCancel: space.isCreator
+            ? () => SpaceStore.instance.cancelInvite(space, m)
+            : null,
       ),
     ),
   ],
@@ -930,6 +953,57 @@ class MemberChip extends StatelessWidget {
               onTap: onKick,
               child: const Icon(Icons.close_rounded,
                   color: Color(0xFFE87070), size: 13),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Pending member chip — dimmed, amber "Pending" badge
+// ─────────────────────────────────────────────────────────────
+class _PendingMemberChip extends StatelessWidget {
+  final String name;
+  final VoidCallback? onCancel;
+  const _PendingMemberChip({required this.name, this.onCancel});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: kWhite.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE8A870).withOpacity(0.35)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.person_outline_rounded,
+              color: kWhite.withOpacity(0.35), size: 12),
+          const SizedBox(width: 5),
+          Text(name,
+              style: TextStyle(color: kWhite.withOpacity(0.4), fontSize: 11)),
+          const SizedBox(width: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE8A870).withOpacity(0.15),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: const Text(
+              'Pending',
+              style: TextStyle(color: Color(0xFFE8A870), fontSize: 9),
+            ),
+          ),
+          if (onCancel != null) ...[
+            const SizedBox(width: 6),
+            GestureDetector(
+              onTap: onCancel,
+              child: Icon(Icons.close_rounded,
+                  size: 13, color: kWhite.withOpacity(0.4)),
             ),
           ],
         ],

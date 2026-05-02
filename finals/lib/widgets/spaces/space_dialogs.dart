@@ -219,29 +219,32 @@ void showAddMemberDialog(
                         setDlg(() => error = 'Already a member');
                         return;
                       }
+                      if (space.pendingMembers.contains(resolvedName)) {
+                        setDlg(() => error = 'Invite already sent');
+                        return;
+                      }
 
                       Navigator.pop(ctx);
 
-                      // Add the resolved display name to the member list.
-                      space.members.add(resolvedName);
+                      // Add to pendingMembers — not members — until they accept.
+                      space.pendingMembers.add(resolvedName);
                       SpaceStore.instance.save();
 
                       final invitedId = AuthStore.instance.userIdForName(resolvedName);
                       if (invitedId != null) {
-                        // Push the space itself into the invitee's pending inbox
-                        // so it appears automatically when they open the app.
+                        // Write the invite into their inbox.
                         await SpaceStore.instance.pushPendingInvite(invitedId, space);
 
-                        // Also push a notification so they know they were added.
+                        // Send a spaceInviteReceived notification so they see it.
                         final notif = AppNotification(
                           id: 'space_invite_${space.inviteCode}_$resolvedName',
-                          type: NotificationType.spaceMemberJoined,
+                          type: NotificationType.spaceInviteReceived,
                           sourceId: space.inviteCode,
                           spaceInviteCode: space.inviteCode,
                           spaceAccentColor: space.accentColor,
                           title: space.name,
-                          subtitle: 'You were added to a space 🎉',
-                          detail: '${AuthStore.instance.displayName} added you to "${space.name}".',
+                          subtitle: '${AuthStore.instance.displayName} invited you to join',
+                          detail: 'You\'ve been invited to join "${space.name}". Accept or decline in the app drawer.',
                         );
                         await TaskStore.instance.pushInviteNotification(invitedId, notif);
                       }

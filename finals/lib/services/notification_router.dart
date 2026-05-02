@@ -3,6 +3,7 @@ import '../models/app_notification.dart';
 import '../store/task_store.dart';
 import '../store/space_store.dart';
 import '../store/wallet_store.dart';
+import '../widgets/class_alerts_sheet.dart';
 
 /// Callback signature that MainScaffold registers so the router can
 /// switch tabs without knowing about the scaffold's internals.
@@ -102,6 +103,12 @@ class NotificationRouter extends ChangeNotifier {
       return;
     }
 
+    // ── Class notifications ───────────────────────────────
+    if (notification.isClassNotification) {
+      _routeClassAlert(context);
+      return;
+    }
+
     // Fallback — should never reach here if all types are handled above.
     _showFallbackSnackBar(context, 'Could not open notification.');
   }
@@ -167,8 +174,15 @@ class NotificationRouter extends ChangeNotifier {
       _showFallbackSnackBar(context, 'Could not open notification.');
       return;
     }
-    final spaces     = SpaceStore.instance.spaces;
-    final space      = spaces.where((s) => s.inviteCode == inviteCode).firstOrNull;
+
+    // ── Invite received: open the drawer so user can accept/decline ──
+    if (n.isSpaceInviteNotification) {
+      _routeInviteReceived(context);
+      return;
+    }
+
+    final spaces = SpaceStore.instance.spaces;
+    final space  = spaces.where((s) => s.inviteCode == inviteCode).firstOrNull;
 
     if (space == null) {
       // Space deleted or user was removed.
@@ -199,9 +213,23 @@ class NotificationRouter extends ChangeNotifier {
         return;
       }
 
-      // Default: open space overview (created, joined, member events, deleted notice, etc.)
+      // Default: open space overview (created, joined, member events,
+      // deleted notice, invite declined notice, etc.)
       _openSpaceSafe(context, inviteCode);
     });
+  }
+
+  /// Opens the app drawer so the user can see and act on the invite.
+  void _routeInviteReceived(BuildContext context) {
+    if (!context.mounted) return;
+    // Find the nearest Scaffold and open its drawer.
+    final scaffoldState = Scaffold.maybeOf(context);
+    if (scaffoldState != null && scaffoldState.hasDrawer) {
+      scaffoldState.openDrawer();
+    } else {
+      // Fallback: switch to Spaces tab where the user can see pending invites.
+      _switchTab(2);
+    }
   }
 
   // ── Callback guards ───────────────────────────────────────
@@ -263,6 +291,14 @@ class NotificationRouter extends ChangeNotifier {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       WalletStore.instance.requestOpenWallet();
     });
+  }
+
+  // ── Class alert routing ───────────────────────────────────
+
+  void _routeClassAlert(BuildContext context) {
+    if (!context.mounted) return;
+    // Open the Class Alerts sheet so the user can see their schedule.
+    showClassAlertsSheet(context);
   }
 
   // ── Type helpers ──────────────────────────────────────────

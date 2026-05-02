@@ -26,6 +26,8 @@ enum NotificationType {
   spaceTaskDueSoon,   // a space task is due tomorrow
   spaceTaskOverdue,   // a space task is overdue
   spaceDeleted,       // the space was deleted by its creator
+  spaceInviteReceived, // user B received an invite to join a space
+  spaceInviteDeclined, // user B declined — notifies user A
 
   // ── Wallet ────────────────────────────
   walletExpenseAdded,        // new expense logged
@@ -37,6 +39,9 @@ enum NotificationType {
   walletBudgetExceeded,      // monthly spend crossed 100 % of budget
   walletDailyWarning,        // today's spend crossed 80 % of daily allowance
   walletDailyExceeded,       // today's spend exceeded daily allowance
+
+  // ── Class Alerts ──────────────────────────────
+  classReminder,             // upcoming class about to start
 }
 
 class AppNotification {
@@ -121,6 +126,8 @@ class AppNotification {
       case NotificationType.spaceTaskDueSoon:   return Icons.schedule_rounded;
       case NotificationType.spaceTaskOverdue:   return Icons.warning_amber_rounded;
       case NotificationType.spaceDeleted:       return Icons.delete_forever_rounded;
+      case NotificationType.spaceInviteReceived: return Icons.mail_rounded;
+      case NotificationType.spaceInviteDeclined: return Icons.person_remove_rounded;
       // Wallet
       case NotificationType.walletExpenseAdded:      return Icons.receipt_long_rounded;
       case NotificationType.walletExpenseDueSoon:    return Icons.schedule_rounded;
@@ -131,6 +138,8 @@ class AppNotification {
       case NotificationType.walletBudgetExceeded:    return Icons.account_balance_wallet_rounded;
       case NotificationType.walletDailyWarning:      return Icons.credit_card_rounded;
       case NotificationType.walletDailyExceeded:     return Icons.credit_card_rounded;
+      // Class
+      case NotificationType.classReminder:           return Icons.school_rounded;
     }
   }
 
@@ -139,6 +148,8 @@ class AppNotification {
     if (spaceAccentColor != null) return spaceAccentColor!;
     if (eventCategory != null) return eventCategory!.color;
     switch (type) {
+      case NotificationType.classReminder:
+        return const Color(0xFF90D0CB); // kTeal
       case NotificationType.walletExpenseAdded:
       case NotificationType.walletExpenseDueSoon:
       case NotificationType.walletExpensePaid:
@@ -183,6 +194,14 @@ class AppNotification {
   /// Returns true for types that should open the space chat directly.
   bool get isSpaceChatNotification =>
       type == NotificationType.spaceChatMessage;
+
+  /// Returns true when this notification carries a pending space invite
+  /// that the recipient can accept or decline.
+  bool get isSpaceInviteNotification =>
+      type == NotificationType.spaceInviteReceived;
+
+  bool get isClassNotification =>
+      type == NotificationType.classReminder;
 
   // ── Serialisation ─────────────────────────────────────────
 

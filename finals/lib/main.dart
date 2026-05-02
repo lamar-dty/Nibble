@@ -14,6 +14,7 @@ import 'store/space_store.dart';
 import 'store/space_chat_store.dart';
 import 'store/auth_store.dart';
 import 'store/wallet_store.dart';
+import 'store/class_schedule_store.dart';
 import 'services/notification_router.dart';
 
 class ScrollBehaviorNoGlow extends ScrollBehavior {
@@ -43,22 +44,24 @@ void main() async {
         SpaceStore.instance.spaces.map((s) => s.inviteCode).toList(),
       );
       await WalletStore.instance.reload();
+      await ClassScheduleStore.instance.reload(); // load schedules for logged-in user
     },
     onLogout: () async {
       await TaskStore.instance.reload();
       await SpaceStore.instance.reload();
       await SpaceChatStore.instance.reload([]);
       await WalletStore.instance.clear();
+      await ClassScheduleStore.instance.clear(); // wipe schedules on logout
     },
   );
 
   // Load persisted data before showing any UI.
   await TaskStore.instance.load();
   await SpaceStore.instance.load();
-  // Chat messages are keyed per space; load for all already-persisted spaces.
   await SpaceChatStore.instance.load(
     SpaceStore.instance.spaces.map((s) => s.inviteCode).toList(),
   );
+  await ClassScheduleStore.instance.load();
 
   runApp(const MyApp());
 }
@@ -98,13 +101,8 @@ class _MainScaffoldState extends State<MainScaffold> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<SpacesScreenState> _spacesKey = GlobalKey<SpacesScreenState>();
 
-  // Notifies all tab screens whenever the active tab changes so each
-  // screen can collapse its DraggableScrollableSheet.  Using a
-  // ValueNotifier<int> (the newly-selected index) keeps screens fully
-  // decoupled from MainScaffold — no GlobalKey or public State method needed.
   final ValueNotifier<int> _tabNotifier = ValueNotifier<int>(0);
 
-  // ── Persisted calendar time range ────────────────────────
   int _calStartHour = 6;
   int _calEndHour   = 22;
 
@@ -113,8 +111,6 @@ class _MainScaffoldState extends State<MainScaffold> {
   @override
   void initState() {
     super.initState();
-    // Register the tab switcher so NotificationRouter can switch tabs
-    // from a notification tap without knowing MainScaffold's internals.
     NotificationRouter.instance.registerTabSwitcher((index) {
       if (mounted) {
         setState(() => _selectedIndex = index);
@@ -165,9 +161,6 @@ class _MainScaffoldState extends State<MainScaffold> {
           onTap: (i) {
             setState(() => _selectedIndex = i);
             _tabNotifier.value = i;
-            // Drain inbox + deletion notices every time the home tab is
-            // opened so spaceDeleted alerts appear regardless of which tab
-            // the user visits first.
             if (i == 0) {
               TaskStore.instance.drainSharedInbox();
               SpaceStore.instance.drainDeletionNotices().then((removed) {

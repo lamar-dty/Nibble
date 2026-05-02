@@ -21,7 +21,7 @@ String get _kNotifications => AuthStore.instance.keyNotifications();
 // ─────────────────────────────────────────────────────────────
 // TaskStore
 // ─────────────────────────────────────────────────────────────
-class TaskStore extends ChangeNotifier {
+class TaskStore extends ChangeNotifier with WidgetsBindingObserver {
   TaskStore._();
   static final TaskStore instance = TaskStore._();
 
@@ -36,6 +36,7 @@ class TaskStore extends ChangeNotifier {
   // ── Initialisation ────────────────────────────────────────
 
   Future<void> load() async {
+    WidgetsBinding.instance.addObserver(this);
     final prefs = await SharedPreferences.getInstance();
 
     // ── Tasks ────────────────────────────────────────────────
@@ -120,7 +121,16 @@ class TaskStore extends ChangeNotifier {
   Future<void> drainSharedInbox() async {
     final prefs = await SharedPreferences.getInstance();
     await _drainSharedInbox(prefs);
-    notifyListeners();
+    // postFrameCallback ensures notifyListeners never fires mid-build,
+    // preventing the "setState() called during build" crash.
+    WidgetsBinding.instance.addPostFrameCallback((_) => notifyListeners());
+  }
+
+  /// Drain inbox whenever the app comes back to the foreground —
+  /// covers the case where B is already on the home tab when A sends an invite.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) drainSharedInbox();
   }
 
   /// Push a notification into another user's shared inbox.
@@ -658,11 +668,22 @@ class TaskStore extends ChangeNotifier {
   /// [NotificationType.spaceDeleted] is exempt: this is a lifecycle
   /// notification that must remain visible even after the space is gone.
   void pruneOrphanedSpaceNotifications(Set<String> activeInviteCodes) {
+    // spaceDeleted and spaceInviteReceived are both exempt from pruning:
+    //   • spaceDeleted must survive the space being removed so the user
+    //     can see why it disappeared.
+    //   • spaceInviteReceived belongs to a space the recipient has NOT yet
+    //     joined, so its invite code will never appear in activeInviteCodes.
+    //     Pruning it would silently delete the invite notification before
+    //     user B ever sees it.
+    const preserved = {
+      NotificationType.spaceDeleted,
+      NotificationType.spaceInviteReceived,
+    };
     final before = _notifications.length;
     _notifications.removeWhere((n) =>
         n.spaceInviteCode != null &&
         !activeInviteCodes.contains(n.spaceInviteCode) &&
-        n.type != NotificationType.spaceDeleted);
+        !preserved.contains(n.type));
     if (_notifications.length != before) {
       notifyListeners();
       _saveNotifications();
