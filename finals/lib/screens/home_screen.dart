@@ -112,7 +112,6 @@ class _HomeScreenState extends State<HomeScreen> {
         final savHist = wallet.savingsHistory;
         String savingsValue;
         String savingsSubtitle;
-        Color  savingsColor;
         if (savHist.length >= 2) {
           final prev = savHist[savHist.length - 2].value;
           final curr = savHist[savHist.length - 1].value;
@@ -120,17 +119,14 @@ class _HomeScreenState extends State<HomeScreen> {
             final delta = ((curr - prev) / prev * 100);
             savingsValue    = '${delta >= 0 ? '+' : ''}${delta.toStringAsFixed(1)}%';
             savingsSubtitle = 'vs last month';
-            savingsColor    = delta >= 0 ? const Color(0xFF3BBFA3) : const Color(0xFFE87070);
           } else {
             savingsValue    = '₱${curr.toStringAsFixed(0)}';
             savingsSubtitle = 'Total saved';
-            savingsColor    = const Color(0xFF9B88E8);
           }
         } else {
           final total = wallet.savings;
           savingsValue    = '₱${total.toStringAsFixed(0)}';
           savingsSubtitle = total > 0 ? 'Total saved' : 'No savings yet';
-          savingsColor    = const Color(0xFF9B88E8);
         }
 
         // username is the canonical public identity — never fall back to displayName.
@@ -193,7 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               const SizedBox(width: 10),
                               _HomeStatCard(
                                 icon: Icons.account_balance_wallet_rounded,
-                                iconColor: const Color(0xFF3BBFA3),
+                                iconColor: const Color(0xFF4A90D9),
                                 title: 'Wallet Balance',
                                 value: dailySet
                                     ? (dailyRemaining >= 0
@@ -208,11 +204,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     : null,
                                 showProgress: dailySet && wallet.monthlyBudget > 0,
                                 progressValue: budgetFraction,
-                                progressColor: budgetFraction >= 1.0
-                                    ? const Color(0xFFE87070)
-                                    : budgetFraction >= 0.8
-                                        ? const Color(0xFFE8A870)
-                                        : const Color(0xFF3BBFA3),
+                                progressColor: const Color(0xFF9B88E8),
                               ),
                             ],
                           ),
@@ -230,14 +222,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               const SizedBox(width: 10),
                               _HomeStatCard(
-                                icon: savingsColor == const Color(0xFFE87070)
+                                icon: savingsValue.startsWith('-')
                                     ? Icons.trending_down_rounded
                                     : Icons.trending_up_rounded,
-                                iconColor: savingsColor,
+                                iconColor: const Color(0xFF3BBFA3),
                                 title: 'Savings',
                                 value: savingsValue,
                                 subtitle: savingsSubtitle,
-                                subtitleColor: savingsColor,
+                                subtitleColor: const Color(0xFF3BBFA3),
                               ),
                             ],
                           ),
