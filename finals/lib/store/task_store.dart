@@ -7,6 +7,7 @@ import '../models/app_notification.dart';
 import '../models/space.dart';
 import 'auth_store.dart';
 import 'storage_keys.dart';
+import 'wallet_store.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Storage keys — all resolved through StorageKeys helpers
@@ -939,6 +940,25 @@ class TaskStore extends ChangeNotifier {
     _notifications.removeWhere((n) => n.sourceId == task.id);
     if (task.status == TaskStatus.completed) {
       _addNotification(_buildCompleted(task));
+      // Sync linked expense → paid if not already.
+      if (task.linkedExpenseId != null) {
+        final idx = WalletStore.instance
+            .findExpenseIndexByTaskId(task.linkedExpenseId!);
+        if (idx != -1) {
+          WalletStore.instance.markExpensePaid(idx);
+          final expense = WalletStore.instance.expenses[idx];
+          _addNotification(AppNotification(
+            id:       'wallet_linked_paid_${expense.id}',
+            type:     NotificationType.walletLinkedExpensePaid,
+            sourceId: expense.id,
+            title:    'Expense Auto-Paid',
+            subtitle: expense.name,
+            detail:   'Marked paid because linked task "${task.name}" was completed.',
+          ));
+          notifyListeners();
+          _saveNotifications();
+        }
+      }
     } else if (task.status == TaskStatus.notStarted) {
       _generateTaskNotifications(task);
     }
@@ -972,6 +992,25 @@ class TaskStore extends ChangeNotifier {
   void _addNotification(AppNotification notif) {
     if (_notifications.any((n) => n.id == notif.id)) return;
     _notifications.insert(0, notif);
+  }
+
+  /// Public entry point for wallet_store to push wallet notifications.
+  /// Deduplicates by ID, then persists and notifies listeners.
+  void addWalletNotification(AppNotification notif) {
+    _addNotification(notif);
+    notifyListeners();
+    _saveNotifications();
+  }
+
+  /// Removes a notification by its stable ID. Used by wallet_store to retract
+  /// stale budget/daily warning notifs when an expense is un-paid.
+  void removeNotificationById(String id) {
+    final before = _notifications.length;
+    _notifications.removeWhere((n) => n.id == id);
+    if (_notifications.length != before) {
+      notifyListeners();
+      _saveNotifications();
+    }
   }
 
   String _fmtDate(DateTime d) {

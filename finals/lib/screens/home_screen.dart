@@ -7,6 +7,7 @@ import '../store/space_store.dart';
 import '../store/auth_store.dart';
 import '../store/space_chat_store.dart';
 import '../services/notification_router.dart';
+import '../store/wallet_store.dart';
 
 class HomeScreen extends StatefulWidget {
   final ValueNotifier<int> tabNotifier;
@@ -91,12 +92,46 @@ class _HomeScreenState extends State<HomeScreen> {
       listenable: Listenable.merge([
         TaskStore.instance,
         SpaceStore.instance,
+        WalletStore.instance,
       ]),
       builder: (context, _) {
         final store  = TaskStore.instance;
         final pct    = store.completionPercent;
         final total  = store.total;
         final spaces = SpaceStore.instance.spaces;
+        final wallet = WalletStore.instance;
+
+        // ── Wallet Balance ────────────────────────────────────
+        final dailyRemaining   = wallet.dailyRemaining;
+        final budgetFraction   = wallet.budgetUsedFraction;
+        final dailySet         = wallet.dailyAllowance > 0;
+
+        // ── Savings Increase ──────────────────────────────────
+        // Compare latest two monthly savings snapshots for a delta %.
+        // Falls back to total savings if history is too short.
+        final savHist = wallet.savingsHistory;
+        String savingsValue;
+        String savingsSubtitle;
+        Color  savingsColor;
+        if (savHist.length >= 2) {
+          final prev = savHist[savHist.length - 2].value;
+          final curr = savHist[savHist.length - 1].value;
+          if (prev > 0) {
+            final delta = ((curr - prev) / prev * 100);
+            savingsValue    = '${delta >= 0 ? '+' : ''}${delta.toStringAsFixed(1)}%';
+            savingsSubtitle = 'vs last month';
+            savingsColor    = delta >= 0 ? const Color(0xFF3BBFA3) : const Color(0xFFE87070);
+          } else {
+            savingsValue    = '₱${curr.toStringAsFixed(0)}';
+            savingsSubtitle = 'Total saved';
+            savingsColor    = const Color(0xFF9B88E8);
+          }
+        } else {
+          final total = wallet.savings;
+          savingsValue    = '₱${total.toStringAsFixed(0)}';
+          savingsSubtitle = total > 0 ? 'Total saved' : 'No savings yet';
+          savingsColor    = const Color(0xFF9B88E8);
+        }
 
         // username is the canonical public identity — never fall back to displayName.
         final _username = AuthStore.instance.username;
@@ -156,12 +191,28 @@ class _HomeScreenState extends State<HomeScreen> {
                                     : '${store.completed} of $total done',
                               ),
                               const SizedBox(width: 10),
-                              const _HomeStatCard(
+                              _HomeStatCard(
                                 icon: Icons.account_balance_wallet_rounded,
-                                iconColor: Color(0xFF3BBFA3),
+                                iconColor: const Color(0xFF3BBFA3),
                                 title: 'Wallet Balance',
-                                value: '₱0.00',
-                                subtitle: 'Current balance',
+                                value: dailySet
+                                    ? (dailyRemaining >= 0
+                                        ? '₱${dailyRemaining.toStringAsFixed(2)}'
+                                        : '-₱${(-dailyRemaining).toStringAsFixed(2)}')
+                                    : '—',
+                                subtitle: dailySet
+                                    ? (dailyRemaining >= 0 ? 'left today' : 'over today')
+                                    : 'No allowance set',
+                                subtitleColor: dailySet && dailyRemaining < 0
+                                    ? const Color(0xFFE87070)
+                                    : null,
+                                showProgress: dailySet && wallet.monthlyBudget > 0,
+                                progressValue: budgetFraction,
+                                progressColor: budgetFraction >= 1.0
+                                    ? const Color(0xFFE87070)
+                                    : budgetFraction >= 0.8
+                                        ? const Color(0xFFE8A870)
+                                        : const Color(0xFF3BBFA3),
                               ),
                             ],
                           ),
@@ -178,12 +229,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                     : '${spaces.where((s) => !s.isCompleted).length} active now',
                               ),
                               const SizedBox(width: 10),
-                              const _HomeStatCard(
-                                icon: Icons.trending_up_rounded,
-                                iconColor: Color(0xFF9B88E8),
-                                title: 'Savings Increase',
-                                value: '0%',
-                                subtitle: 'vs last month',
+                              _HomeStatCard(
+                                icon: savingsColor == const Color(0xFFE87070)
+                                    ? Icons.trending_down_rounded
+                                    : Icons.trending_up_rounded,
+                                iconColor: savingsColor,
+                                title: 'Savings',
+                                value: savingsValue,
+                                subtitle: savingsSubtitle,
+                                subtitleColor: savingsColor,
                               ),
                             ],
                           ),
@@ -261,6 +315,10 @@ class _HomeStatCard extends StatelessWidget {
   final String title;
   final String value;
   final String subtitle;
+  final Color? subtitleColor;
+  final bool showProgress;
+  final double progressValue;
+  final Color? progressColor;
 
   const _HomeStatCard({
     required this.icon,
@@ -268,6 +326,10 @@ class _HomeStatCard extends StatelessWidget {
     required this.title,
     required this.value,
     required this.subtitle,
+    this.subtitleColor,
+    this.showProgress = false,
+    this.progressValue = 0,
+    this.progressColor,
   });
 
   @override
@@ -309,10 +371,23 @@ class _HomeStatCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
+            if (showProgress) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(3),
+                child: LinearProgressIndicator(
+                  value: progressValue,
+                  minHeight: 3,
+                  backgroundColor: kWhite.withOpacity(0.12),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                      progressColor ?? iconColor),
+                ),
+              ),
+              const SizedBox(height: 3),
+            ],
             Text(
               subtitle,
               style: TextStyle(
-                color: kWhite.withOpacity(0.45),
+                color: subtitleColor ?? kWhite.withOpacity(0.45),
                 fontSize: 10,
               ),
             ),
@@ -383,6 +458,16 @@ class _NotificationSheetState extends State<_NotificationSheet> {
             case NotificationType.spaceCreated:       return 16;
             // Space - lifecycle
             case NotificationType.spaceDeleted:       return 17;
+            // Wallet
+            case NotificationType.walletExpenseOverdue:    return 18;
+            case NotificationType.walletExpenseDueSoon:    return 19;
+            case NotificationType.walletBudgetExceeded:    return 20;
+            case NotificationType.walletDailyExceeded:     return 21;
+            case NotificationType.walletBudgetWarning:     return 22;
+            case NotificationType.walletDailyWarning:      return 23;
+            case NotificationType.walletExpenseAdded:      return 24;
+            case NotificationType.walletExpensePaid:       return 25;
+            case NotificationType.walletLinkedExpensePaid: return 26;
           }
         }
         list.sort((a, b) => rank(a.type).compareTo(rank(b.type)));

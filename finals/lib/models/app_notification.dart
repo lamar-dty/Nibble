@@ -26,6 +26,17 @@ enum NotificationType {
   spaceTaskDueSoon,   // a space task is due tomorrow
   spaceTaskOverdue,   // a space task is overdue
   spaceDeleted,       // the space was deleted by its creator
+
+  // ── Wallet ────────────────────────────
+  walletExpenseAdded,        // new expense logged
+  walletExpenseDueSoon,      // unpaid expense due tomorrow
+  walletExpenseOverdue,      // unpaid expense passed due date
+  walletExpensePaid,         // expense manually marked paid
+  walletLinkedExpensePaid,   // expense auto-paid via linked task completion
+  walletBudgetWarning,       // monthly spend crossed 80 % of budget
+  walletBudgetExceeded,      // monthly spend crossed 100 % of budget
+  walletDailyWarning,        // today's spend crossed 80 % of daily allowance
+  walletDailyExceeded,       // today's spend exceeded daily allowance
 }
 
 class AppNotification {
@@ -110,6 +121,16 @@ class AppNotification {
       case NotificationType.spaceTaskDueSoon:   return Icons.schedule_rounded;
       case NotificationType.spaceTaskOverdue:   return Icons.warning_amber_rounded;
       case NotificationType.spaceDeleted:       return Icons.delete_forever_rounded;
+      // Wallet
+      case NotificationType.walletExpenseAdded:      return Icons.receipt_long_rounded;
+      case NotificationType.walletExpenseDueSoon:    return Icons.schedule_rounded;
+      case NotificationType.walletExpenseOverdue:    return Icons.warning_amber_rounded;
+      case NotificationType.walletExpensePaid:       return Icons.check_circle_rounded;
+      case NotificationType.walletLinkedExpensePaid: return Icons.task_alt_rounded;
+      case NotificationType.walletBudgetWarning:     return Icons.account_balance_wallet_rounded;
+      case NotificationType.walletBudgetExceeded:    return Icons.account_balance_wallet_rounded;
+      case NotificationType.walletDailyWarning:      return Icons.credit_card_rounded;
+      case NotificationType.walletDailyExceeded:     return Icons.credit_card_rounded;
     }
   }
 
@@ -117,7 +138,22 @@ class AppNotification {
   Color get iconColor {
     if (spaceAccentColor != null) return spaceAccentColor!;
     if (eventCategory != null) return eventCategory!.color;
-    return taskCategory?.color ?? const Color(0xFF9B88E8);
+    switch (type) {
+      case NotificationType.walletExpenseAdded:
+      case NotificationType.walletExpenseDueSoon:
+      case NotificationType.walletExpensePaid:
+      case NotificationType.walletLinkedExpensePaid:
+        return const Color(0xFF3BBFA3); // teal
+      case NotificationType.walletExpenseOverdue:
+      case NotificationType.walletBudgetExceeded:
+      case NotificationType.walletDailyExceeded:
+        return const Color(0xFFE87070); // red
+      case NotificationType.walletBudgetWarning:
+      case NotificationType.walletDailyWarning:
+        return const Color(0xFFE8A870); // amber
+      default:
+        return taskCategory?.color ?? const Color(0xFF9B88E8);
+    }
   }
 
   Color get iconBgColor => iconColor.withOpacity(0.15);

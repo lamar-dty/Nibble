@@ -58,6 +58,9 @@ enum WalletExpenseCategory {
 enum _WalletSortBy { dueDate, amount, status, category }
 
 class WalletExpense {
+  /// Stable unique identifier — used for notification dedup IDs.
+  /// Format: millisecondsSinceEpoch string, or 'exp_<taskId>' for task-linked expenses.
+  final String id;
   final String name;
   final double amount;
   final String? savingNote;
@@ -69,7 +72,11 @@ class WalletExpense {
   final WalletExpenseCategory category;
   final DateTime? paidAt; // set when status becomes paid
 
+  /// ID of a linked personal [Task]. Null if no task is attached.
+  final String? taskId;
+
   const WalletExpense({
+    required this.id,
     required this.name,
     required this.amount,
     required this.dateRange,
@@ -80,9 +87,11 @@ class WalletExpense {
     this.dueDate,
     this.paidAt,
     this.category = WalletExpenseCategory.other,
+    this.taskId,
   });
 
   WalletExpense copyWith({
+    String? id,
     String? name,
     double? amount,
     String? savingNote,
@@ -94,8 +103,11 @@ class WalletExpense {
     IconData? icon,
     Color? iconColor,
     WalletExpenseCategory? category,
+    String? taskId,
+    bool clearTaskId = false,
   }) {
     return WalletExpense(
+      id:        id        ?? this.id,
       name:      name      ?? this.name,
       amount:    amount    ?? this.amount,
       dateRange: dateRange ?? this.dateRange,
@@ -106,10 +118,12 @@ class WalletExpense {
       iconColor: iconColor ?? this.iconColor,
       savingNote: savingNote ?? this.savingNote,
       category:  category  ?? this.category,
+      taskId:    clearTaskId ? null : (taskId ?? this.taskId),
     );
   }
 
   Map<String, dynamic> toJson() => {
+    'id':        id,
     'name':      name,
     'amount':    amount,
     'dateRange': dateRange,
@@ -121,6 +135,7 @@ class WalletExpense {
     if (paidAt != null) 'paidAt': paidAt!.toIso8601String(),
     if (savingNote != null) 'savingNote': savingNote,
     if (dueDate != null) 'dueDate': dueDate!.toIso8601String(),
+    if (taskId != null) 'taskId': taskId,
   };
 
   factory WalletExpense.fromJson(Map<String, dynamic> json) {
@@ -145,7 +160,12 @@ class WalletExpense {
       try { paidAt = DateTime.parse(paidAtRaw); } catch (_) {}
     }
 
+    // ── id — fall back to a hash of name+dateRange for legacy records ──
+    final id = json['id'] as String? ??
+        '${json['name']}_${json['dateRange']}'.hashCode.toString();
+
     return WalletExpense(
+      id:         id,
       name:       json['name']      as String,
       amount:     (json['amount']   as num).toDouble(),
       dateRange:  json['dateRange'] as String,
@@ -159,6 +179,7 @@ class WalletExpense {
       iconColor:  Color((json['iconColor'] as num).toInt()),
       savingNote: json['savingNote'] as String?,
       category:   category,
+      taskId:     json['taskId'] as String?,
     );
   }
 }
@@ -1677,6 +1698,7 @@ class IndexedExpense extends WalletExpense {
 
   IndexedExpense({required WalletExpense expense, required this.storeIndex})
       : super(
+          id:        expense.id,
           name:      expense.name,
           amount:    expense.amount,
           dateRange: expense.dateRange,
@@ -1687,6 +1709,7 @@ class IndexedExpense extends WalletExpense {
           iconColor: expense.iconColor,
           savingNote: expense.savingNote,
           category:  expense.category,
+          taskId:    expense.taskId,
         );
 
   @override

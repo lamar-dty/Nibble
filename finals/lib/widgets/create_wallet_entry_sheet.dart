@@ -122,6 +122,7 @@ class _CreateWalletEntrySheetState extends State<_CreateWalletEntrySheet>
     switch (_type) {
       case _EntryType.expense:
         await WalletStore.instance.addExpense(WalletExpense(
+          id:        DateTime.now().millisecondsSinceEpoch.toString(),
           name:      _nameCtrl.text.trim(),
           amount:    amount,
           dateRange: _dueDate != null ? _formatDate(_dueDate!) : _todayLabel(),

@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/wallet/wallet_sheet.dart';
+import '../models/app_notification.dart';
 import 'auth_store.dart';
+import 'task_store.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Storage key
@@ -79,6 +81,82 @@ class WalletStore extends ChangeNotifier {
   final List<SavingsEntry>       _savingsLog          = [];
   final List<MonthlySpendPoint>  _monthlySpendHistory = [];
   String? _loadedUserId;
+
+  // ── Pending open-wallet signal ────────────────────────────
+  // Set by requestOpenWallet(); cleared by wallet_screen after it acts on it.
+  bool _pendingOpenWallet = false;
+  bool get pendingOpenWallet => _pendingOpenWallet;
+
+  void requestOpenWallet() {
+    _pendingOpenWallet = true;
+    notifyListeners();
+  }
+
+  void clearPendingOpenWallet() {
+    _pendingOpenWallet = false;
+    // No notifyListeners needed — caller drives the rebuild.
+  }
+
+  // ── Notification helper ───────────────────────────────────
+  void _pushNotif(AppNotification notif) {
+    TaskStore.instance.addWalletNotification(notif);
+  }
+
+  // Fires budget and daily warning/exceeded notifications after a payment.
+  // Stable IDs ensure each fires at most once per day/month.
+  void _checkBudgetAndDailyWarnings() {
+    final now      = DateTime.now();
+    final monthStr = '${now.year}-${now.month}';
+    final dayStr   = '${now.year}-${now.month}-${now.day}';
+
+    // Monthly budget
+    if (_monthlyBudget > 0) {
+      final fraction = _monthlySpentAccum / _monthlyBudget;
+      if (fraction >= 1.0) {
+        _pushNotif(AppNotification(
+          id:       'wallet_budget_exceeded_${monthStr}',
+          type:     NotificationType.walletBudgetExceeded,
+          sourceId: monthStr,
+          title:    'Monthly Budget Exceeded',
+          subtitle: '₱${_monthlySpentAccum.toStringAsFixed(2)} of ₱${_monthlyBudget.toStringAsFixed(2)}',
+          detail:   'You have exceeded your monthly budget.',
+        ));
+      } else if (fraction >= 0.8) {
+        _pushNotif(AppNotification(
+          id:       'wallet_budget_warning_${monthStr}',
+          type:     NotificationType.walletBudgetWarning,
+          sourceId: monthStr,
+          title:    'Budget at 80%',
+          subtitle: '₱${_monthlySpentAccum.toStringAsFixed(2)} of ₱${_monthlyBudget.toStringAsFixed(2)}',
+          detail:   'You have used 80% of your monthly budget.',
+        ));
+      }
+    }
+
+    // Daily allowance
+    if (_dailyAllowance > 0) {
+      final fraction = _todaySpentAccum / _dailyAllowance;
+      if (fraction > 1.0) {
+        _pushNotif(AppNotification(
+          id:       'wallet_daily_exceeded_${dayStr}',
+          type:     NotificationType.walletDailyExceeded,
+          sourceId: dayStr,
+          title:    'Daily Allowance Exceeded',
+          subtitle: '₱${_todaySpentAccum.toStringAsFixed(2)} of ₱${_dailyAllowance.toStringAsFixed(2)}',
+          detail:   'You have exceeded today\'s daily allowance.',
+        ));
+      } else if (fraction >= 0.8) {
+        _pushNotif(AppNotification(
+          id:       'wallet_daily_warning_${dayStr}',
+          type:     NotificationType.walletDailyWarning,
+          sourceId: dayStr,
+          title:    'Daily Allowance at 80%',
+          subtitle: '₱${_todaySpentAccum.toStringAsFixed(2)} of ₱${_dailyAllowance.toStringAsFixed(2)}',
+          detail:   'You have used 80% of today\'s allowance.',
+        ));
+      }
+    }
+  }
 
   // ── Locked-in spend accumulators ─────────────────────────
   // These are stamped at the moment of payment and never
@@ -275,10 +353,32 @@ class WalletStore extends ChangeNotifier {
           e.status != WalletExpenseStatus.overdue) {
         _expenses[i] = e.copyWith(status: WalletExpenseStatus.overdue);
         anyChanged = true;
+        _pushNotif(AppNotification(
+          id:       'wallet_overdue_${e.id}_${dueDate.millisecondsSinceEpoch}',
+          type:     NotificationType.walletExpenseOverdue,
+          sourceId: e.id,
+          title:    'Expense Overdue',
+          subtitle: e.name,
+          detail:   '₱${e.amount.toStringAsFixed(2)} was due ${dueDate.day}/${dueDate.month}/${dueDate.year}.',
+        ));
       } else if (!dueDate.isBefore(todayDate) &&
           e.status == WalletExpenseStatus.overdue) {
         _expenses[i] = e.copyWith(status: WalletExpenseStatus.unpaid);
         anyChanged = true;
+      }
+
+      // Due-soon: due tomorrow and still unpaid/overdue.
+      final tomorrow = todayDate.add(const Duration(days: 1));
+      if (dueDate == tomorrow &&
+          e.status != WalletExpenseStatus.paid) {
+        _pushNotif(AppNotification(
+          id:       'wallet_due_soon_${e.id}_${dueDate.millisecondsSinceEpoch}',
+          type:     NotificationType.walletExpenseDueSoon,
+          sourceId: e.id,
+          title:    'Expense Due Tomorrow',
+          subtitle: e.name,
+          detail:   '₱${e.amount.toStringAsFixed(2)} is due tomorrow.',
+        ));
       }
     }
     return anyChanged;
@@ -386,6 +486,14 @@ class WalletStore extends ChangeNotifier {
 
   Future<void> addExpense(WalletExpense expense) async {
     _expenses.add(expense);
+    _pushNotif(AppNotification(
+      id:       'wallet_added_${expense.id}',
+      type:     NotificationType.walletExpenseAdded,
+      sourceId: expense.id,
+      title:    'New Expense Added',
+      subtitle: expense.name,
+      detail:   '₱${expense.amount.toStringAsFixed(2)} logged.',
+    ));
     notifyListeners();
     await save();
   }
@@ -414,6 +522,16 @@ class WalletStore extends ChangeNotifier {
 
     _todaySpentAccum   += e.amount;
     _monthlySpentAccum += e.amount;
+
+    _pushNotif(AppNotification(
+      id:       'wallet_paid_${e.id}',
+      type:     NotificationType.walletExpensePaid,
+      sourceId: e.id,
+      title:    'Expense Paid',
+      subtitle: e.name,
+      detail:   '₱${e.amount.toStringAsFixed(2)} marked as paid.',
+    ));
+    _checkBudgetAndDailyWarnings();
 
     notifyListeners();
     await save();
@@ -452,6 +570,22 @@ class WalletStore extends ChangeNotifier {
         if (_monthlySpentMonth == monthStr && pMonStr == monthStr) {
           _monthlySpentAccum = (_monthlySpentAccum - e.amount).clamp(0.0, double.infinity);
         }
+
+        // Remove stale budget/daily warning notifs if accumulators now drop below thresholds.
+        final budgetFraction = _monthlyBudget > 0 ? _monthlySpentAccum / _monthlyBudget : 0.0;
+        if (budgetFraction < 1.0) {
+          TaskStore.instance.removeNotificationById('wallet_budget_exceeded_$monthStr');
+        }
+        if (budgetFraction < 0.8) {
+          TaskStore.instance.removeNotificationById('wallet_budget_warning_$monthStr');
+        }
+        final dailyFraction = _dailyAllowance > 0 ? _todaySpentAccum / _dailyAllowance : 0.0;
+        if (dailyFraction <= 1.0) {
+          TaskStore.instance.removeNotificationById('wallet_daily_exceeded_$todayStr');
+        }
+        if (dailyFraction < 0.8) {
+          TaskStore.instance.removeNotificationById('wallet_daily_warning_$todayStr');
+        }
       }
     } else {
       // Paying — stamp paidAt and lock in the spend.
@@ -477,6 +611,16 @@ class WalletStore extends ChangeNotifier {
 
       _todaySpentAccum   += e.amount;
       _monthlySpentAccum += e.amount;
+
+      _pushNotif(AppNotification(
+        id:       'wallet_paid_${e.id}',
+        type:     NotificationType.walletExpensePaid,
+        sourceId: e.id,
+        title:    'Expense Paid',
+        subtitle: e.name,
+        detail:   '₱${e.amount.toStringAsFixed(2)} marked as paid.',
+      ));
+      _checkBudgetAndDailyWarnings();
     }
 
     notifyListeners();
@@ -498,6 +642,11 @@ class WalletStore extends ChangeNotifier {
     notifyListeners();
     await save();
   }
+
+  /// Returns the index of the first expense whose [taskId] matches,
+  /// or -1 if none found. Used by TaskStore to sync task completion → paid.
+  int findExpenseIndexByTaskId(String taskId) =>
+      _expenses.indexWhere((e) => e.taskId == taskId);
 
   Future<void> withdrawFromSavings(double amount, {String? note}) async {
     _savings = (_savings - amount).clamp(0.0, double.infinity);

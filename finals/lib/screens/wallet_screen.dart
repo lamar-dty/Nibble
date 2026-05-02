@@ -76,13 +76,29 @@ class _WalletScreenState extends State<WalletScreen> {
       if (mounted) setState(() => _sheetSize = _sheetController.size);
     });
     widget.tabNotifier.addListener(_onTabChanged);
+    WalletStore.instance.addListener(_onStoreChanged);
   }
 
   @override
   void dispose() {
     widget.tabNotifier.removeListener(_onTabChanged);
+    WalletStore.instance.removeListener(_onStoreChanged);
     _sheetController.dispose();
     super.dispose();
+  }
+
+  // Called whenever WalletStore notifies — checks for a pending open signal
+  // and expands the sheet to half-height, mirroring calendar_screen behaviour.
+  void _onStoreChanged() {
+    if (!mounted) return;
+    if (!WalletStore.instance.pendingOpenWallet) return;
+    WalletStore.instance.clearPendingOpenWallet();
+    if (!_sheetController.isAttached) return;
+    _sheetController.animateTo(
+      _snapHalf,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOut,
+    );
   }
 
   // Collapse sheet when navigating away from the Wallet tab (index 3).
@@ -90,7 +106,11 @@ class _WalletScreenState extends State<WalletScreen> {
   // always visible after the sheet collapses.
   void _onTabChanged() {
     if (!mounted) return;
-    if (widget.tabNotifier.value == 3) return; // staying on wallet tab — no-op
+    if (widget.tabNotifier.value == 3) {
+      // Navigated to wallet tab — sweep for newly overdue / due-soon expenses.
+      WalletStore.instance.recomputeOverdue();
+      return;
+    }
     if (!_sheetController.isAttached) return;
 
     // Reset the expense list scroll to top before collapsing.

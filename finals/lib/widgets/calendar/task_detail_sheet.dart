@@ -3,6 +3,8 @@ import '../../constants/colors.dart';
 import '../../models/task.dart';
 import '../../models/event.dart';
 import '../../store/task_store.dart';
+import '../../store/wallet_store.dart';
+import '../wallet/wallet_sheet.dart';
 
 /// Shows a modal bottom sheet with full task details.
 /// Returns false if the task no longer exists (caller can show a snackbar).
@@ -239,6 +241,14 @@ class _TaskDetailSheetState extends State<_TaskDetailSheet> {
                   if (widget.task.notes != null && widget.task.notes!.isNotEmpty) ...[
                     const SizedBox(height: 18),
                     _NotesCard(notes: widget.task.notes!),
+                  ],
+                  // ── Linked expense card ──────────────────────
+                  if (widget.task.linkedExpenseId != null) ...[
+                    const SizedBox(height: 18),
+                    _LinkedExpenseCard(
+                      taskId:   widget.task.linkedExpenseId!,
+                      taskDone: _status == TaskStatus.completed,
+                    ),
                   ],
                   const SizedBox(height: 20),
                   Center(
@@ -632,6 +642,163 @@ class _NotesCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(notes,
               style: TextStyle(color: kWhite.withOpacity(0.8), fontSize: 13, height: 1.55)),
+        ],
+      ),
+    );
+  }
+}
+// ─────────────────────────────────────────────────────────────
+// Linked Expense Card
+// ─────────────────────────────────────────────────────────────
+class _LinkedExpenseCard extends StatefulWidget {
+  final String taskId;
+  final bool taskDone;
+  const _LinkedExpenseCard({required this.taskId, required this.taskDone});
+
+  @override
+  State<_LinkedExpenseCard> createState() => _LinkedExpenseCardState();
+}
+
+class _LinkedExpenseCardState extends State<_LinkedExpenseCard> {
+  WalletExpense? _expense;
+  int _index = -1;
+
+  @override
+  void initState() {
+    super.initState();
+    _resolve();
+    WalletStore.instance.addListener(_resolve);
+  }
+
+  @override
+  void dispose() {
+    WalletStore.instance.removeListener(_resolve);
+    super.dispose();
+  }
+
+  void _resolve() {
+    final idx = WalletStore.instance.findExpenseIndexByTaskId(widget.taskId);
+    setState(() {
+      _index   = idx;
+      _expense = idx == -1 ? null : WalletStore.instance.expenses[idx];
+    });
+  }
+
+  Future<void> _toggle() async {
+    if (_index == -1) return;
+    await WalletStore.instance.toggleExpensePaidUnpaid(_index);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_expense == null) return const SizedBox.shrink();
+
+    final e      = _expense!;
+    final isPaid = e.status == WalletExpenseStatus.paid;
+    final isOverdue = e.status == WalletExpenseStatus.overdue;
+    final statusColor = isPaid
+        ? const Color(0xFF3BBFA3)
+        : isOverdue
+            ? const Color(0xFFE87070)
+            : const Color(0xFFE8D870);
+    final statusLabel = isPaid ? 'Paid' : isOverdue ? 'Overdue' : 'Unpaid';
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: kWhite.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: statusColor.withOpacity(0.25), width: 1.2),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(children: [
+            Icon(Icons.account_balance_wallet_rounded,
+                size: 13, color: statusColor.withOpacity(0.75)),
+            const SizedBox(width: 6),
+            Text('LINKED EXPENSE',
+                style: TextStyle(
+                    color: statusColor.withOpacity(0.65),
+                    fontSize: 9,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.8)),
+          ]),
+          const SizedBox(height: 10),
+          // Info row
+          Row(children: [
+            Icon(e.icon, size: 20, color: e.iconColor),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(e.name,
+                      style: const TextStyle(
+                          color: kWhite,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 2),
+                  Text(e.category.label,
+                      style: TextStyle(
+                          color: kWhite.withOpacity(0.4), fontSize: 12)),
+                ],
+              ),
+            ),
+            Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+              Text('₱${e.amount.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                      color: kWhite,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700)),
+              const SizedBox(height: 2),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(statusLabel,
+                    style: TextStyle(
+                        color: statusColor,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700)),
+              ),
+            ]),
+          ]),
+          // Mark paid button — only when not yet paid
+          if (!isPaid) ...[
+            const SizedBox(height: 12),
+            GestureDetector(
+              onTap: _toggle,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF3BBFA3).withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                      color: const Color(0xFF3BBFA3).withOpacity(0.35),
+                      width: 1),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.check_circle_outline_rounded,
+                        size: 15, color: Color(0xFF3BBFA3)),
+                    SizedBox(width: 6),
+                    Text('Mark as Paid',
+                        style: TextStyle(
+                            color: Color(0xFF3BBFA3),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600)),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

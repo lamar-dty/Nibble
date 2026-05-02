@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/app_notification.dart';
 import '../store/task_store.dart';
 import '../store/space_store.dart';
+import '../store/wallet_store.dart';
 
 /// Callback signature that MainScaffold registers so the router can
 /// switch tabs without knowing about the scaffold's internals.
@@ -92,6 +93,12 @@ class NotificationRouter extends ChangeNotifier {
     // ── Space notifications ───────────────────────────────
     if (notification.isSpaceNotification) {
       _routeSpace(context, notification);
+      return;
+    }
+
+    // ── Wallet notifications ──────────────────────────────
+    if (_isWalletNotification(type)) {
+      _routeWallet();
       return;
     }
 
@@ -249,6 +256,15 @@ class NotificationRouter extends ChangeNotifier {
     _onOpenSpaceTask!.call(inviteCode, taskTitle);
   }
 
+  // ── Wallet routing ────────────────────────────────────────
+
+  void _routeWallet() {
+    _switchTab(3);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      WalletStore.instance.requestOpenWallet();
+    });
+  }
+
   // ── Type helpers ──────────────────────────────────────────
 
   bool _isPersonalTask(NotificationType t) {
@@ -267,6 +283,23 @@ class NotificationRouter extends ChangeNotifier {
     switch (t) {
       case NotificationType.eventReminder:
       case NotificationType.eventToday:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  bool _isWalletNotification(NotificationType t) {
+    switch (t) {
+      case NotificationType.walletExpenseAdded:
+      case NotificationType.walletExpenseDueSoon:
+      case NotificationType.walletExpenseOverdue:
+      case NotificationType.walletExpensePaid:
+      case NotificationType.walletLinkedExpensePaid:
+      case NotificationType.walletBudgetWarning:
+      case NotificationType.walletBudgetExceeded:
+      case NotificationType.walletDailyWarning:
+      case NotificationType.walletDailyExceeded:
         return true;
       default:
         return false;

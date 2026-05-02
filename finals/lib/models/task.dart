@@ -87,6 +87,9 @@ class Task {
   TaskStatus status;
   final DateTime createdAt;
 
+  /// ID of a linked [WalletExpense]. Null if no expense is attached.
+  String? linkedExpenseId;
+
   Task({
     required this.id,
     required this.name,
@@ -100,6 +103,7 @@ class Task {
     this.notes,
     this.repeat = TaskRepeat.once,
     this.status = TaskStatus.notStarted,
+    this.linkedExpenseId,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
@@ -136,6 +140,7 @@ class Task {
         'repeat': repeat.index,
         'status': status.index,
         'createdAt': createdAt.millisecondsSinceEpoch,
+        if (linkedExpenseId != null) 'linkedExpenseId': linkedExpenseId,
       };
 
   factory Task.fromJson(Map<String, dynamic> j) => Task(
@@ -159,5 +164,6 @@ class Task {
         status: TaskStatus.values[j['status'] as int],
         createdAt:
             DateTime.fromMillisecondsSinceEpoch(j['createdAt'] as int),
+        linkedExpenseId: j['linkedExpenseId'] as String?,
       );
 }

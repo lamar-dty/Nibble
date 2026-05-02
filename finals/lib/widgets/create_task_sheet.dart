@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import '../../constants/colors.dart';
 import '../../models/task.dart';
 import '../../store/task_store.dart';
+import '../../store/wallet_store.dart';
+import '../widgets/wallet/wallet_sheet.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Entry point
@@ -43,6 +45,11 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet>
   bool         _showOptional = false;
   bool         _saving = false;
 
+  // ── Linked cost ───────────────────────────────────────────
+  bool                  _addCost      = false;
+  final _costCtrl       = TextEditingController();
+  WalletExpenseCategory _costCategory = WalletExpenseCategory.other;
+
   late AnimationController _fadeCtrl;
   late Animation<double>   _fadeAnim;
 
@@ -59,6 +66,7 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet>
     _nameCtrl.dispose();
     _notesCtrl.dispose();
     _nameFocus.dispose();
+    _costCtrl.dispose();
     _fadeCtrl.dispose();
     super.dispose();
   }
@@ -72,18 +80,46 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet>
     setState(() => _saving = true);
     HapticFeedback.mediumImpact();
 
+    final taskId = DateTime.now().millisecondsSinceEpoch.toString();
+
+    // ── Linked expense ─────────────────────────────────────
+    String? linkedExpenseId;
+    if (_addCost && _costCtrl.text.trim().isNotEmpty) {
+      final amount = double.tryParse(_costCtrl.text.trim());
+      if (amount != null && amount > 0) {
+        linkedExpenseId = 'exp_$taskId';
+        final months = ['Jan','Feb','Mar','Apr','May','Jun',
+                        'Jul','Aug','Sep','Oct','Nov','Dec'];
+        final d = _deadlineDate;
+        final dateRange = '${months[d.month - 1]} ${d.day}, ${d.year}';
+        WalletStore.instance.addExpense(WalletExpense(
+          id:        linkedExpenseId,
+          name:      _nameCtrl.text.trim(),
+          amount:    amount,
+          dateRange: dateRange,
+          dueDate:   _deadlineDate,
+          status:    WalletExpenseStatus.unpaid,
+          icon:      _costCategory.icon,
+          iconColor: _costCategory.color,
+          category:  _costCategory,
+          taskId:    linkedExpenseId,
+        ));
+      }
+    }
+
     final task = Task(
-      id:        DateTime.now().millisecondsSinceEpoch.toString(),
-      name:      _nameCtrl.text.trim(),
-      category:  _category,
-      dueDate:   _deadlineDate,
-      endDate:   null,
-      dueTime:   _deadlineTime,
-      endTime:   null,
-      priority:  _priority,
-      notes:     _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
-      repeat:    _repeat,
-      status:    TaskStatus.notStarted,
+      id:               taskId,
+      name:             _nameCtrl.text.trim(),
+      category:         _category,
+      dueDate:          _deadlineDate,
+      endDate:          null,
+      dueTime:          _deadlineTime,
+      endTime:          null,
+      priority:         _priority,
+      notes:            _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
+      repeat:           _repeat,
+      status:           TaskStatus.notStarted,
+      linkedExpenseId:  linkedExpenseId,
     );
 
     TaskStore.instance.addTask(task);
@@ -306,6 +342,16 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet>
                           ? CrossFadeState.showSecond
                           : CrossFadeState.showFirst,
                       duration: const Duration(milliseconds: 260),
+                    ),
+
+                    // ── Add cost toggle ───────────────────────────
+                    const SizedBox(height: 4),
+                    _CostSection(
+                      addCost:    _addCost,
+                      costCtrl:   _costCtrl,
+                      category:   _costCategory,
+                      onToggle:   (v) => setState(() => _addCost = v),
+                      onCategory: (v) => setState(() => _costCategory = v),
                     ),
 
                     const SizedBox(height: 16),
@@ -1801,6 +1847,150 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Cost Section
+// ─────────────────────────────────────────────────────────────
+class _CostSection extends StatelessWidget {
+  final bool addCost;
+  final TextEditingController costCtrl;
+  final WalletExpenseCategory category;
+  final ValueChanged<bool> onToggle;
+  final ValueChanged<WalletExpenseCategory> onCategory;
+
+  const _CostSection({
+    required this.addCost,
+    required this.costCtrl,
+    required this.category,
+    required this.onToggle,
+    required this.onCategory,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Toggle row
+        GestureDetector(
+          onTap: () => onToggle(!addCost),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: kWhite.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.account_balance_wallet_rounded,
+                    size: 18, color: kWhite.withOpacity(0.5)),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text('Add cost to wallet',
+                      style: TextStyle(
+                          color: kWhite.withOpacity(0.65),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500)),
+                ),
+                AnimatedRotation(
+                  turns: addCost ? 0.5 : 0,
+                  duration: const Duration(milliseconds: 220),
+                  child: Icon(Icons.keyboard_arrow_down_rounded,
+                      color: kWhite.withOpacity(0.4), size: 20),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // Expanded fields
+        AnimatedCrossFade(
+          duration: const Duration(milliseconds: 240),
+          crossFadeState:
+              addCost ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+          firstChild: const SizedBox.shrink(),
+          secondChild: Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Amount field
+                TextField(
+                  controller: costCtrl,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  style: const TextStyle(color: kWhite, fontSize: 15),
+                  decoration: InputDecoration(
+                    hintText: 'Amount (e.g. 250.00)',
+                    hintStyle:
+                        TextStyle(color: kWhite.withOpacity(0.3), fontSize: 14),
+                    prefixIcon: Icon(Icons.attach_money_rounded,
+                        color: kWhite.withOpacity(0.4), size: 18),
+                    filled: true,
+                    fillColor: kWhite.withOpacity(0.06),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 12),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                // Category chips
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: WalletExpenseCategory.values.map((cat) {
+                    final selected = cat == category;
+                    return GestureDetector(
+                      onTap: () => onCategory(cat),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: selected
+                              ? cat.color.withOpacity(0.2)
+                              : kWhite.withOpacity(0.06),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: selected ? cat.color : Colors.transparent,
+                            width: 1.4,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(cat.icon,
+                                size: 13,
+                                color: selected
+                                    ? cat.color
+                                    : kWhite.withOpacity(0.45)),
+                            const SizedBox(width: 5),
+                            Text(cat.label,
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    color: selected
+                                        ? cat.color
+                                        : kWhite.withOpacity(0.55),
+                                    fontWeight: selected
+                                        ? FontWeight.w600
+                                        : FontWeight.w400)),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
