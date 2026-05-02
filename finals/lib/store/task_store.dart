@@ -257,6 +257,13 @@ class TaskStore extends ChangeNotifier {
   }
 
   void deleteTask(String id) {
+    // Remove linked wallet expense before removing the task.
+    final task = _tasks.firstWhere((t) => t.id == id, orElse: () => _tasks.first);
+    if (task.id == id && task.linkedExpenseId != null) {
+      final idx = WalletStore.instance
+          .findExpenseIndexByTaskId(task.linkedExpenseId!);
+      if (idx != -1) WalletStore.instance.removeExpense(idx);
+    }
     _tasks.removeWhere((t) => t.id == id);
     // Remove all notifications linked to this task.
     _notifications.removeWhere((n) => n.sourceId == id);

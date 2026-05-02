@@ -58,14 +58,19 @@ class _TaskDetailSheetState extends State<_TaskDetailSheet> {
     _status = widget.task.status;
   }
 
-  void _cycleStatus() {
-    final next = _status == TaskStatus.notStarted
-        ? TaskStatus.inProgress
-        : _status == TaskStatus.inProgress
-            ? TaskStatus.completed
-            : TaskStatus.notStarted;
-    TaskStore.instance.updateStatus(widget.task.id, next);
-    setState(() => _status = next);
+  void _openStatusPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _StatusPickerSheet(
+        current: _status,
+        onSelected: (s) {
+          Navigator.pop(context);
+          TaskStore.instance.updateStatus(widget.task.id, s);
+          setState(() => _status = s);
+        },
+      ),
+    );
   }
 
   Color get _catColor => widget.task.category.color;
@@ -81,31 +86,89 @@ class _TaskDetailSheetState extends State<_TaskDetailSheet> {
   String get _priorityLabel => widget.task.priority.label;
 
   void _confirmDelete(BuildContext context) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A2C5B),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Delete Task',
-            style: TextStyle(color: kWhite, fontWeight: FontWeight.w700)),
-        content: Text('Remove "${widget.task.name}"? This can\'t be undone.',
-            style: TextStyle(color: kWhite.withOpacity(0.55), fontSize: 14)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel',
-                style: TextStyle(color: kWhite.withOpacity(0.45))),
-          ),
-          TextButton(
-            onPressed: () {
-              TaskStore.instance.deleteTask(widget.task.id);
-              Navigator.pop(ctx);
-              Navigator.pop(context);
-            },
-            child: const Text('Delete',
-                style: TextStyle(color: Color(0xFFE05C5C), fontWeight: FontWeight.w700)),
-          ),
-        ],
+      backgroundColor: Colors.transparent,
+      builder: (confirmCtx) => Container(
+        margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1B2D5B),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: kWhite.withOpacity(0.08)),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 40, offset: const Offset(0, -4))],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 36, height: 4,
+              margin: const EdgeInsets.only(top: 14, bottom: 20),
+              decoration: BoxDecoration(color: kWhite.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
+            ),
+            // Icon
+            Container(
+              width: 52, height: 52,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE87070).withOpacity(0.12),
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFE87070).withOpacity(0.3), width: 1.5),
+              ),
+              child: const Icon(Icons.delete_outline_rounded, color: Color(0xFFE87070), size: 26),
+            ),
+            const SizedBox(height: 14),
+            const Text('Remove Task?',
+                style: TextStyle(color: kWhite, fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 6),
+            Text('This cannot be undone',
+                style: TextStyle(color: kWhite.withOpacity(0.4), fontSize: 13)),
+            const SizedBox(height: 24),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+              child: Row(children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(confirmCtx),
+                    child: Container(
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: kWhite.withOpacity(0.07),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: kWhite.withOpacity(0.1)),
+                      ),
+                      child: const Center(
+                        child: Text('Cancel',
+                            style: TextStyle(color: kWhite, fontWeight: FontWeight.w600)),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      TaskStore.instance.deleteTask(widget.task.id);
+                      Navigator.pop(confirmCtx);
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE87070).withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFE87070).withOpacity(0.4)),
+                      ),
+                      child: const Center(
+                        child: Text('Delete',
+                            style: TextStyle(
+                                color: Color(0xFFE87070), fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ),
+                ),
+              ]),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -121,7 +184,7 @@ class _TaskDetailSheetState extends State<_TaskDetailSheet> {
   Color get _statusColor {
     switch (_status) {
       case TaskStatus.notStarted: return const Color(0xFFB0BAD3);
-      case TaskStatus.inProgress: return const Color(0xFFE8D870);
+      case TaskStatus.inProgress: return const Color(0xFF4A90D9);
       case TaskStatus.completed:  return const Color(0xFF3BBFA3);
     }
   }
@@ -216,7 +279,13 @@ class _TaskDetailSheetState extends State<_TaskDetailSheet> {
                     ]),
                   ],
                   const SizedBox(height: 20),
-                  _StatusToggle(icon: _statusIcon, label: _statusLabel, color: _statusColor, onTap: _cycleStatus),
+                  // ── Status toggle — opens StatusPickerSheet on tap ──
+                  _StatusToggle(
+                    icon: _statusIcon,
+                    label: _statusLabel,
+                    color: _statusColor,
+                    onTap: () => _openStatusPicker(context),
+                  ),
                   const SizedBox(height: 16),
                   _InfoGrid(children: [
                     _InfoTile(icon: Icons.calendar_today_rounded, label: 'Due Date',
@@ -266,6 +335,185 @@ class _TaskDetailSheetState extends State<_TaskDetailSheet> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Status Picker Sheet
+// ─────────────────────────────────────────────────────────────────────────────
+class _StatusPickerSheet extends StatelessWidget {
+  final TaskStatus current;
+  final ValueChanged<TaskStatus> onSelected;
+
+  const _StatusPickerSheet({required this.current, required this.onSelected});
+
+  static const _label = {
+    TaskStatus.notStarted: 'Not Started',
+    TaskStatus.inProgress: 'In Progress',
+    TaskStatus.completed:  'Completed',
+  };
+  static const _color = {
+    TaskStatus.notStarted: Color(0xFF8FA6C8),
+    TaskStatus.inProgress: Color(0xFF4A90D9),
+    TaskStatus.completed:  Color(0xFF3BBFA3),
+  };
+  static const _icon = {
+    TaskStatus.notStarted: Icons.radio_button_unchecked_rounded,
+    TaskStatus.inProgress: Icons.timelapse_rounded,
+    TaskStatus.completed:  Icons.check_circle_rounded,
+  };
+  static const _desc = {
+    TaskStatus.notStarted: 'Task has not been started yet',
+    TaskStatus.inProgress: 'Currently working on this',
+    TaskStatus.completed:  'All done!',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1B2D5B),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: kWhite.withOpacity(0.08)),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 40, offset: const Offset(0, -4))],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 36, height: 4,
+            margin: const EdgeInsets.only(top: 14, bottom: 18),
+            decoration: BoxDecoration(color: kWhite.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 22),
+            child: Row(
+              children: [
+                Container(
+                  width: 42, height: 42,
+                  decoration: BoxDecoration(
+                    color: kTeal.withOpacity(0.14),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: kTeal.withOpacity(0.3), width: 1.5),
+                  ),
+                  child: const Icon(Icons.swap_horiz_rounded, color: kTeal, size: 22),
+                ),
+                const SizedBox(width: 13),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Update Status',
+                        style: TextStyle(color: kWhite, fontSize: 17, fontWeight: FontWeight.bold)),
+                    Text('Tap to change task progress',
+                        style: TextStyle(color: kWhite.withOpacity(0.4), fontSize: 12)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Divider(color: kWhite.withOpacity(0.07), thickness: 1, indent: 22, endIndent: 22),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 22),
+            child: Column(
+              children: TaskStatus.values.map((s) {
+                final isCurrent = s == current;
+                final c = _color[s]!;
+                return _StatusCard(
+                  icon: _icon[s]!,
+                  iconColor: c,
+                  label: _label[s]!,
+                  description: _desc[s]!,
+                  selected: isCurrent,
+                  onTap: () => onSelected(s),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusCard extends StatefulWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String label;
+  final String description;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _StatusCard({
+    required this.icon, required this.iconColor, required this.label,
+    required this.description, required this.selected, required this.onTap,
+  });
+
+  @override
+  State<_StatusCard> createState() => _StatusCardState();
+}
+
+class _StatusCardState extends State<_StatusCard> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = widget.iconColor;
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) { setState(() => _pressed = false); widget.onTap(); },
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 130),
+        margin: const EdgeInsets.only(bottom: 9),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: (_pressed || widget.selected) ? c.withOpacity(0.12) : kWhite.withOpacity(0.04),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: (_pressed || widget.selected) ? c.withOpacity(0.55) : kWhite.withOpacity(0.08),
+            width: 1.3,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 46, height: 46,
+              decoration: BoxDecoration(
+                color: c.withOpacity(0.13),
+                borderRadius: BorderRadius.circular(13),
+                border: Border.all(color: c.withOpacity(0.25), width: 1.2),
+              ),
+              child: Icon(widget.icon, color: c, size: 22),
+            ),
+            const SizedBox(width: 13),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(widget.label,
+                      style: const TextStyle(color: kWhite, fontSize: 15, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 3),
+                  Text(widget.description,
+                      style: TextStyle(color: kWhite.withOpacity(0.37), fontSize: 12)),
+                ],
+              ),
+            ),
+            const SizedBox(width: 6),
+            if (widget.selected)
+              Container(
+                width: 22, height: 22,
+                decoration: BoxDecoration(color: c, shape: BoxShape.circle),
+                child: const Icon(Icons.check_rounded, color: kWhite, size: 14),
+              )
+            else
+              Icon(Icons.chevron_right_rounded, color: kWhite.withOpacity(0.2), size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Event Detail Sheet
 // ─────────────────────────────────────────────────────────────────────────────
 class _EventDetailSheet extends StatelessWidget {
@@ -273,31 +521,88 @@ class _EventDetailSheet extends StatelessWidget {
   const _EventDetailSheet({required this.event});
 
   void _confirmDelete(BuildContext context) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A2C5B),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Delete Event',
-            style: TextStyle(color: kWhite, fontWeight: FontWeight.w700)),
-        content: Text('Remove "${event.title}"? This can\'t be undone.',
-            style: TextStyle(color: kWhite.withOpacity(0.55), fontSize: 14)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel',
-                style: TextStyle(color: kWhite.withOpacity(0.45))),
-          ),
-          TextButton(
-            onPressed: () {
-              TaskStore.instance.deleteEvent(event.id);
-              Navigator.pop(ctx);
-              Navigator.pop(context);
-            },
-            child: const Text('Delete',
-                style: TextStyle(color: Color(0xFFE05C5C), fontWeight: FontWeight.w700)),
-          ),
-        ],
+      backgroundColor: Colors.transparent,
+      builder: (confirmCtx) => Container(
+        margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1B2D5B),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: kWhite.withOpacity(0.08)),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 40, offset: const Offset(0, -4))],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 36, height: 4,
+              margin: const EdgeInsets.only(top: 14, bottom: 20),
+              decoration: BoxDecoration(color: kWhite.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
+            ),
+            Container(
+              width: 52, height: 52,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE87070).withOpacity(0.12),
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFE87070).withOpacity(0.3), width: 1.5),
+              ),
+              child: const Icon(Icons.delete_outline_rounded, color: Color(0xFFE87070), size: 26),
+            ),
+            const SizedBox(height: 14),
+            const Text('Remove Event?',
+                style: TextStyle(color: kWhite, fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 6),
+            Text('This cannot be undone',
+                style: TextStyle(color: kWhite.withOpacity(0.4), fontSize: 13)),
+            const SizedBox(height: 24),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+              child: Row(children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(confirmCtx),
+                    child: Container(
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: kWhite.withOpacity(0.07),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: kWhite.withOpacity(0.1)),
+                      ),
+                      child: const Center(
+                        child: Text('Cancel',
+                            style: TextStyle(color: kWhite, fontWeight: FontWeight.w600)),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      TaskStore.instance.deleteEvent(event.id);
+                      Navigator.pop(confirmCtx);
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE87070).withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFE87070).withOpacity(0.4)),
+                      ),
+                      child: const Center(
+                        child: Text('Delete',
+                            style: TextStyle(
+                                color: Color(0xFFE87070), fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ),
+                ),
+              ]),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -352,7 +657,6 @@ class _EventDetailSheet extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Category chip + EVENT badge + close
                   Row(
                     children: [
                       _CategoryChip(
@@ -398,11 +702,9 @@ class _EventDetailSheet extends StatelessWidget {
 
                   const SizedBox(height: 16),
 
-                  // Title
                   Text(event.title,
                       style: const TextStyle(color: kWhite, fontSize: 22, fontWeight: FontWeight.w800, height: 1.2)),
 
-                  // Location
                   if (event.location != null && event.location!.isNotEmpty) ...[
                     const SizedBox(height: 6),
                     Row(children: [
@@ -417,7 +719,6 @@ class _EventDetailSheet extends StatelessWidget {
 
                   const SizedBox(height: 20),
 
-                  // Info grid
                   _InfoGrid(children: [
                     _InfoTile(
                       icon: Icons.calendar_today_rounded,
@@ -445,7 +746,6 @@ class _EventDetailSheet extends StatelessWidget {
                     ),
                   ]),
 
-                  // Notes
                   if (event.notes != null && event.notes!.isNotEmpty) ...[
                     const SizedBox(height: 18),
                     _NotesCard(notes: event.notes!),
@@ -647,6 +947,7 @@ class _NotesCard extends StatelessWidget {
     );
   }
 }
+
 // ─────────────────────────────────────────────────────────────
 // Linked Expense Card
 // ─────────────────────────────────────────────────────────────
@@ -713,7 +1014,6 @@ class _LinkedExpenseCardState extends State<_LinkedExpenseCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Row(children: [
             Icon(Icons.account_balance_wallet_rounded,
                 size: 13, color: statusColor.withOpacity(0.75)),
@@ -726,7 +1026,6 @@ class _LinkedExpenseCardState extends State<_LinkedExpenseCard> {
                     letterSpacing: 0.8)),
           ]),
           const SizedBox(height: 10),
-          // Info row
           Row(children: [
             Icon(e.icon, size: 20, color: e.iconColor),
             const SizedBox(width: 10),
@@ -754,8 +1053,7 @@ class _LinkedExpenseCardState extends State<_LinkedExpenseCard> {
                       fontWeight: FontWeight.w700)),
               const SizedBox(height: 2),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: statusColor.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(20),
@@ -768,7 +1066,6 @@ class _LinkedExpenseCardState extends State<_LinkedExpenseCard> {
               ),
             ]),
           ]),
-          // Mark paid button — only when not yet paid
           if (!isPaid) ...[
             const SizedBox(height: 12),
             GestureDetector(

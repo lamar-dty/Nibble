@@ -54,6 +54,9 @@ class _CreateWalletEntrySheetState extends State<_CreateWalletEntrySheet>
   WalletExpenseCategory _category = WalletExpenseCategory.other;
   bool                  _saving   = false;
 
+  String? _nameError;
+  String? _amountError;
+
   late AnimationController _fadeCtrl;
   late Animation<double>   _fadeAnim;
 
@@ -78,12 +81,25 @@ class _CreateWalletEntrySheetState extends State<_CreateWalletEntrySheet>
 
   // ── Validation ─────────────────────────────────────────────
 
-  String? _validate() {
+  bool _validate() {
     final name   = _nameCtrl.text.trim();
     final amount = double.tryParse(_amountCtrl.text.trim());
-    if (_type == _EntryType.expense && name.isEmpty) return 'Please enter a name.';
-    if (amount == null || amount <= 0) return 'Please enter a valid amount.';
-    return null;
+    String? nameErr;
+    String? amountErr;
+
+    if (_type == _EntryType.expense && name.isEmpty) {
+      nameErr = 'Please enter a name.';
+    }
+    if (amount == null || amount <= 0) {
+      amountErr = 'Please enter a valid amount.';
+    }
+
+    setState(() {
+      _nameError   = nameErr;
+      _amountError = amountErr;
+    });
+
+    return nameErr == null && amountErr == null;
   }
 
   // ── Status from due date ───────────────────────────────────
@@ -99,18 +115,11 @@ class _CreateWalletEntrySheetState extends State<_CreateWalletEntrySheet>
   // ── Save ───────────────────────────────────────────────────
 
   Future<void> _save() async {
-    final error = _validate();
-    if (error != null) {
+    if (!_validate()) {
       HapticFeedback.lightImpact();
       if (_type == _EntryType.expense && _nameCtrl.text.trim().isEmpty) {
         FocusScope.of(context).requestFocus(_nameFocus);
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(error),
-          backgroundColor: const Color(0xFFE87070),
-        ),
-      );
       return;
     }
 
@@ -268,6 +277,8 @@ class _CreateWalletEntrySheetState extends State<_CreateWalletEntrySheet>
                         _type = t;
                         _amountCtrl.clear();
                         _nameCtrl.clear();
+                        _nameError   = null;
+                        _amountError = null;
                       }),
                     ),
 
@@ -287,6 +298,10 @@ class _CreateWalletEntrySheetState extends State<_CreateWalletEntrySheet>
                                 nameFocus:         _nameFocus,
                                 dueDate:           _dueDate,
                                 category:          _category,
+                                nameError:         _nameError,
+                                amountError:       _amountError,
+                                onNameChanged:     () { if (_nameError != null) setState(() => _nameError = null); },
+                                onAmountChanged:   () { if (_amountError != null) setState(() => _amountError = null); },
                                 onDueDateTap:      _pickDueDate,
                                 onClearDueDate:
                                     () => setState(() => _dueDate = null),
@@ -294,8 +309,10 @@ class _CreateWalletEntrySheetState extends State<_CreateWalletEntrySheet>
                                     setState(() => _category = c),
                               )
                             : _SimpleSection(
-                                ctrl:      _amountCtrl,
-                                entryType: _type,
+                                ctrl:        _amountCtrl,
+                                entryType:   _type,
+                                amountError: _amountError,
+                                onAmountChanged: () { if (_amountError != null) setState(() => _amountError = null); },
                               ),
                       ),
                     ),
@@ -378,10 +395,14 @@ class _ExpenseSection extends StatelessWidget {
   final TextEditingController amountCtrl;
   final FocusNode             nameFocus;
   final DateTime?             dueDate;
-  final WalletExpenseCategory category;          // ← now public type
+  final WalletExpenseCategory category;
+  final String?               nameError;
+  final String?               amountError;
+  final VoidCallback          onNameChanged;
+  final VoidCallback          onAmountChanged;
   final VoidCallback          onDueDateTap;
   final VoidCallback          onClearDueDate;
-  final ValueChanged<WalletExpenseCategory> onCategoryChanged; // ← now public type
+  final ValueChanged<WalletExpenseCategory> onCategoryChanged;
 
   const _ExpenseSection({
     required this.nameCtrl,
@@ -389,6 +410,10 @@ class _ExpenseSection extends StatelessWidget {
     required this.nameFocus,
     required this.dueDate,
     required this.category,
+    required this.nameError,
+    required this.amountError,
+    required this.onNameChanged,
+    required this.onAmountChanged,
     required this.onDueDateTap,
     required this.onClearDueDate,
     required this.onCategoryChanged,
@@ -402,13 +427,13 @@ class _ExpenseSection extends StatelessWidget {
 
         _FieldLabel(label: 'Expense Name', icon: Icons.label_outline_rounded),
         const SizedBox(height: 8),
-        _NameField(controller: nameCtrl, focusNode: nameFocus),
+        _NameField(controller: nameCtrl, focusNode: nameFocus, errorText: nameError, onChanged: onNameChanged),
 
         const SizedBox(height: 18),
 
         _FieldLabel(label: 'Amount', icon: Icons.payments_outlined),
         const SizedBox(height: 8),
-        _AmountField(ctrl: amountCtrl),
+        _AmountField(ctrl: amountCtrl, errorText: amountError, onChanged: onAmountChanged),
 
         const SizedBox(height: 18),
 
@@ -464,8 +489,15 @@ class _ExpenseSection extends StatelessWidget {
 class _SimpleSection extends StatelessWidget {
   final TextEditingController ctrl;
   final _EntryType entryType;
+  final String?    amountError;
+  final VoidCallback onAmountChanged;
 
-  const _SimpleSection({required this.ctrl, required this.entryType});
+  const _SimpleSection({
+    required this.ctrl,
+    required this.entryType,
+    required this.amountError,
+    required this.onAmountChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -484,7 +516,7 @@ class _SimpleSection extends StatelessWidget {
 
         _FieldLabel(label: cfg.fieldLabel, icon: cfg.icon),
         const SizedBox(height: 8),
-        _AmountField(ctrl: ctrl),
+        _AmountField(ctrl: ctrl, errorText: amountError, onChanged: onAmountChanged),
 
         const SizedBox(height: 18),
 
@@ -798,34 +830,53 @@ class _FieldLabel extends StatelessWidget {
 class _NameField extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode             focusNode;
-  const _NameField({required this.controller, required this.focusNode});
+  final String?               errorText;
+  final VoidCallback          onChanged;
+  const _NameField({required this.controller, required this.focusNode, required this.errorText, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: kWhite.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: kWhite.withOpacity(0.1)),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
-      child: TextField(
-        controller: controller,
-        focusNode: focusNode,
-        style: const TextStyle(
-            color: kWhite, fontSize: 15, fontWeight: FontWeight.w600),
-        maxLines: 1,
-        textCapitalization: TextCapitalization.sentences,
-        decoration: InputDecoration(
-          hintText: 'e.g. Electric bill, School fee…',
-          hintStyle: TextStyle(
-              color: kWhite.withOpacity(0.22),
-              fontSize: 15,
-              fontWeight: FontWeight.w600),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+    final hasError = errorText != null;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          decoration: BoxDecoration(
+            color: kWhite.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: hasError ? const Color(0xFFE87070) : kWhite.withOpacity(0.1)),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+          child: TextField(
+            controller: controller,
+            focusNode: focusNode,
+            onChanged: (_) => onChanged(),
+            style: const TextStyle(
+                color: kWhite, fontSize: 15, fontWeight: FontWeight.w600),
+            maxLines: 1,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: InputDecoration(
+              hintText: 'e.g. Electric bill, School fee…',
+              hintStyle: TextStyle(
+                  color: kWhite.withOpacity(0.22),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+          ),
         ),
-      ),
+        if (hasError) ...[
+          const SizedBox(height: 5),
+          Row(children: [
+            const SizedBox(width: 2),
+            const Icon(Icons.error_outline_rounded, size: 11, color: Color(0xFFE87070)),
+            const SizedBox(width: 4),
+            Text(errorText!, style: const TextStyle(color: Color(0xFFE87070), fontSize: 11)),
+          ]),
+        ],
+      ],
     );
   }
 }
@@ -835,49 +886,68 @@ class _NameField extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────
 class _AmountField extends StatelessWidget {
   final TextEditingController ctrl;
-  const _AmountField({required this.ctrl});
+  final String?               errorText;
+  final VoidCallback          onChanged;
+  const _AmountField({required this.ctrl, required this.errorText, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: kWhite.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: kWhite.withOpacity(0.1)),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
-      child: Row(children: [
-        Text('₱',
-            style: TextStyle(
-                color: kWhite.withOpacity(0.45),
-                fontSize: 17,
-                fontWeight: FontWeight.w700)),
-        const SizedBox(width: 6),
-        Expanded(
-          child: TextField(
-            controller: ctrl,
-            keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(
-                  RegExp(r'^\d*\.?\d{0,2}'))
-            ],
-            style: const TextStyle(
-                color: kWhite, fontSize: 17, fontWeight: FontWeight.w600),
-            cursorColor: const Color(0xFFE8A870),
-            decoration: InputDecoration(
-              hintText: '0.00',
-              hintStyle: TextStyle(
-                  color: kWhite.withOpacity(0.22),
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600),
-              border: InputBorder.none,
-              contentPadding:
-                  const EdgeInsets.symmetric(vertical: 12),
-            ),
+    final hasError = errorText != null;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          decoration: BoxDecoration(
+            color: kWhite.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: hasError ? const Color(0xFFE87070) : kWhite.withOpacity(0.1)),
           ),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+          child: Row(children: [
+            Text('₱',
+                style: TextStyle(
+                    color: kWhite.withOpacity(0.45),
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700)),
+            const SizedBox(width: 6),
+            Expanded(
+              child: TextField(
+                controller: ctrl,
+                onChanged: (_) => onChanged(),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(
+                      RegExp(r'^\d*\.?\d{0,2}'))
+                ],
+                style: const TextStyle(
+                    color: kWhite, fontSize: 17, fontWeight: FontWeight.w600),
+                cursorColor: const Color(0xFFE8A870),
+                decoration: InputDecoration(
+                  hintText: '0.00',
+                  hintStyle: TextStyle(
+                      color: kWhite.withOpacity(0.22),
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600),
+                  border: InputBorder.none,
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+            ),
+          ]),
         ),
-      ]),
+        if (hasError) ...[
+          const SizedBox(height: 5),
+          Row(children: [
+            const SizedBox(width: 2),
+            const Icon(Icons.error_outline_rounded, size: 11, color: Color(0xFFE87070)),
+            const SizedBox(width: 4),
+            Text(errorText!, style: const TextStyle(color: Color(0xFFE87070), fontSize: 11)),
+          ]),
+        ],
+      ],
     );
   }
 }

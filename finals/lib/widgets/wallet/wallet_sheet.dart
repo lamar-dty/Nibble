@@ -600,112 +600,12 @@ class _WalletSheetState extends State<WalletSheet> {
                   if (widget.onAddToSavings != null)
                     GestureDetector(
                       onTap: () {
-                        final amountController = TextEditingController();
-                        final noteController   = TextEditingController();
                         showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,
                           backgroundColor: Colors.transparent,
-                          builder: (_) => Padding(
-                            padding: EdgeInsets.only(
-                              bottom: MediaQuery.of(context).viewInsets.bottom,
-                            ),
-                            child: Container(
-                              margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
-                              padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF1B2D5B),
-                                borderRadius: BorderRadius.circular(24),
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Center(
-                                    child: Container(
-                                      width: 36, height: 4,
-                                      margin: const EdgeInsets.only(bottom: 20),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.18),
-                                        borderRadius: BorderRadius.circular(2),
-                                      ),
-                                    ),
-                                  ),
-                                  const Text(
-                                    'Add to Savings',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  TextField(
-                                    controller: amountController,
-                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                    style: const TextStyle(color: Colors.white),
-                                    decoration: InputDecoration(
-                                      hintText: 'Amount (₱)',
-                                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
-                                      prefixText: '₱ ',
-                                      prefixStyle: const TextStyle(color: Color(0xFF3BBFA3)),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide(color: Colors.white.withOpacity(0.15)),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: const BorderSide(color: Color(0xFF3BBFA3)),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  TextField(
-                                    controller: noteController,
-                                    style: const TextStyle(color: Colors.white),
-                                    decoration: InputDecoration(
-                                      hintText: 'Note (optional)',
-                                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide(color: Colors.white.withOpacity(0.15)),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: const BorderSide(color: Color(0xFF3BBFA3)),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFF3BBFA3),
-                                        foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(vertical: 14),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(14)),
-                                      ),
-                                      onPressed: () {
-                                        final amount = double.tryParse(
-                                            amountController.text.trim());
-                                        if (amount == null || amount <= 0) return;
-                                        final note = noteController.text.trim().isEmpty
-                                            ? null
-                                            : noteController.text.trim();
-                                        Navigator.pop(context);
-                                        widget.onAddToSavings!(amount, note);
-                                      },
-                                      child: const Text('Save',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 15)),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                          builder: (_) => _AddSavingsSheet(
+                            onAdd: widget.onAddToSavings!,
                           ),
                         );
                       },
@@ -773,110 +673,11 @@ class _WalletSheetHeader extends StatelessWidget {
   });
 
   void _showAddSavingsDialog(BuildContext context) {
-    final amountController = TextEditingController();
-    final noteController   = TextEditingController();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: Container(
-          margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1B2D5B),
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 36, height: 4,
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.18),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const Text(
-                'Add to Savings',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: amountController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  hintText: 'Amount (₱)',
-                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
-                  prefixText: '₱ ',
-                  prefixStyle: const TextStyle(color: Color(0xFF3BBFA3)),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.white.withOpacity(0.15)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF3BBFA3)),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: noteController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  hintText: 'Note (optional)',
-                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.white.withOpacity(0.15)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF3BBFA3)),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF3BBFA3),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                  ),
-                  onPressed: () {
-                    final amount = double.tryParse(amountController.text.trim());
-                    if (amount == null || amount <= 0) return;
-                    final note = noteController.text.trim().isEmpty
-                        ? null
-                        : noteController.text.trim();
-                    Navigator.pop(context);
-                    onAddToSavings!(amount, note);
-                  },
-                  child: const Text('Save',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+      builder: (_) => _AddSavingsSheet(onAdd: onAddToSavings!),
     );
   }
 
@@ -1344,7 +1145,10 @@ class _SheetEmptyState extends StatelessWidget {
 // Expense item row
 // Long-press → bottom sheet with "Mark Paid / Mark Unpaid / Delete"
 // ─────────────────────────────────────────────────────────────
-class _ExpenseItem extends StatelessWidget {
+// ─────────────────────────────────────────────────────────────
+// Expense item — tappable row, opens detail sheet
+// ─────────────────────────────────────────────────────────────
+class _ExpenseItem extends StatefulWidget {
   final WalletExpense expense;
   final VoidCallback? onTogglePaid;
   final VoidCallback? onDelete;
@@ -1355,108 +1159,303 @@ class _ExpenseItem extends StatelessWidget {
     this.onDelete,
   });
 
+  @override
+  State<_ExpenseItem> createState() => _ExpenseItemState();
+}
+
+class _ExpenseItemState extends State<_ExpenseItem> {
+  bool _pressed = false;
+
   Color get _badgeColor {
-    switch (expense.status) {
-      case WalletExpenseStatus.overdue:
-        return const Color(0xFFE87070);
-      case WalletExpenseStatus.unpaid:
-        return const Color(0xFF4A90D9);
-      case WalletExpenseStatus.paid:
-        return const Color(0xFF3BBFA3);
+    switch (widget.expense.status) {
+      case WalletExpenseStatus.overdue: return const Color(0xFFE87070);
+      case WalletExpenseStatus.unpaid:  return const Color(0xFF4A90D9);
+      case WalletExpenseStatus.paid:    return const Color(0xFF3BBFA3);
     }
   }
 
   String get _badgeLabel {
-    switch (expense.status) {
-      case WalletExpenseStatus.overdue:
-        return 'Overdue ⚠';
-      case WalletExpenseStatus.unpaid:
-        return 'Unpaid';
-      case WalletExpenseStatus.paid:
-        return 'Paid';
+    switch (widget.expense.status) {
+      case WalletExpenseStatus.overdue: return 'Overdue ⚠';
+      case WalletExpenseStatus.unpaid:  return 'Unpaid';
+      case WalletExpenseStatus.paid:    return 'Paid';
     }
   }
 
-  // ── Badge tap → action sheet ──────────────────────────────
-  void _showActions(BuildContext context) {
-    final isPaid = expense.status == WalletExpenseStatus.paid;
+  void _openDetail(BuildContext context) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => Container(
+      isScrollControlled: true,
+      builder: (_) => _ExpenseDetailSheet(
+        expense: widget.expense,
+        onTogglePaid: widget.onTogglePaid,
+        onDelete: widget.onDelete,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final e = widget.expense;
+    return GestureDetector(
+      onTap: () => _openDetail(context),
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 120),
+        color: _pressed ? const Color(0xFF6B7A99).withOpacity(0.04) : Colors.transparent,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Icon circle
+              Container(
+                width: 34, height: 34,
+                decoration: BoxDecoration(
+                  color: e.iconColor.withOpacity(0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(e.icon, color: e.iconColor, size: 17),
+              ),
+              const SizedBox(width: 12),
+              // Content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            e.name,
+                            style: const TextStyle(
+                              color: kNavyDark, fontSize: 14, fontWeight: FontWeight.bold),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: _badgeColor.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: _badgeColor.withOpacity(0.3)),
+                          ),
+                          child: Text(
+                            _badgeLabel,
+                            style: TextStyle(
+                              color: _badgeColor, fontSize: 10, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 3),
+                    Row(
+                      children: [
+                        Text(
+                          '₱${e.amount.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            color: kNavyDark, fontSize: 13, fontWeight: FontWeight.w600),
+                        ),
+                        if (e.savingNote != null) ...[
+                          const Text(' – ',
+                              style: TextStyle(color: Color(0xFF6B7A99), fontSize: 12)),
+                          Text(e.savingNote!,
+                              style: const TextStyle(
+                                color: Color(0xFF6B7A99), fontSize: 11)),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        const Icon(Icons.access_time_rounded,
+                            size: 11, color: Color(0xFF6B7A99)),
+                        const SizedBox(width: 3),
+                        Text(e.dateRange,
+                            style: const TextStyle(
+                                color: Color(0xFF6B7A99), fontSize: 11)),
+                      ],
+                    ),
+                    const Divider(height: 16, color: Color(0xFFEEEEEE)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Expense detail sheet — mirrors TaskDetailSheet style
+// ─────────────────────────────────────────────────────────────
+class _ExpenseDetailSheet extends StatefulWidget {
+  final WalletExpense expense;
+  final VoidCallback? onTogglePaid;
+  final VoidCallback? onDelete;
+
+  const _ExpenseDetailSheet({
+    required this.expense,
+    this.onTogglePaid,
+    this.onDelete,
+  });
+
+  @override
+  State<_ExpenseDetailSheet> createState() => _ExpenseDetailSheetState();
+}
+
+class _ExpenseDetailSheetState extends State<_ExpenseDetailSheet> {
+  late WalletExpenseStatus _status;
+
+  @override
+  void initState() {
+    super.initState();
+    _status = widget.expense.status;
+  }
+
+  Color get _catColor => widget.expense.category.color;
+
+  Color get _statusColor {
+    switch (_status) {
+      case WalletExpenseStatus.overdue: return const Color(0xFFE87070);
+      case WalletExpenseStatus.unpaid:  return const Color(0xFF4A90D9);
+      case WalletExpenseStatus.paid:    return const Color(0xFF3BBFA3);
+    }
+  }
+
+  IconData get _statusIcon {
+    switch (_status) {
+      case WalletExpenseStatus.overdue: return Icons.warning_amber_rounded;
+      case WalletExpenseStatus.unpaid:  return Icons.radio_button_unchecked_rounded;
+      case WalletExpenseStatus.paid:    return Icons.check_circle_rounded;
+    }
+  }
+
+  String get _statusLabel {
+    switch (_status) {
+      case WalletExpenseStatus.overdue: return 'Overdue';
+      case WalletExpenseStatus.unpaid:  return 'Unpaid';
+      case WalletExpenseStatus.paid:    return 'Paid';
+    }
+  }
+
+  void _openStatusPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _PaymentStatusPickerSheet(
+        current: _status,
+        onSelected: (s) {
+          Navigator.pop(context);
+          // Only toggle if the status actually changes
+          if (s != _status) {
+            widget.onTogglePaid?.call();
+            setState(() => _status = s);
+          }
+        },
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (confirmCtx) => Container(
         margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
         decoration: BoxDecoration(
           color: const Color(0xFF1B2D5B),
           borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.white.withOpacity(0.08)),
+          boxShadow: [BoxShadow(
+              color: Colors.black.withOpacity(0.4), blurRadius: 40,
+              offset: const Offset(0, -4))],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Handle
             Container(
               width: 36, height: 4,
-              margin: const EdgeInsets.only(top: 14, bottom: 16),
+              margin: const EdgeInsets.only(top: 14, bottom: 20),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.18),
-                borderRadius: BorderRadius.circular(2),
-              ),
+                borderRadius: BorderRadius.circular(2)),
             ),
-            // Expense name header
+            Container(
+              width: 52, height: 52,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE87070).withOpacity(0.12),
+                shape: BoxShape.circle,
+                border: Border.all(
+                    color: const Color(0xFFE87070).withOpacity(0.3), width: 1.5),
+              ),
+              child: const Icon(Icons.delete_outline_rounded,
+                  color: Color(0xFFE87070), size: 26),
+            ),
+            const SizedBox(height: 14),
+            const Text('Remove Expense?',
+                style: TextStyle(
+                    color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 6),
+            Text('This cannot be undone',
+                style: TextStyle(
+                    color: Colors.white.withOpacity(0.4), fontSize: 13)),
+            const SizedBox(height: 24),
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-              child: Text(
-                expense.name,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+              child: Row(children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(confirmCtx),
+                    child: Container(
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.07),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.white.withOpacity(0.1)),
+                      ),
+                      child: const Center(
+                        child: Text('Cancel',
+                            style: TextStyle(
+                                color: Colors.white, fontWeight: FontWeight.w600)),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      widget.onDelete?.call();
+                      Navigator.pop(confirmCtx);
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE87070).withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                            color: const Color(0xFFE87070).withOpacity(0.4)),
+                      ),
+                      child: const Center(
+                        child: Text('Delete',
+                            style: TextStyle(
+                                color: Color(0xFFE87070),
+                                fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ),
+                ),
+              ]),
             ),
-            const Divider(color: Colors.white12, height: 1),
-            // Toggle paid / unpaid
-            if (onTogglePaid != null)
-              ListTile(
-                leading: Icon(
-                  isPaid
-                      ? Icons.unpublished_rounded
-                      : Icons.check_circle_rounded,
-                  color: isPaid
-                      ? const Color(0xFF4A90D9)
-                      : const Color(0xFF3BBFA3),
-                ),
-                title: Text(
-                  isPaid ? 'Mark as Unpaid' : 'Mark as Paid',
-                  style: TextStyle(
-                    color: isPaid
-                        ? const Color(0xFF4A90D9)
-                        : const Color(0xFF3BBFA3),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  onTogglePaid!();
-                },
-              ),
-            // Delete
-            if (onDelete != null)
-              ListTile(
-                leading: const Icon(Icons.delete_outline_rounded,
-                    color: Color(0xFFE87070)),
-                title: const Text(
-                  'Delete Expense',
-                  style: TextStyle(
-                    color: Color(0xFFE87070),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  onDelete!();
-                },
-              ),
-            const SizedBox(height: 8),
           ],
         ),
       ),
@@ -1465,136 +1464,504 @@ class _ExpenseItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Icon circle
-            SizedBox(
-              width: 36,
-              child: Column(
-                children: [
-                  Container(
-                    width: 34,
-                    height: 34,
-                    decoration: BoxDecoration(
-                      color: expense.iconColor.withOpacity(0.12),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(expense.icon,
-                        color: expense.iconColor, size: 17),
-                  ),
-                ],
-              ),
+    final e = widget.expense;
+    final bottomPad = MediaQuery.of(context).viewInsets.bottom +
+        MediaQuery.of(context).padding.bottom;
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A2C5B),
+        borderRadius: BorderRadius.circular(26),
+        border: Border.all(color: _catColor.withOpacity(0.25), width: 1),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.45),
+              blurRadius: 32, offset: const Offset(0, -8)),
+          BoxShadow(color: _catColor.withOpacity(0.08),
+              blurRadius: 40, spreadRadius: -4),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 12),
+          Center(
+            child: Container(
+              width: 38, height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.18),
+                borderRadius: BorderRadius.circular(2)),
             ),
-
-            const SizedBox(width: 12),
-
-            // Content
-            Expanded(
+          ),
+          const SizedBox(height: 18),
+          ConstrainedBox(
+            constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.72),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(22, 0, 22, 24 + bottomPad),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Name + badge
+                  // Header row: category chip + delete + close
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(
-                        child: Text(
-                          expense.name,
-                          style: const TextStyle(
-                            color: kNavyDark,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          overflow: TextOverflow.ellipsis,
+                      // Category chip
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 11, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: _catColor.withOpacity(0.18),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                              color: _catColor.withOpacity(0.4), width: 1),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(e.category.icon, size: 11, color: _catColor),
+                            const SizedBox(width: 6),
+                            Text(e.category.label,
+                                style: TextStyle(
+                                    color: _catColor,
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.2)),
+                          ],
                         ),
                       ),
+                      const Spacer(),
+                      if (widget.onDelete != null)
+                        GestureDetector(
+                          onTap: () => _confirmDelete(context),
+                          child: Container(
+                            width: 32, height: 32,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE05C5C).withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                  color: const Color(0xFFE05C5C)
+                                      .withOpacity(0.25)),
+                            ),
+                            child: const Icon(Icons.delete_outline_rounded,
+                                color: Color(0xFFE05C5C), size: 16),
+                          ),
+                        ),
                       const SizedBox(width: 8),
                       GestureDetector(
-                        onTap: (onTogglePaid != null || onDelete != null)
-                            ? () => _showActions(context)
-                            : null,
+                        onTap: () => Navigator.pop(context),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
+                          width: 30, height: 30,
                           decoration: BoxDecoration(
-                            color: _badgeColor.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.white.withOpacity(0.08),
+                            shape: BoxShape.circle,
                             border: Border.all(
-                                color: _badgeColor.withOpacity(0.3)),
+                                color: Colors.white.withOpacity(0.1)),
                           ),
-                          child: Text(
-                            _badgeLabel,
-                            style: TextStyle(
-                              color: _badgeColor,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
+                          child: Icon(Icons.close_rounded,
+                              size: 16,
+                              color: Colors.white.withOpacity(0.55)),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Name
+                  Text(e.name,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          height: 1.2)),
+
+                  if (e.savingNote != null) ...[
+                    const SizedBox(height: 6),
+                    Row(children: [
+                      Icon(Icons.notes_rounded,
+                          size: 13, color: Colors.white.withOpacity(0.4)),
+                      const SizedBox(width: 5),
+                      Text(e.savingNote!,
+                          style: TextStyle(
+                              color: Colors.white.withOpacity(0.55),
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w500)),
+                    ]),
+                  ],
+
+                  const SizedBox(height: 20),
+
+                  // Status toggle — opens picker
+                  if (widget.onTogglePaid != null)
+                    GestureDetector(
+                      onTap: () => _openStatusPicker(context),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 220),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 11),
+                        decoration: BoxDecoration(
+                          color: _statusColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                              color: _statusColor.withOpacity(0.35), width: 1),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(_statusIcon, color: _statusColor, size: 18),
+                            const SizedBox(width: 10),
+                            Text(_statusLabel,
+                                style: TextStyle(
+                                    color: _statusColor,
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w700)),
+                            const Spacer(),
+                            Text(
+                              _status == WalletExpenseStatus.overdue
+                                  ? 'Mark as paid'
+                                  : 'Tap to change',
+                              style: TextStyle(
+                                  color: _statusColor.withOpacity(0.5),
+                                  fontSize: 10.5),
                             ),
-                          ),
+                            const SizedBox(width: 4),
+                            Icon(Icons.chevron_right_rounded,
+                                color: _statusColor.withOpacity(0.5), size: 14),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
 
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 16),
 
-                  // Amount + saving note
-                  Row(
-                    children: [
-                      Text(
-                        '₱${expense.amount.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          color: kNavyDark,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
+                  // Info grid
+                  _ExpenseInfoGrid(children: [
+                    _ExpenseInfoTile(
+                      icon: Icons.attach_money_rounded,
+                      label: 'Amount',
+                      value: '₱${e.amount.toStringAsFixed(2)}',
+                      color: _catColor,
+                    ),
+                    _ExpenseInfoTile(
+                      icon: Icons.category_rounded,
+                      label: 'Category',
+                      value: e.category.label,
+                      color: _catColor,
+                    ),
+                    _ExpenseInfoTile(
+                      icon: Icons.access_time_rounded,
+                      label: 'Date',
+                      value: e.dateRange,
+                      color: const Color(0xFF6B7A99),
+                    ),
+                    if (e.paidAt != null)
+                      _ExpenseInfoTile(
+                        icon: Icons.check_circle_outline_rounded,
+                        label: 'Paid On',
+                        value:
+                            '${e.paidAt!.day}/${e.paidAt!.month}/${e.paidAt!.year}',
+                        color: const Color(0xFF3BBFA3),
                       ),
-                      if (expense.savingNote != null) ...[
-                        const Text(' – ',
-                            style: TextStyle(
-                                color: Color(0xFF6B7A99), fontSize: 12)),
-                        Text(
-                          expense.savingNote!,
-                          style: const TextStyle(
-                            color: Color(0xFF6B7A99),
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-
-                  const SizedBox(height: 2),
-
-                  // Date
-                  Row(
-                    children: [
-                      const Icon(Icons.access_time_rounded,
-                          size: 11, color: Color(0xFF6B7A99)),
-                      const SizedBox(width: 3),
-                      Text(
-                        expense.dateRange,
-                        style: const TextStyle(
-                            color: Color(0xFF6B7A99), fontSize: 11),
-                      ),
-                    ],
-                  ),
-
-                  const Divider(height: 16, color: Color(0xFFEEEEEE)),
+                  ]),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 }
 
 // ─────────────────────────────────────────────────────────────
-// Savings log item row
+// Payment status picker sheet
 // ─────────────────────────────────────────────────────────────
+class _PaymentStatusPickerSheet extends StatelessWidget {
+  final WalletExpenseStatus current;
+  final ValueChanged<WalletExpenseStatus> onSelected;
+
+  const _PaymentStatusPickerSheet({
+    required this.current,
+    required this.onSelected,
+  });
+
+  static const _label = {
+    WalletExpenseStatus.unpaid:  'Unpaid',
+    WalletExpenseStatus.paid:    'Paid',
+    WalletExpenseStatus.overdue: 'Overdue',
+  };
+  static const _color = {
+    WalletExpenseStatus.unpaid:  Color(0xFF4A90D9),
+    WalletExpenseStatus.paid:    Color(0xFF3BBFA3),
+    WalletExpenseStatus.overdue: Color(0xFFE87070),
+  };
+  static const _icon = {
+    WalletExpenseStatus.unpaid:  Icons.radio_button_unchecked_rounded,
+    WalletExpenseStatus.paid:    Icons.check_circle_rounded,
+    WalletExpenseStatus.overdue: Icons.warning_amber_rounded,
+  };
+  static const _desc = {
+    WalletExpenseStatus.unpaid:  'Payment is pending',
+    WalletExpenseStatus.paid:    'Payment has been made',
+    WalletExpenseStatus.overdue: 'Payment is past due date',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1B2D5B),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.4),
+              blurRadius: 40, offset: const Offset(0, -4))
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 36, height: 4,
+            margin: const EdgeInsets.only(top: 14, bottom: 18),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.18),
+              borderRadius: BorderRadius.circular(2)),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 22),
+            child: Row(
+              children: [
+                Container(
+                  width: 42, height: 42,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF3BBFA3).withOpacity(0.14),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                        color: const Color(0xFF3BBFA3).withOpacity(0.3),
+                        width: 1.5),
+                  ),
+                  child: const Icon(Icons.swap_horiz_rounded,
+                      color: Color(0xFF3BBFA3), size: 22),
+                ),
+                const SizedBox(width: 13),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Update Payment Status',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold)),
+                    Text('Mark as paid once you\'ve settled it',
+                        style: TextStyle(
+                            color: Colors.white.withOpacity(0.4),
+                            fontSize: 12)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Divider(
+              color: Colors.white.withOpacity(0.07),
+              thickness: 1,
+              indent: 22,
+              endIndent: 22),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 22),
+            child: Column(
+              children: const [WalletExpenseStatus.unpaid, WalletExpenseStatus.paid].map((s) {
+                final isCurrent = s == current;
+                final c = _color[s]!;
+                return _PaymentStatusCard(
+                  icon: _icon[s]!,
+                  iconColor: c,
+                  label: _label[s]!,
+                  description: _desc[s]!,
+                  selected: isCurrent,
+                  onTap: () => onSelected(s),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PaymentStatusCard extends StatefulWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String label;
+  final String description;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _PaymentStatusCard({
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+    required this.description,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  State<_PaymentStatusCard> createState() => _PaymentStatusCardState();
+}
+
+class _PaymentStatusCardState extends State<_PaymentStatusCard> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = widget.iconColor;
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) {
+        setState(() => _pressed = false);
+        widget.onTap();
+      },
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 130),
+        margin: const EdgeInsets.only(bottom: 9),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: (_pressed || widget.selected)
+              ? c.withOpacity(0.12)
+              : Colors.white.withOpacity(0.04),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: (_pressed || widget.selected)
+                ? c.withOpacity(0.55)
+                : Colors.white.withOpacity(0.08),
+            width: 1.3,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 46, height: 46,
+              decoration: BoxDecoration(
+                color: c.withOpacity(0.13),
+                borderRadius: BorderRadius.circular(13),
+                border: Border.all(color: c.withOpacity(0.25), width: 1.2),
+              ),
+              child: Icon(widget.icon, color: c, size: 22),
+            ),
+            const SizedBox(width: 13),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(widget.label,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 3),
+                  Text(widget.description,
+                      style: TextStyle(
+                          color: Colors.white.withOpacity(0.37),
+                          fontSize: 12)),
+                ],
+              ),
+            ),
+            const SizedBox(width: 6),
+            if (widget.selected)
+              Container(
+                width: 22, height: 22,
+                decoration: BoxDecoration(color: c, shape: BoxShape.circle),
+                child: const Icon(Icons.check_rounded,
+                    color: Colors.white, size: 14),
+              )
+            else
+              Icon(Icons.chevron_right_rounded,
+                  color: Colors.white.withOpacity(0.2), size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Info grid helpers (for expense detail sheet)
+// ─────────────────────────────────────────────────────────────
+class _ExpenseInfoGrid extends StatelessWidget {
+  final List<Widget> children;
+  const _ExpenseInfoGrid({required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = <Widget>[];
+    for (int i = 0; i < children.length; i += 2) {
+      rows.add(Row(children: [
+        Expanded(child: children[i]),
+        const SizedBox(width: 10),
+        Expanded(
+            child: i + 1 < children.length
+                ? children[i + 1]
+                : const SizedBox.shrink()),
+      ]));
+      if (i + 2 < children.length) rows.add(const SizedBox(height: 10));
+    }
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: rows);
+  }
+}
+
+class _ExpenseInfoTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color color;
+
+  const _ExpenseInfoTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.08), width: 0.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            Icon(icon, color: color, size: 13),
+            const SizedBox(width: 5),
+            Text(label.toUpperCase(),
+                style: TextStyle(
+                    color: color.withOpacity(0.65),
+                    fontSize: 9,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.8)),
+          ]),
+          const SizedBox(height: 5),
+          Text(value,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  height: 1.3)),
+        ],
+      ),
+    );
+  }
+}
+
 class _SavingsLogItem extends StatelessWidget {
   final SavingsEntry entry;
 
@@ -1716,7 +2083,218 @@ class IndexedExpense extends WalletExpense {
   int? get _storeIndex => storeIndex;
 }
 // ─────────────────────────────────────────────────────────────
-// Withdraw sheet — StatefulWidget so we can show inline errors
+// Add Savings sheet
+// ─────────────────────────────────────────────────────────────
+class _AddSavingsSheet extends StatefulWidget {
+  final void Function(double amount, String? note) onAdd;
+  const _AddSavingsSheet({required this.onAdd});
+
+  @override
+  State<_AddSavingsSheet> createState() => _AddSavingsSheetState();
+}
+
+class _AddSavingsSheetState extends State<_AddSavingsSheet> {
+  final _amountController = TextEditingController();
+  final _noteController   = TextEditingController();
+  String? _amountError;
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final amount = double.tryParse(_amountController.text.trim());
+    if (amount == null || amount <= 0) {
+      setState(() => _amountError = 'Enter a valid amount');
+      return;
+    }
+    final note = _noteController.text.trim().isEmpty
+        ? null
+        : _noteController.text.trim();
+    Navigator.pop(context);
+    widget.onAdd(amount, note);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mq = MediaQuery.of(context);
+    return Padding(
+      padding: EdgeInsets.only(bottom: mq.viewInsets.bottom),
+      child: Container(
+        margin: EdgeInsets.fromLTRB(12, 0, 12, 24 + mq.padding.bottom),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1A2D5A),
+          borderRadius: BorderRadius.circular(26),
+          border: Border.all(color: kWhite.withOpacity(0.08)),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.45), blurRadius: 40, offset: const Offset(0, -4))],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle
+            Container(
+              width: 36, height: 4,
+              margin: const EdgeInsets.only(top: 12),
+              decoration: BoxDecoration(color: kWhite.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
+            ),
+
+            // Header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 16, 0),
+              child: Row(
+                children: [
+                  Container(
+                    width: 42, height: 42,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF3BBFA3).withOpacity(0.14),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: const Color(0xFF3BBFA3).withOpacity(0.3), width: 1.5),
+                    ),
+                    child: const Icon(Icons.savings_rounded, color: Color(0xFF3BBFA3), size: 21),
+                  ),
+                  const SizedBox(width: 13),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Add to Savings',
+                          style: TextStyle(color: kWhite, fontSize: 17, fontWeight: FontWeight.bold)),
+                      Text('Set aside money for later',
+                          style: TextStyle(color: kWhite.withOpacity(0.4), fontSize: 12)),
+                    ],
+                  ),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      width: 32, height: 32,
+                      decoration: BoxDecoration(color: kWhite.withOpacity(0.07), shape: BoxShape.circle),
+                      child: Icon(Icons.close_rounded, color: kWhite.withOpacity(0.5), size: 17),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+            Divider(height: 1, color: kWhite.withOpacity(0.07)),
+
+            // Fields
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Amount
+                  Row(children: [
+                    Icon(Icons.attach_money_rounded, color: kSubtitle, size: 12),
+                    const SizedBox(width: 5),
+                    Text('Amount', style: const TextStyle(color: kSubtitle, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+                  ]),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _amountController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    style: const TextStyle(color: kWhite, fontSize: 15, fontWeight: FontWeight.w600),
+                    onChanged: (_) { if (_amountError != null) setState(() => _amountError = null); },
+                    decoration: InputDecoration(
+                      hintText: 'e.g. 250.00',
+                      hintStyle: TextStyle(color: kWhite.withOpacity(0.22), fontSize: 15, fontWeight: FontWeight.w500),
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.only(left: 14, right: 8),
+                        child: Text('₱', style: TextStyle(color: const Color(0xFF3BBFA3), fontSize: 16, fontWeight: FontWeight.bold)),
+                      ),
+                      prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+                      errorText: _amountError,
+                      errorStyle: const TextStyle(color: Color(0xFFE87070), fontSize: 11),
+                      filled: true,
+                      fillColor: kWhite.withOpacity(0.05),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(13), borderSide: BorderSide.none),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(13),
+                        borderSide: const BorderSide(color: Color(0xFF3BBFA3), width: 1.5),
+                      ),
+                      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(13), borderSide: const BorderSide(color: Color(0xFFE87070))),
+                      focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(13), borderSide: const BorderSide(color: Color(0xFFE87070))),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Note
+                  Row(children: [
+                    Icon(Icons.notes_rounded, color: kSubtitle, size: 12),
+                    const SizedBox(width: 5),
+                    Text('Note', style: const TextStyle(color: kSubtitle, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+                    const SizedBox(width: 6),
+                    Text('optional', style: TextStyle(color: kWhite.withOpacity(0.25), fontSize: 10, fontStyle: FontStyle.italic)),
+                  ]),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _noteController,
+                    style: const TextStyle(color: kWhite, fontSize: 14),
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: InputDecoration(
+                      hintText: 'e.g. Weekly allowance savings',
+                      hintStyle: TextStyle(color: kWhite.withOpacity(0.22), fontSize: 14),
+                      filled: true,
+                      fillColor: kWhite.withOpacity(0.05),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(13), borderSide: BorderSide.none),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(13),
+                        borderSide: const BorderSide(color: Color(0xFF3BBFA3), width: 1.5),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Save button
+            Container(
+              decoration: BoxDecoration(border: Border(top: BorderSide(color: kWhite.withOpacity(0.07)))),
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
+              child: SizedBox(
+                width: double.infinity, height: 50,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                    gradient: const LinearGradient(colors: [Color(0xFF3BBFA3), Color(0xFF2FA898)]),
+                    boxShadow: [BoxShadow(color: const Color(0xFF3BBFA3).withOpacity(0.35), blurRadius: 16, offset: const Offset(0, 4))],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: _submit,
+                      child: const Center(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.savings_rounded, color: kNavyDark, size: 18),
+                            SizedBox(width: 7),
+                            Text('Add to Savings', style: TextStyle(color: kNavyDark, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.3)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Withdraw sheet
 // ─────────────────────────────────────────────────────────────
 class _WithdrawSheet extends StatefulWidget {
   final double savings;
@@ -1741,9 +2319,7 @@ class _WithdrawSheetState extends State<_WithdrawSheet> {
   }
 
   void _submit() {
-    final raw    = _amountController.text.trim();
-    final amount = double.tryParse(raw);
-
+    final amount = double.tryParse(_amountController.text.trim());
     if (amount == null || amount <= 0) {
       setState(() => _amountError = 'Enter a valid amount');
       return;
@@ -1753,7 +2329,6 @@ class _WithdrawSheetState extends State<_WithdrawSheet> {
           'Exceeds your savings (₱${widget.savings.toStringAsFixed(2)})');
       return;
     }
-
     final note = _noteController.text.trim().isEmpty
         ? null
         : _noteController.text.trim();
@@ -1763,123 +2338,169 @@ class _WithdrawSheetState extends State<_WithdrawSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final mq = MediaQuery.of(context);
     return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
+      padding: EdgeInsets.only(bottom: mq.viewInsets.bottom),
       child: Container(
-        margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+        margin: EdgeInsets.fromLTRB(12, 0, 12, 24 + mq.padding.bottom),
         decoration: BoxDecoration(
-          color: const Color(0xFF1B2D5B),
-          borderRadius: BorderRadius.circular(24),
+          color: const Color(0xFF1A2D5A),
+          borderRadius: BorderRadius.circular(26),
+          border: Border.all(color: kWhite.withOpacity(0.08)),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.45), blurRadius: 40, offset: const Offset(0, -4))],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Drag handle
-            Center(
-              child: Container(
-                width: 36, height: 4,
-                margin: const EdgeInsets.only(bottom: 20),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.18),
-                  borderRadius: BorderRadius.circular(2),
-                ),
+            // Handle
+            Container(
+              width: 36, height: 4,
+              margin: const EdgeInsets.only(top: 12),
+              decoration: BoxDecoration(color: kWhite.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
+            ),
+
+            // Header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 16, 0),
+              child: Row(
+                children: [
+                  Container(
+                    width: 42, height: 42,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF9B88E8).withOpacity(0.14),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: const Color(0xFF9B88E8).withOpacity(0.3), width: 1.5),
+                    ),
+                    child: const Icon(Icons.arrow_circle_down_rounded, color: Color(0xFF9B88E8), size: 21),
+                  ),
+                  const SizedBox(width: 13),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Withdraw Savings',
+                          style: TextStyle(color: kWhite, fontSize: 17, fontWeight: FontWeight.bold)),
+                      Text('Available: ₱${widget.savings.toStringAsFixed(2)}',
+                          style: TextStyle(color: kWhite.withOpacity(0.4), fontSize: 12)),
+                    ],
+                  ),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      width: 32, height: 32,
+                      decoration: BoxDecoration(color: kWhite.withOpacity(0.07), shape: BoxShape.circle),
+                      child: Icon(Icons.close_rounded, color: kWhite.withOpacity(0.5), size: 17),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const Text(
-              'Withdraw from Savings',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+
             const SizedBox(height: 16),
+            Divider(height: 1, color: kWhite.withOpacity(0.07)),
 
-            // ── Amount field with inline error ──────────────────────────
-            TextField(
-              controller: _amountController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: const TextStyle(color: Colors.white),
-              onChanged: (_) {
-                if (_amountError != null) setState(() => _amountError = null);
-              },
-              decoration: InputDecoration(
-                hintText: 'Amount (₱)',
-                hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
-                prefixText: '₱ ',
-                prefixStyle: const TextStyle(color: Color(0xFF9B88E8)),
-                errorText: _amountError,
-                errorStyle: const TextStyle(
-                  color: Color(0xFFE87070),
-                  fontSize: 12,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: _amountError != null
-                        ? const Color(0xFFE87070)
-                        : Colors.white.withOpacity(0.15),
+            // Fields
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Amount
+                  Row(children: [
+                    Icon(Icons.attach_money_rounded, color: kSubtitle, size: 12),
+                    const SizedBox(width: 5),
+                    Text('Amount', style: const TextStyle(color: kSubtitle, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+                  ]),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _amountController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    style: const TextStyle(color: kWhite, fontSize: 15, fontWeight: FontWeight.w600),
+                    onChanged: (_) { if (_amountError != null) setState(() => _amountError = null); },
+                    decoration: InputDecoration(
+                      hintText: 'e.g. 100.00',
+                      hintStyle: TextStyle(color: kWhite.withOpacity(0.22), fontSize: 15, fontWeight: FontWeight.w500),
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.only(left: 14, right: 8),
+                        child: Text('₱', style: TextStyle(color: const Color(0xFF9B88E8), fontSize: 16, fontWeight: FontWeight.bold)),
+                      ),
+                      prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+                      errorText: _amountError,
+                      errorStyle: const TextStyle(color: Color(0xFFE87070), fontSize: 11),
+                      filled: true,
+                      fillColor: kWhite.withOpacity(0.05),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(13), borderSide: BorderSide.none),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(13),
+                        borderSide: const BorderSide(color: Color(0xFF9B88E8), width: 1.5),
+                      ),
+                      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(13), borderSide: const BorderSide(color: Color(0xFFE87070))),
+                      focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(13), borderSide: const BorderSide(color: Color(0xFFE87070))),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                    ),
                   ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: _amountError != null
-                        ? const Color(0xFFE87070)
-                        : const Color(0xFF9B88E8),
+
+                  const SizedBox(height: 16),
+
+                  // Note
+                  Row(children: [
+                    Icon(Icons.notes_rounded, color: kSubtitle, size: 12),
+                    const SizedBox(width: 5),
+                    Text('Note', style: const TextStyle(color: kSubtitle, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+                    const SizedBox(width: 6),
+                    Text('optional', style: TextStyle(color: kWhite.withOpacity(0.25), fontSize: 10, fontStyle: FontStyle.italic)),
+                  ]),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _noteController,
+                    style: const TextStyle(color: kWhite, fontSize: 14),
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: InputDecoration(
+                      hintText: 'e.g. Grocery run',
+                      hintStyle: TextStyle(color: kWhite.withOpacity(0.22), fontSize: 14),
+                      filled: true,
+                      fillColor: kWhite.withOpacity(0.05),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(13), borderSide: BorderSide.none),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(13),
+                        borderSide: const BorderSide(color: Color(0xFF9B88E8), width: 1.5),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                    ),
                   ),
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFFE87070)),
-                ),
-                focusedErrorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFFE87070)),
-                ),
+                ],
               ),
             ),
 
-            const SizedBox(height: 12),
-
-            // ── Note field ──────────────────────────────────────────────
-            TextField(
-              controller: _noteController,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: 'Note (optional)',
-                hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.white.withOpacity(0.15)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF9B88E8)),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF9B88E8),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14)),
-                ),
-                onPressed: _submit,
-                child: const Text(
-                  'Withdraw',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            // Withdraw button
+            Container(
+              decoration: BoxDecoration(border: Border(top: BorderSide(color: kWhite.withOpacity(0.07)))),
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
+              child: SizedBox(
+                width: double.infinity, height: 50,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                    gradient: const LinearGradient(colors: [Color(0xFF9B88E8), Color(0xFF7B6BC8)]),
+                    boxShadow: [BoxShadow(color: const Color(0xFF9B88E8).withOpacity(0.35), blurRadius: 16, offset: const Offset(0, 4))],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: _submit,
+                      child: const Center(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.arrow_circle_down_rounded, color: kWhite, size: 18),
+                            SizedBox(width: 7),
+                            Text('Withdraw', style: TextStyle(color: kWhite, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.3)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),

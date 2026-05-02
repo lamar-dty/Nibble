@@ -413,9 +413,10 @@ void showConfirmDeleteSpace(
           children: [
             const Icon(Icons.delete_rounded, color: Color(0xFFE87070), size: 36),
             const SizedBox(height: 12),
-            const Text('Delete Space',
-                style: TextStyle(
-                    color: kWhite, fontSize: 17, fontWeight: FontWeight.bold)),
+            const Text(
+              'Delete Space',
+              style: TextStyle(color: kWhite, fontSize: 17, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
             Text(
               'Are you sure you want to delete "${space.name}"? This cannot be undone.',
@@ -473,12 +474,12 @@ void showConfirmLeaveSpace(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.exit_to_app_rounded,
-                color: Color(0xFFE87070), size: 36),
+            const Icon(Icons.exit_to_app_rounded, color: Color(0xFFE87070), size: 36),
             const SizedBox(height: 12),
-            const Text('Leave Space',
-                style: TextStyle(
-                    color: kWhite, fontSize: 17, fontWeight: FontWeight.bold)),
+            const Text(
+              'Leave Space',
+              style: TextStyle(color: kWhite, fontSize: 17, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
             Text(
               'Are you sure you want to leave "${space.name}"?',
