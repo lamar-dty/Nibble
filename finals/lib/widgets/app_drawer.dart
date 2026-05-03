@@ -12,6 +12,8 @@ import 'reminder_settings_sheet.dart';
 import 'class_alerts_sheet.dart';
 import '../store/task_store.dart';
 import '../store/space_chat_store.dart';
+import 'change_password_sheet.dart';
+
 
 class AppDrawer extends StatefulWidget {
   const AppDrawer({super.key});
@@ -458,6 +460,12 @@ class _AppDrawerState extends State<AppDrawer>
 
   Widget _buildItem(_DrawerItem item) {
     VoidCallback? tap = item.onTap;
+    if (tap == null && item.label == 'Change Password') {
+  tap = () {
+    Navigator.pop(context);
+    showChangePasswordSheet(context);
+  };
+}
     if (tap == null && item.label == 'FAQ') {
       tap = () {
         Navigator.pop(context);

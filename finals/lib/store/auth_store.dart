@@ -463,6 +463,89 @@ class AuthStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ── Change password ───────────────────────────────────────
+
+  /// Verifies [currentPassword] against the stored hash, then replaces it
+  /// with [newPassword].
+  ///
+  /// Returns null on success, or a human-readable error string on failure.
+  /// No cross-store side effects — the password is never stored in
+  /// spaces or tasks.
+  Future<String?> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    if (_currentUser == null) return 'Not logged in.';
+
+    if (_hashPassword(currentPassword) != _currentUser!.passwordHash) {
+      return 'Current password is incorrect.';
+    }
+
+    if (newPassword.length < 6) {
+      return 'New password must be at least 6 characters.';
+    }
+
+    final updated = UserRecord(
+      id:           _currentUser!.id,
+      username:     _currentUser!.username,
+      displayName:  _currentUser!.displayName,
+      email:        _currentUser!.email,
+      passwordHash: _hashPassword(newPassword),
+    );
+
+    final idx = _users.indexWhere((u) => u.id == updated.id);
+    if (idx == -1) return 'User record not found.';
+    _users[idx] = updated;
+    _currentUser = updated;
+
+    await _saveUsers();
+    notifyListeners();
+    return null;
+  }
+
+  // ── Edit profile ──────────────────────────────────────────
+
+  /// Changes the current user's username to [newUsername].
+  ///
+  /// Validates format, checks uniqueness, then updates the UserRecord and
+  /// persists via [_saveUsers].  Returns null on success or an error string.
+  ///
+  /// IMPORTANT: call [SpaceStore.renameUserInSpaces] immediately after a
+  /// successful return to keep creatorName / members consistent for spaces
+  /// that were created or joined under the old name.
+  Future<String?> updateUsername(String newUsername) async {
+    if (_currentUser == null) return 'Not logged in.';
+
+    final normalised = _normaliseUsername(newUsername);
+
+    final formatError = validateUsername(normalised);
+    if (formatError != null) return formatError;
+
+    // No-op if unchanged.
+    if (normalised == _currentUser!.username) return null;
+
+    if (!isUsernameAvailable(normalised)) {
+      return 'That username is already taken.';
+    }
+
+    final updated = UserRecord(
+      id:           _currentUser!.id,
+      username:     normalised,
+      displayName:  _currentUser!.displayName,
+      email:        _currentUser!.email,
+      passwordHash: _currentUser!.passwordHash,
+    );
+
+    final idx = _users.indexWhere((u) => u.id == updated.id);
+    if (idx == -1) return 'User record not found.';
+    _users[idx] = updated;
+    _currentUser = updated;
+
+    await _saveUsers();
+    notifyListeners();
+    return null;
+  }
+
   // ── Store lifecycle helpers ───────────────────────────────
 
   Future<void> _reloadStores() async {
