@@ -218,8 +218,15 @@ class SpaceStore extends ChangeNotifier {
       final needsUpdate = patched.tasks.length != space.tasks.length ||
           patched.status != space.status ||
           patched.progress != space.progress ||
+          patched.creatorName != space.creatorName ||
           patched.members.length != space.members.length ||
           patched.pendingMembers.length != space.pendingMembers.length ||
+          // Content checks: a rename changes names but not list length, so
+          // comparing counts alone is not enough to detect renames.
+          (List<String>.from(patched.members)..sort()).join(',') !=
+              (List<String>.from(space.members)..sort()).join(',') ||
+          (List<String>.from(patched.pendingMembers)..sort()).join(',') !=
+              (List<String>.from(space.pendingMembers)..sort()).join(',') ||
           assignFingerprint(patched.tasks) != assignFingerprint(space.tasks);
 
       if (needsUpdate) {
@@ -293,6 +300,26 @@ class SpaceStore extends ChangeNotifier {
       list.add(space.toJson());
       await prefs.setString(key, jsonEncode(list));
     }
+
+    // Record userId → nameAtInviteTime so accept/decline can clear the correct
+    // pendingMembers entry even if the invitee renames before acting.
+    try {
+      final raw = prefs.getString(kSpacePendingMemberIds);
+      final Map<String, dynamic> outer = raw != null
+          ? Map<String, dynamic>.from(jsonDecode(raw) as Map)
+          : {};
+      final inner = outer[space.inviteCode] != null
+          ? Map<String, dynamic>.from(outer[space.inviteCode] as Map)
+          : <String, dynamic>{};
+      // Look up the invitee's current name from the space's pendingMembers —
+      // it was just added by the caller before pushPendingInvite was called.
+      final inviteeName = AuthStore.instance.nameForId(recipientUserId);
+      if (inviteeName != null && inviteeName.isNotEmpty) {
+        inner[recipientUserId] = inviteeName;
+      }
+      outer[space.inviteCode] = inner;
+      await prefs.setString(kSpacePendingMemberIds, jsonEncode(outer));
+    } catch (_) {}
   }
 
   /// Returns all pending invite [Space] objects waiting for the current user.
@@ -431,6 +458,36 @@ class SpaceStore extends ChangeNotifier {
     }
   }
 
+  /// Looks up and removes the name-at-invite-time for [userId] in [inviteCode]
+  /// from kSpacePendingMemberIds. Returns that name so the caller can remove
+  /// it from pendingMembers — even if the user has renamed since the invite.
+  Future<String?> _lookupAndClearPendingMemberId(
+      SharedPreferences prefs, String inviteCode, String userId) async {
+    if (userId.isEmpty) return null;
+    try {
+      final raw = prefs.getString(kSpacePendingMemberIds);
+      if (raw == null) return null;
+      final Map<String, dynamic> outer =
+          Map<String, dynamic>.from(jsonDecode(raw) as Map);
+      final innerRaw = outer[inviteCode];
+      if (innerRaw == null) return null;
+      final Map<String, dynamic> inner =
+          Map<String, dynamic>.from(innerRaw as Map);
+      final oldName = inner[userId] as String?;
+      // Clean up so the map doesn't grow indefinitely.
+      inner.remove(userId);
+      if (inner.isEmpty) {
+        outer.remove(inviteCode);
+      } else {
+        outer[inviteCode] = inner;
+      }
+      await prefs.setString(kSpacePendingMemberIds, jsonEncode(outer));
+      return oldName;
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<void> _acceptMemberInRegistry(
       String inviteCode, String memberName) async {
     final prefs = await SharedPreferences.getInstance();
@@ -444,7 +501,16 @@ class SpaceStore extends ChangeNotifier {
       final updated = Map<String, dynamic>.from(entry as Map);
       final members = List<String>.from(updated['members'] as List? ?? []);
       final pending = List<String>.from(updated['pendingMembers'] as List? ?? []);
-      pending.remove(memberName);
+
+      // B may have renamed between invite-send and accept. The name stored in
+      // pendingMembers is B's name AT INVITE TIME; memberName is the NEW name.
+      // Look up the old name from kSpacePendingMemberIds (written at invite
+      // time) so we always clear the correct entry regardless of renames.
+      final oldName = await _lookupAndClearPendingMemberId(
+          prefs, inviteCode, AuthStore.instance.userId);
+      if (oldName != null && oldName != memberName) pending.remove(oldName);
+      pending.remove(memberName); // always try current name as fallback
+
       if (!members.contains(memberName)) members.add(memberName);
       updated['members'] = members;
       updated['pendingMembers'] = pending;
@@ -467,7 +533,11 @@ class SpaceStore extends ChangeNotifier {
       if (entry == null) return;
       final updated = Map<String, dynamic>.from(entry as Map);
       final pending = List<String>.from(updated['pendingMembers'] as List? ?? []);
-      pending.remove(memberName);
+      // Same rename-before-decline fix: look up name-at-invite-time by userId.
+      final oldName = await _lookupAndClearPendingMemberId(
+          prefs, inviteCode, AuthStore.instance.userId);
+      if (oldName != null && oldName != memberName) pending.remove(oldName);
+      pending.remove(memberName); // fallback / no-op if already removed above
       updated['pendingMembers'] = pending;
       registry[inviteCode] = updated;
       await prefs.setString(kSpaceGlobalRegistry, jsonEncode(registry));
@@ -502,6 +572,189 @@ class SpaceStore extends ChangeNotifier {
           raw != null ? Map<String, dynamic>.from(jsonDecode(raw) as Map) : {};
       patches[inviteCode] = data;
       await prefs.setString(kSpaceSharedPatches, jsonEncode(patches));
+    } catch (_) {}
+  }
+
+  // ── Username rename ───────────────────────────────────────
+
+  /// Replaces every occurrence of [oldName] with [newName] across:
+  ///   1. In-memory _spaces  (creatorName, members, task.assignedTo)
+  ///   2. kSpaceList         (user-scoped prefs — via _save())
+  ///   3. kSpaceGlobalRegistry — device-wide shared key read by other users
+  ///   4. kSpaceSharedPatches  — device-wide shared key used by syncFromSharedPatches
+  ///
+  /// Patching 3 & 4 prevents syncFromSharedPatches from overwriting the rename
+  /// on the next sync cycle.
+  ///
+  /// Call immediately after [AuthStore.updateUsername] returns null.
+  Future<void> renameUserInSpaces(String oldName, String newName) async {
+    if (oldName == newName || oldName.isEmpty || newName.isEmpty) return;
+
+    // ── 1: patch in-memory ────────────────────────────────────
+    for (int i = 0; i < _spaces.length; i++) {
+      final s = _spaces[i];
+
+      final newCreator = s.creatorName == oldName ? newName : s.creatorName;
+      final newMembers =
+          s.members.map((m) => m == oldName ? newName : m).toList();
+      // Bug 1 fix: also rename in pendingMembers so cancel-invite and the
+      // invite-card label both show the correct name after a rename.
+      final newPending =
+          s.pendingMembers.map((m) => m == oldName ? newName : m).toList();
+
+      // Patch assignedTo on every task (SpaceTask.assignedTo is mutable).
+      for (final task in s.tasks) {
+        for (int j = 0; j < task.assignedTo.length; j++) {
+          if (task.assignedTo[j] == oldName) task.assignedTo[j] = newName;
+        }
+      }
+
+      // Always replace the Space object so the tasks list (mutated above)
+      // and any field changes are captured — even if only tasks changed.
+      _spaces[i] = Space(
+        name:           s.name,
+        description:    s.description,
+        dateRange:      s.dateRange,
+        dueDate:        s.dueDate,
+        members:        newMembers,
+        pendingMembers: newPending,
+        isCreator:      s.isCreator,
+        creatorName:    newCreator,
+        status:         s.status,
+        statusColor:    s.statusColor,
+        accentColor:    s.accentColor,
+        progress:       s.progress,
+        completedTasks: s.completedTasks,
+        tasks:          s.tasks,
+        inviteCode:     s.inviteCode,
+      );
+    }
+
+    // ── 2: persist kSpaceList (user-scoped) ───────────────────
+    await _save();
+    notifyListeners();
+
+    // ── 3 & 4: rewrite registry + shared patches from current  ─
+    // in-memory state rather than string-swapping the old blobs.
+    // This is safe across repeated renames: every call writes a
+    // fresh authoritative snapshot, so stale names from earlier
+    // renames can never survive in the shared keys.
+    final prefs = await SharedPreferences.getInstance();
+
+    // Registry: only spaces this user created are registered here.
+    // Read the existing map and overwrite entries we own.
+    try {
+      final raw = prefs.getString(kSpaceGlobalRegistry);
+      final Map<String, dynamic> registry = raw != null
+          ? Map<String, dynamic>.from(jsonDecode(raw) as Map)
+          : {};
+      for (final s in _spaces) {
+        if (s.isCreator) registry[s.inviteCode] = s.toJson();
+      }
+      await prefs.setString(kSpaceGlobalRegistry, jsonEncode(registry));
+    } catch (_) {}
+
+    // Shared patches: overwrite every space we have in memory so
+    // the blob is always the full authoritative current state.
+    try {
+      final raw = prefs.getString(kSpaceSharedPatches);
+      final Map<String, dynamic> patches = raw != null
+          ? Map<String, dynamic>.from(jsonDecode(raw) as Map)
+          : {};
+      for (final s in _spaces) {
+        patches[s.inviteCode] = s.toJson();
+      }
+      await prefs.setString(kSpaceSharedPatches, jsonEncode(patches));
+    } catch (_) {}
+
+    // ── 5: patch shared storage for spaces owned by OTHER users ──
+    // B's _spaces only contains spaces B created or joined. But A's space
+    // still holds oldName in pendingMembers — and B has no copy of it in
+    // _spaces (B hasn't accepted yet). So the loops above never touch it.
+    // We must directly string-swap oldName→newName inside kSpaceSharedPatches
+    // and kSpaceGlobalRegistry for any entry that references oldName in
+    // pendingMembers, members, or creatorName.
+    await _renameInSharedStorage(oldName, newName);
+  }
+
+  /// String-swaps [oldName] → [newName] directly inside [kSpaceSharedPatches]
+  /// and [kSpaceGlobalRegistry] for every space entry that references oldName
+  /// in pendingMembers, members, or creatorName — covering spaces owned by
+  /// other users that B's _spaces list never contains.
+  Future<void> _renameInSharedStorage(String oldName, String newName) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    void _patchEntry(Map<String, dynamic> entry) {
+      // pendingMembers
+      if (entry['pendingMembers'] is List) {
+        final pending = List<String>.from(entry['pendingMembers'] as List);
+        final idx = pending.indexOf(oldName);
+        if (idx != -1) {
+          pending[idx] = newName;
+          entry['pendingMembers'] = pending;
+        }
+      }
+      // members
+      if (entry['members'] is List) {
+        final members = List<String>.from(entry['members'] as List);
+        final idx = members.indexOf(oldName);
+        if (idx != -1) {
+          members[idx] = newName;
+          entry['members'] = members;
+        }
+      }
+      // creatorName
+      if (entry['creatorName'] == oldName) {
+        entry['creatorName'] = newName;
+      }
+      // tasks[].assignedTo — rename inside every task's assignee list
+      if (entry['tasks'] is List) {
+        final tasks = List<dynamic>.from(entry['tasks'] as List);
+        for (int i = 0; i < tasks.length; i++) {
+          if (tasks[i] is! Map) continue;
+          final task = Map<String, dynamic>.from(tasks[i] as Map);
+          if (task['assignedTo'] is List) {
+            final assignees = List<String>.from(task['assignedTo'] as List);
+            final idx = assignees.indexOf(oldName);
+            if (idx != -1) {
+              assignees[idx] = newName;
+              task['assignedTo'] = assignees;
+              tasks[i] = task;
+            }
+          }
+        }
+        entry['tasks'] = tasks;
+      }
+    }
+
+    // Patch kSpaceSharedPatches
+    try {
+      final raw = prefs.getString(kSpaceSharedPatches);
+      if (raw != null) {
+        final patches = Map<String, dynamic>.from(jsonDecode(raw) as Map);
+        final patched = <String, dynamic>{};
+        for (final kv in patches.entries) {
+          final e = Map<String, dynamic>.from(kv.value as Map);
+          _patchEntry(e);
+          patched[kv.key] = e;
+        }
+        await prefs.setString(kSpaceSharedPatches, jsonEncode(patched));
+      }
+    } catch (_) {}
+
+    // Patch kSpaceGlobalRegistry
+    try {
+      final raw = prefs.getString(kSpaceGlobalRegistry);
+      if (raw != null) {
+        final registry = Map<String, dynamic>.from(jsonDecode(raw) as Map);
+        final patched = <String, dynamic>{};
+        for (final kv in registry.entries) {
+          final e = Map<String, dynamic>.from(kv.value as Map);
+          _patchEntry(e);
+          patched[kv.key] = e;
+        }
+        await prefs.setString(kSpaceGlobalRegistry, jsonEncode(patched));
+      }
     } catch (_) {}
   }
 

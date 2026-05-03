@@ -83,8 +83,15 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet>
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Password updated successfully.'),
         behavior: SnackBarBehavior.floating,
+        backgroundColor: Color(0xFF1A2A5E),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12))),
+        duration: Duration(seconds: 3),
+        content: Text(
+          'Password updated successfully.',
+          style: TextStyle(color: Colors.white, fontSize: 13),
+        ),
       ),
     );
   }

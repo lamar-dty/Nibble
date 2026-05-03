@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../models/space.dart';
 import '../../store/space_chat_store.dart';
+import '../../store/auth_store.dart';
 import 'space_chat_sheet.dart';
 
 // ─────────────────────────────────────────────────────────────
@@ -35,10 +36,15 @@ class _SpaceChatFabState extends State<SpaceChatFab>
       widget.currentUser ??
       (widget.space.members.isNotEmpty ? widget.space.members.first : 'Me');
 
-  /// Only counts non-system messages from OTHER users that arrived after the
-  /// current user's read cursor. Returns 0 once the sheet has been opened.
-  int get _unreadCount => SpaceChatStore.instance
-      .unreadCountFor(widget.space.inviteCode, _resolvedUser);
+  /// Unread count keyed by userId (stable UUID) so renames never reset the
+  /// cursor.  Falls back to displayName-based key for the rare case where
+  /// userId is not yet available (e.g. before login completes).
+  int get _unreadCount {
+    final uid = AuthStore.instance.userId;
+    final key = uid.isNotEmpty ? uid : _resolvedUser;
+    return SpaceChatStore.instance
+        .unreadCountFor(widget.space.inviteCode, key);
+  }
 
   @override
   void initState() {

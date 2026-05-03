@@ -13,6 +13,7 @@ import 'class_alerts_sheet.dart';
 import '../store/task_store.dart';
 import '../store/space_chat_store.dart';
 import 'change_password_sheet.dart';
+import 'edit_profile_sheet.dart';
 
 
 class AppDrawer extends StatefulWidget {
@@ -115,7 +116,32 @@ class _AppDrawerState extends State<AppDrawer>
 
   Future<void> _loadInvites() async {
     final invites = await SpaceStore.instance.getPendingInvites();
-    if (mounted) setState(() { _pendingInvites = invites; _loadingInvites = false; });
+    // Bug 3 fix: the stored invite snapshot was written at invite-send time and
+    // may have a stale creatorName if the creator renamed since then. Refresh
+    // creatorName from the registry (which is always kept up-to-date by
+    // renameUserInSpaces) so the "Invited by" label is always current.
+    final enriched = await Future.wait(invites.map((invite) async {
+      final fresh = await SpaceStore.instance.lookupByCode(invite.inviteCode);
+      if (fresh == null || fresh.creatorName == invite.creatorName) return invite;
+      return Space(
+        name:           invite.name,
+        description:    invite.description,
+        dateRange:      invite.dateRange,
+        dueDate:        invite.dueDate,
+        members:        invite.members,
+        pendingMembers: invite.pendingMembers,
+        isCreator:      invite.isCreator,
+        creatorName:    fresh.creatorName,
+        status:         invite.status,
+        statusColor:    invite.statusColor,
+        accentColor:    invite.accentColor,
+        progress:       invite.progress,
+        completedTasks: invite.completedTasks,
+        tasks:          invite.tasks,
+        inviteCode:     invite.inviteCode,
+      );
+    }));
+    if (mounted) setState(() { _pendingInvites = enriched; _loadingInvites = false; });
   }
 
   Future<void> _accept(Space invite) async {
@@ -460,6 +486,12 @@ class _AppDrawerState extends State<AppDrawer>
 
   Widget _buildItem(_DrawerItem item) {
     VoidCallback? tap = item.onTap;
+    if (tap == null && item.label == 'Edit Profile') {
+  tap = () {
+    Navigator.pop(context);
+    showEditProfileSheet(context);
+  };
+}
     if (tap == null && item.label == 'Change Password') {
   tap = () {
     Navigator.pop(context);

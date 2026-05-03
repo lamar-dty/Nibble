@@ -70,12 +70,16 @@ class _ContactSupportSheetState extends State<ContactSupportSheet>
   void _copyEmail(BuildContext ctx) {
     Clipboard.setData(const ClipboardData(text: _email));
     ScaffoldMessenger.of(ctx).showSnackBar(
-      SnackBar(
-        content: const Text('Email copied to clipboard'),
-        backgroundColor: const Color(0xFF1A2D5A),
+      const SnackBar(
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(seconds: 2),
+        backgroundColor: Color(0xFF1A2A5E),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12))),
+        duration: Duration(seconds: 3),
+        content: Text(
+          'Email copied to clipboard',
+          style: TextStyle(color: Colors.white, fontSize: 13),
+        ),
       ),
     );
   }

@@ -36,6 +36,11 @@ class UserRecord {
   final String? displayName;   // optional human-readable override
   final String email;
   final String passwordHash;
+  /// The username this user held immediately before their last rename.
+  /// Stored so that space objects still carrying the old name can be resolved
+  /// to the correct userId even before a sync propagates the new name.
+  /// Only one level of history is kept — sufficient for single-hop lookups.
+  final String? previousUsername;
 
   UserRecord({
     required this.id,
@@ -43,6 +48,7 @@ class UserRecord {
     this.displayName,
     required this.email,
     required this.passwordHash,
+    this.previousUsername,
   });
 
   /// The name surfaces in UI and in cross-user references
@@ -57,6 +63,7 @@ class UserRecord {
         if (displayName != null) 'displayName': displayName,
         'email':        email,
         'passwordHash': passwordHash,
+        if (previousUsername != null) 'previousUsername': previousUsername,
       };
 
   /// Deserialises a stored record.
@@ -107,11 +114,12 @@ class UserRecord {
     }
 
     return UserRecord(
-      id:           json['id'] as String,
-      username:     username,
-      displayName:  displayName?.isEmpty == true ? null : displayName,
-      email:        json['email'] as String,
-      passwordHash: json['passwordHash'] as String,
+      id:               json['id'] as String,
+      username:         username,
+      displayName:      displayName?.isEmpty == true ? null : displayName,
+      email:            json['email'] as String,
+      passwordHash:     json['passwordHash'] as String,
+      previousUsername: json['previousUsername'] as String?,
     );
   }
 }
@@ -221,13 +229,22 @@ class AuthStore extends ChangeNotifier {
       {for (final u in _users) u.effectiveName: u.id};
 
   /// Look up a userId by effective display name. Returns null if not found.
+  ///
+  /// Falls back to [UserRecord.previousUsername] so that space objects still
+  /// carrying a member's old name (before a rename sync has propagated) can
+  /// still be resolved to the correct userId.  One level of history is enough
+  /// for the common case; the primary match is always tried first.
   String? userIdForName(String name) {
     if (name.isEmpty) return null;
-    try {
-      return _users.firstWhere((u) => u.effectiveName == name).id;
-    } catch (_) {
-      return null;
+    // Primary: current username.
+    for (final u in _users) {
+      if (u.effectiveName == name) return u.id;
     }
+    // Fallback: previous username (set when the user last renamed).
+    for (final u in _users) {
+      if (u.previousUsername == name) return u.id;
+    }
+    return null;
   }
 
   /// Look up a userId by username. Returns null if not found.
@@ -507,12 +524,11 @@ class AuthStore extends ChangeNotifier {
 
   /// Changes the current user's username to [newUsername].
   ///
-  /// Validates format, checks uniqueness, then updates the UserRecord and
-  /// persists via [_saveUsers].  Returns null on success or an error string.
+  /// Validates format, checks uniqueness, persists via [_saveUsers].
+  /// Returns null on success or a human-readable error string.
   ///
-  /// IMPORTANT: call [SpaceStore.renameUserInSpaces] immediately after a
-  /// successful return to keep creatorName / members consistent for spaces
-  /// that were created or joined under the old name.
+  /// After a successful return, call [SpaceStore.renameUserInSpaces] to keep
+  /// creatorName / members / assignedTo consistent in local spaces.
   Future<String?> updateUsername(String newUsername) async {
     if (_currentUser == null) return 'Not logged in.';
 
@@ -529,11 +545,12 @@ class AuthStore extends ChangeNotifier {
     }
 
     final updated = UserRecord(
-      id:           _currentUser!.id,
-      username:     normalised,
-      displayName:  _currentUser!.displayName,
-      email:        _currentUser!.email,
-      passwordHash: _currentUser!.passwordHash,
+      id:               _currentUser!.id,
+      username:         normalised,
+      displayName:      _currentUser!.displayName,
+      email:            _currentUser!.email,
+      passwordHash:     _currentUser!.passwordHash,
+      previousUsername: _currentUser!.username, // retain for stale-name lookups
     );
 
     final idx = _users.indexWhere((u) => u.id == updated.id);

@@ -12,6 +12,13 @@ import 'storage_keys.dart';
 // Read cursors are per-user — use the scoped helper.
 String get _kCursorsKey => AuthStore.instance.keyChatCursors();
 
+// ── Sender resolution helper ───────────────────────────────────
+// Returns the userId for a message sender name, checking current username
+// and previousUsername (via AuthStore.userIdForName which already does both).
+// Used so isOwn / unread checks survive username renames.
+String? _senderUserId(String senderName) =>
+    AuthStore.instance.userIdForName(senderName);
+
 // ─────────────────────────────────────────────────────────────
 // SpaceChatStore
 // ─────────────────────────────────────────────────────────────
@@ -133,13 +140,16 @@ class SpaceChatStore extends ChangeNotifier {
 
   // ── Unread tracking ─────────────────────────────────────────
 
-  String _cursorKey(String spaceCode, String currentUser) =>
-      '$spaceCode|$currentUser';
+  // Cursor keys are keyed by userId (stable across renames), not by username.
+  // [currentUserId] must always be AuthStore.instance.userId.
+  String _cursorKey(String spaceCode, String currentUserId) =>
+      '$spaceCode|$currentUserId';
 
-  void markAsRead(String spaceCode, String currentUser) {
-    if (spaceCode.isEmpty || currentUser.isEmpty) return;
+  /// [currentUserId] = AuthStore.instance.userId (stable UUID).
+  void markAsRead(String spaceCode, String currentUserId) {
+    if (spaceCode.isEmpty || currentUserId.isEmpty) return;
     final msgs      = messagesFor(spaceCode);
-    final key       = _cursorKey(spaceCode, currentUser);
+    final key       = _cursorKey(spaceCode, currentUserId);
     final lastIndex = msgs.length - 1;
     if (lastIndex > (_readCursors[key] ?? -1)) {
       _readCursors[key] = lastIndex;
@@ -148,15 +158,52 @@ class SpaceChatStore extends ChangeNotifier {
     }
   }
 
-  int unreadCountFor(String spaceCode, String currentUser) {
-    if (spaceCode.isEmpty || currentUser.isEmpty) return 0;
+  /// [currentUserId] = AuthStore.instance.userId (stable UUID).
+  /// Counts non-system messages not sent by the current user that arrived
+  /// after the read cursor.  Sender name is resolved to userId via
+  /// AuthStore so messages sent under old usernames are still recognised
+  /// as "own" after a rename.
+  int unreadCountFor(String spaceCode, String currentUserId) {
+    if (spaceCode.isEmpty || currentUserId.isEmpty) return 0;
     final msgs   = messagesFor(spaceCode);
-    final cursor = _readCursors[_cursorKey(spaceCode, currentUser)] ?? -1;
+    final cursor = _readCursors[_cursorKey(spaceCode, currentUserId)] ?? -1;
     var count = 0;
     for (var i = cursor + 1; i < msgs.length; i++) {
       final m = msgs[i];
-      if (!m.isSystemMessage && m.sender != currentUser) count++;
+      if (m.isSystemMessage) continue;
+      // Resolve sender name → userId so renames don't break own-message detection.
+      final senderId = _senderUserId(m.sender);
+      if (senderId != currentUserId) count++;
     }
     return count;
+  }
+
+  /// Rewrites every stored chat message whose [sender] matches [oldName]
+  /// to [newName], then re-persists the affected space logs.
+  ///
+  /// Call from [SpaceStore.renameUserInSpaces] immediately after updating
+  /// space data, so that the chat history reflects the new username and
+  /// [isOwn] / [unreadCountFor] comparisons stay correct even for
+  /// messages sent before the rename.
+  Future<void> renameSenderInMessages(
+      String oldName, String newName, List<String> spaceCodes) async {
+    if (oldName == newName || oldName.isEmpty || newName.isEmpty) return;
+    for (final code in spaceCodes) {
+      final msgs = _messages[code];
+      if (msgs == null) continue;
+      bool changed = false;
+      for (int i = 0; i < msgs.length; i++) {
+        if (msgs[i].sender == oldName) {
+          msgs[i] = SpaceMessage(
+            sender:    newName,
+            text:      msgs[i].text,
+            timestamp: msgs[i].timestamp,
+          );
+          changed = true;
+        }
+      }
+      if (changed) await _saveMessages(code);
+    }
+    notifyListeners();
   }
 }

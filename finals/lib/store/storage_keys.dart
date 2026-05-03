@@ -92,3 +92,9 @@ String kInboxSpaceInvites(String recipientUserId) =>
 /// Stores a JSON array of invite-code strings.
 String kInboxSpaceDeletion(String recipientUserId) =>
     'inbox_space_del_$recipientUserId';
+
+/// Maps userId → name-at-invite-time for each space's pendingMembers.
+/// Structure: { inviteCode: { userId: nameAtInviteTime } }
+/// Written by the creator on pushPendingInvite; read at accept/decline to
+/// find the old pending name even if the invitee renamed in the meantime.
+const kSpacePendingMemberIds = 'space_pending_member_ids';

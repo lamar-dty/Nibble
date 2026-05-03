@@ -72,7 +72,19 @@ class SpacesScreenState extends State<SpacesScreen>
   void _onSpaceStoreChanged() {
     if (!mounted) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) setState(() {});
+      if (!mounted) return;
+      setState(() {
+        // Refresh _selectedSpace from the store so any in-place mutations
+        // (e.g. a username rename updating members/pendingMembers/creatorName)
+        // are reflected in the detail view immediately without requiring the
+        // user to deselect and re-tap the space.
+        if (_selectedSpace != null) {
+          final refreshed = SpaceStore.instance.spaces
+              .where((s) => s.inviteCode == _selectedSpace!.inviteCode)
+              .firstOrNull;
+          if (refreshed != null) _selectedSpace = refreshed;
+        }
+      });
     });
   }
 
@@ -275,10 +287,32 @@ class SpacesScreenState extends State<SpacesScreen>
   Future<void> _removeSpace(Space space) async {
     if (!space.isCreator) {
       final leavingName = AuthStore.instance.displayName;
-      for (final task in space.tasks) {
-        task.assignedTo.remove(leavingName);
+      final myId = AuthStore.instance.userId;
+
+      // Bug 2 fix: after a rename the member entry in space.members may still
+      // carry an old username. Resolve the actual entry by matching on userId
+      // so leave works correctly regardless of how many times the user renamed.
+      // userIdForName now falls back to previousUsername so even a stale name
+      // in space.members resolves to the correct userId.
+      String effectiveLeavingName = leavingName;
+      if (!space.members.contains(leavingName)) {
+        for (final m in space.members) {
+          if (AuthStore.instance.userIdForName(m) == myId) {
+            effectiveLeavingName = m;
+            break;
+          }
+        }
       }
-      space.members.remove(leavingName);
+
+      for (final task in space.tasks) {
+        task.assignedTo.remove(effectiveLeavingName);
+        // Also clear the current display name in case tasks were partially
+        // updated (e.g. rename happened mid-session without a full sync).
+        if (effectiveLeavingName != leavingName) {
+          task.assignedTo.remove(leavingName);
+        }
+      }
+      space.members.remove(effectiveLeavingName);
       await SpaceStore.instance.writeSharedPatchForLeave(space);
       await TaskStore.instance.notifyMemberLeft(space, leavingName);
     }

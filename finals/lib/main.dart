@@ -40,6 +40,9 @@ void main() async {
     onLogin: () async {
       await TaskStore.instance.reload();
       await SpaceStore.instance.reload();
+      // Pull latest shared patches on every login so renames, task updates,
+      // and member changes made by other users are visible immediately.
+      await SpaceStore.instance.syncFromSharedPatches();
       await SpaceChatStore.instance.reload(
         SpaceStore.instance.spaces.map((s) => s.inviteCode).toList(),
       );

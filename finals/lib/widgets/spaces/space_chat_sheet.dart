@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../models/space.dart';
 import '../../models/space_message.dart';
 import '../../store/space_chat_store.dart';
+import '../../store/auth_store.dart';
 import '../../store/task_store.dart';             // ← Step 3: clear chat notification on open
 
 // ─────────────────────────────────────────────────────────────
@@ -66,8 +67,10 @@ class _SpaceChatSheetState extends State<SpaceChatSheet>
     // is fully built and the cursor advances against the real message count.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToBottom();
+      // Use userId (stable UUID) as the cursor key so renames never orphan
+      // the read cursor.  AuthStore.userId is always the current user's UUID.
       SpaceChatStore.instance
-          .markAsRead(widget.space.inviteCode, widget.currentUser);
+          .markAsRead(widget.space.inviteCode, AuthStore.instance.userId);
       TaskStore.instance
           .clearChatNotificationsFor(widget.space.inviteCode);
     });
@@ -109,7 +112,7 @@ class _SpaceChatSheetState extends State<SpaceChatSheet>
     setState(() {});
     // Own messages are immediately read — advance the cursor.
     SpaceChatStore.instance
-        .markAsRead(widget.space.inviteCode, widget.currentUser);
+        .markAsRead(widget.space.inviteCode, AuthStore.instance.userId);
     WidgetsBinding.instance
         .addPostFrameCallback((_) => _scrollToBottom(animated: true));
   }
@@ -137,6 +140,7 @@ class _SpaceChatSheetState extends State<SpaceChatSheet>
                     : _MessageList(
                         messages: _messages,
                         currentUser: widget.currentUser,
+                        currentUserId: AuthStore.instance.userId,
                         scrollController: _scroll,
                         accentColor: widget.space.accentColor,
                         isCreator: widget.space.isCreator,
@@ -242,6 +246,9 @@ class _ChatHeader extends StatelessWidget {
 class _MessageList extends StatelessWidget {
   final List<SpaceMessage> messages;
   final String currentUser;
+  /// Stable UUID of the current user — used for isOwn detection so that
+  /// messages sent before a username rename still appear on the correct side.
+  final String currentUserId;
   final ScrollController scrollController;
   final Color accentColor;
   final bool isCreator;
@@ -249,6 +256,7 @@ class _MessageList extends StatelessWidget {
   const _MessageList({
     required this.messages,
     required this.currentUser,
+    required this.currentUserId,
     required this.scrollController,
     required this.accentColor,
     required this.isCreator,
@@ -267,7 +275,10 @@ class _MessageList extends StatelessWidget {
             (prev == null ||
                 prev.sender != msg.sender ||
                 prev.isSystemMessage);
-        final isOwn = msg.sender == currentUser;
+        // Resolve sender to userId so old messages (sent under a previous
+        // username) are still identified as "own" after a rename.
+        final senderUid = AuthStore.instance.userIdForName(msg.sender);
+        final isOwn = senderUid != null && senderUid == currentUserId;
 
         if (msg.isSystemMessage) {
           return _SystemBubble(text: msg.text);
