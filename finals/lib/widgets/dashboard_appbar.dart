@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
+import '../store/auth_store.dart';
+import 'manage_account_sheet.dart';
 
 class DashboardAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onMenuTap;
@@ -30,24 +32,14 @@ class DashboardAppBar extends StatelessWidget implements PreferredSizeWidget {
             // ── Avatar ───────────────────────────────
             GestureDetector(
               onTap: () {},
-              child: Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: kWhite,
-                  border: Border.all(color: kTeal, width: 2),
-                ),
-                child: ClipOval(
-                  child: Image.network(
-                    'https://api.dicebear.com/7.x/bottts/png?seed=bunny',
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const Icon(
-                      Icons.person,
-                      color: kNavyDark,
-                      size: 24,
-                    ),
-                  ),
+              child: ListenableBuilder(
+                listenable: AuthStore.instance,
+                builder: (_, __) => AppAvatar(
+                  seed: AuthStore.instance.avatarSeed.isNotEmpty
+                      ? AuthStore.instance.avatarSeed
+                      : 'bunny',
+                  size: 44,
+                  showBorder: true,
                 ),
               ),
             ),

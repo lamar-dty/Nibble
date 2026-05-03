@@ -14,6 +14,7 @@ import '../store/task_store.dart';
 import '../store/space_chat_store.dart';
 import 'change_password_sheet.dart';
 import 'edit_profile_sheet.dart';
+import 'manage_account_sheet.dart';
 
 
 class AppDrawer extends StatefulWidget {
@@ -200,27 +201,19 @@ class _AppDrawerState extends State<AppDrawer>
                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
                   child: Row(
                     children: [
-                      Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: kWhite, width: 2.5),
-                        ),
-                        child: ClipOval(
-                          child: Image.network(
-                            'https://api.dicebear.com/7.x/bottts/png?seed=bunny',
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => const Icon(
-                              Icons.person,
-                              color: kWhite,
-                              size: 32,
-                            ),
-                          ),
+                      ListenableBuilder(
+                        listenable: AuthStore.instance,
+                        builder: (_, __) => AppAvatar(
+                          seed: AuthStore.instance.avatarSeed.isNotEmpty
+                              ? AuthStore.instance.avatarSeed
+                              : 'bunny',
+                          size: 64,
+                          showBorder: true,
                         ),
                       ),
                       const SizedBox(width: 14),
-                      Column(
+                      Expanded(
+                        child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
@@ -231,6 +224,7 @@ class _AppDrawerState extends State<AppDrawer>
                                 color: kWhite,
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold),
+                            overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 2),
                           () {
@@ -246,6 +240,7 @@ class _AppDrawerState extends State<AppDrawer>
                               style:
                                   const TextStyle(color: kWhite, fontSize: 12)),
                         ],
+                      ),
                       ),
                     ],
                   ),
@@ -498,6 +493,12 @@ class _AppDrawerState extends State<AppDrawer>
     showChangePasswordSheet(context);
   };
 }
+    if (tap == null && item.label == 'Manage Account') {
+      tap = () {
+        Navigator.pop(context);
+        showManageAccountSheet(context);
+      };
+    }
     if (tap == null && item.label == 'FAQ') {
       tap = () {
         Navigator.pop(context);

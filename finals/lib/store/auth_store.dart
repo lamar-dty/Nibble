@@ -42,6 +42,10 @@ class UserRecord {
   /// Only one level of history is kept — sufficient for single-hop lookups.
   final String? previousUsername;
 
+  /// Key into [kAvatarPresets] identifying the user's chosen avatar.
+  /// Defaults to 'bunny' when absent (new accounts or migrated records).
+  final String avatarSeed;
+
   UserRecord({
     required this.id,
     required this.username,
@@ -49,6 +53,7 @@ class UserRecord {
     required this.email,
     required this.passwordHash,
     this.previousUsername,
+    this.avatarSeed = 'bunny',
   });
 
   /// The name surfaces in UI and in cross-user references
@@ -64,6 +69,7 @@ class UserRecord {
         'email':        email,
         'passwordHash': passwordHash,
         if (previousUsername != null) 'previousUsername': previousUsername,
+        'avatarSeed':   avatarSeed,
       };
 
   /// Deserialises a stored record.
@@ -120,6 +126,9 @@ class UserRecord {
       email:            json['email'] as String,
       passwordHash:     json['passwordHash'] as String,
       previousUsername: json['previousUsername'] as String?,
+      avatarSeed:       (json['avatarSeed'] as String?)?.isNotEmpty == true
+                            ? json['avatarSeed'] as String
+                            : 'bunny',
     );
   }
 }
@@ -182,6 +191,9 @@ class AuthStore extends ChangeNotifier {
   String get displayName => _currentUser?.effectiveName ?? '';
 
   String get displayEmail => _currentUser?.email ?? '';
+
+  /// The avatar seed for the current user; defaults to 'bunny'.
+  String get avatarSeed => _currentUser?.avatarSeed ?? 'bunny';
 
   /// Stripped UUID (no dashes), 32 hex chars — used as storage namespace.
   /// IMPORTANT: never use username as a storage key; always use this prefix.
@@ -351,6 +363,7 @@ class AuthStore extends ChangeNotifier {
           displayName:  _users[i].displayName,
           email:        _users[i].email,
           passwordHash: _users[i].passwordHash,
+          avatarSeed:   _users[i].avatarSeed,
         );
       }
       seen.add(candidate);
@@ -508,6 +521,7 @@ class AuthStore extends ChangeNotifier {
       displayName:  _currentUser!.displayName,
       email:        _currentUser!.email,
       passwordHash: _hashPassword(newPassword),
+      avatarSeed:   _currentUser!.avatarSeed,
     );
 
     final idx = _users.indexWhere((u) => u.id == updated.id);
@@ -551,6 +565,7 @@ class AuthStore extends ChangeNotifier {
       email:            _currentUser!.email,
       passwordHash:     _currentUser!.passwordHash,
       previousUsername: _currentUser!.username, // retain for stale-name lookups
+      avatarSeed:       _currentUser!.avatarSeed,
     );
 
     final idx = _users.indexWhere((u) => u.id == updated.id);
@@ -561,6 +576,33 @@ class AuthStore extends ChangeNotifier {
     await _saveUsers();
     notifyListeners();
     return null;
+  }
+
+  // ── Update avatar ─────────────────────────────────────────
+
+  /// Stores [seed] on the current user record and persists.
+  /// No-op when already set to [seed].
+  Future<void> updateAvatarSeed(String seed) async {
+    if (_currentUser == null) return;
+    if (_currentUser!.avatarSeed == seed) return;
+
+    final updated = UserRecord(
+      id:               _currentUser!.id,
+      username:         _currentUser!.username,
+      displayName:      _currentUser!.displayName,
+      email:            _currentUser!.email,
+      passwordHash:     _currentUser!.passwordHash,
+      previousUsername: _currentUser!.previousUsername,
+      avatarSeed:       seed,
+    );
+
+    final idx = _users.indexWhere((u) => u.id == updated.id);
+    if (idx == -1) return;
+    _users[idx] = updated;
+    _currentUser = updated;
+
+    await _saveUsers();
+    notifyListeners();
   }
 
   // ── Store lifecycle helpers ───────────────────────────────
