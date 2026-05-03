@@ -600,23 +600,60 @@ class TaskStore extends ChangeNotifier with WidgetsBindingObserver {
   /// by resolving them to the current user's real display name before lookup.
   Future<void> notifySpaceTaskAssigned(
       Space space, SpaceTask task, String currentUserDisplayName) async {
-    final notif  = _buildSpaceTaskAssigned(space, task);
-    final myId   = AuthStore.instance.userId;
+    final assignedNotif = _buildSpaceTaskAssigned(space, task);
+    final myId = AuthStore.instance.userId;
     final Set<String> pushed = {};
 
+    // 1. Push "you were assigned" to each assignee.
     for (final assignee in task.assignedTo) {
-      // Normalise sentinels that come from the UI assignment picker.
-      final resolvedName = _resolveAssigneeName(assignee, currentUserDisplayName);
-      if (resolvedName == null) continue; // unknown / deleted user
+      final resolvedName =
+          _resolveAssigneeName(assignee, currentUserDisplayName);
+      if (resolvedName == null) continue;
 
       final uid = AuthStore.instance.userIdForName(resolvedName);
       if (uid == null || pushed.contains(uid)) continue;
       pushed.add(uid);
 
       if (uid == myId) {
-        _addSpaceNotif(notif);
+        _addSpaceNotif(assignedNotif);
       } else {
-        await _pushToUser(uid, notif);
+        await _pushToUser(uid, assignedNotif);
+      }
+    }
+
+    // 2. Push "task assignment updated" to every OTHER member + creator so
+    //    they can see the updated assignee list without waiting for the next
+    //    shared-patch sync.  Distinct id so it doesn't collide with the
+    //    assignee's own "you were assigned" notif.
+    final updatedNotif = AppNotification(
+      id: 'space_task_assign_update_${space.inviteCode}_${task.title}',
+      type: NotificationType.spaceTaskAssigned,
+      sourceId: space.inviteCode,
+      spaceInviteCode: space.inviteCode,
+      spaceAccentColor: space.accentColor,
+      title: task.title,
+      subtitle: 'Task assignment updated',
+      detail: '"${task.title}" in "${space.name}" has been assigned.',
+    );
+
+    for (final member in space.members) {
+      final uid = AuthStore.instance.userIdForName(member);
+      if (uid == null || uid == myId || pushed.contains(uid)) continue;
+      pushed.add(uid);
+      await _pushToUser(uid, updatedNotif);
+    }
+
+    // Creator is not in space.members — handle separately.
+    final cleanedCreator = space.creatorName
+        .replaceAll(RegExp(r'\s*\(Creator\)\s*$'), '')
+        .trim();
+    if (cleanedCreator.isNotEmpty) {
+      final creatorId = AuthStore.instance.userIdForName(cleanedCreator);
+      if (creatorId != null &&
+          creatorId != myId &&
+          !pushed.contains(creatorId)) {
+        pushed.add(creatorId);
+        await _pushToUser(creatorId, updatedNotif);
       }
     }
   }
@@ -646,12 +683,17 @@ class TaskStore extends ChangeNotifier with WidgetsBindingObserver {
   /// Remove all operational notifications for [spaceInviteCode] — task alerts,
   /// chat messages, member events, deadline warnings, etc.
   ///
-  /// Lifecycle notifications ([NotificationType.spaceDeleted]) are intentionally
-  /// preserved: they must survive the space being removed from memory so the
-  /// user can see why the space disappeared.  Wiping them here would cause the
-  /// "space deleted" alert to vanish before the user ever reads it.
+  /// Lifecycle notifications are intentionally preserved: they must survive
+  /// the space being removed from memory so the user can see why it disappeared.
+  ///   • spaceDeleted    — creator deleted the space.
+  ///   • spaceMemberRemoved — this user was kicked; they need to see why the
+  ///     space vanished.  Clearing it here would erase the kick notification
+  ///     in the same cycle that drainDeletionNotices removes the space.
   void clearSpaceNotifications(String spaceInviteCode) {
-    const preserved = {NotificationType.spaceDeleted};
+    const preserved = {
+      NotificationType.spaceDeleted,
+      NotificationType.spaceMemberRemoved,
+    };
     final before = _notifications.length;
     _notifications.removeWhere((n) =>
         n.spaceInviteCode == spaceInviteCode &&
@@ -668,15 +710,20 @@ class TaskStore extends ChangeNotifier with WidgetsBindingObserver {
   /// [NotificationType.spaceDeleted] is exempt: this is a lifecycle
   /// notification that must remain visible even after the space is gone.
   void pruneOrphanedSpaceNotifications(Set<String> activeInviteCodes) {
-    // spaceDeleted and spaceInviteReceived are both exempt from pruning:
+    // spaceDeleted, spaceMemberRemoved, and spaceInviteReceived are exempt:
     //   • spaceDeleted must survive the space being removed so the user
     //     can see why it disappeared.
+    //   • spaceMemberRemoved (kick notification) must survive so the kicked
+    //     user sees why the space disappeared from their list. Without this,
+    //     drainDeletionNotices removes the space then pruneOrphaned immediately
+    //     wipes the kick notification in the same didChangeDependencies cycle —
+    //     before the user ever reads it.
     //   • spaceInviteReceived belongs to a space the recipient has NOT yet
     //     joined, so its invite code will never appear in activeInviteCodes.
-    //     Pruning it would silently delete the invite notification before
-    //     user B ever sees it.
+    //     Pruning it would silently delete the invite before user B sees it.
     const preserved = {
       NotificationType.spaceDeleted,
+      NotificationType.spaceMemberRemoved,
       NotificationType.spaceInviteReceived,
     };
     final before = _notifications.length;
@@ -721,14 +768,36 @@ class TaskStore extends ChangeNotifier with WidgetsBindingObserver {
     return cleaned.isNotEmpty ? cleaned : null;
   }
 
+  /// Push [notif] to every space member except the acting user.
+  ///
+  /// Covers both regular members (space.members) AND the creator
+  /// (space.creatorName), who is intentionally not listed in space.members.
+  /// Without the creator block, status/completion changes made by a member
+  /// are never delivered to User A (the creator).
   Future<void> _pushToOtherMembers(Space space, AppNotification notif) async {
     final myId = AuthStore.instance.userId;
     final Set<String> pushed = {};
+
+    // Regular members.
     for (final member in space.members) {
       final uid = AuthStore.instance.userIdForName(member);
       if (uid == null || uid == myId || pushed.contains(uid)) continue;
       pushed.add(uid);
       await _pushToUser(uid, notif);
+    }
+
+    // Creator — not in space.members, must be handled separately.
+    final cleanedCreator = space.creatorName
+        .replaceAll(RegExp(r'\s*\(Creator\)\s*$'), '')
+        .trim();
+    if (cleanedCreator.isNotEmpty) {
+      final creatorId = AuthStore.instance.userIdForName(cleanedCreator);
+      if (creatorId != null &&
+          creatorId != myId &&
+          !pushed.contains(creatorId)) {
+        pushed.add(creatorId);
+        await _pushToUser(creatorId, notif);
+      }
     }
   }
 

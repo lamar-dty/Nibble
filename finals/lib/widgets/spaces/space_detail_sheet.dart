@@ -563,7 +563,7 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
   children: [
     MemberChip(
       name: space.isCreator
-          ? 'You (Creator)'
+          ? '${AuthStore.instance.username} (Creator)'
           : '${space.creatorName} (Creator)',
       canKick: false,
       onKick: null,
@@ -1607,19 +1607,26 @@ else if (_canEditStructure)                          Row(
                             ),
                           ),
                         ),
-                        // Member chips
-...[widget.space.isCreator ? 'You (Creator)' : '${widget.space.creatorName} (Creator)', ...widget.space.members]                            .map((m) {
-                          final isSelected = task.assignedTo.contains(m);
+                        // Member chips.
+                        // [m]    = display label, may carry "(Creator)" suffix.
+                        // [mKey] = bare name stored in task.assignedTo / model.
+                        // All data operations use mKey; m is render-only.
+...[widget.space.isCreator ? '${AuthStore.instance.username} (Creator)' : '${widget.space.creatorName} (Creator)', ...widget.space.members]                            .map((m) {
+                          final mKey = m.endsWith(' (Creator)')
+                              ? m.substring(0, m.length - ' (Creator)'.length)
+                              : m;
+                          // Check both bare name and suffixed form so old
+                          // persisted data with the suffix still highlights.
+                          final isSelected = task.assignedTo.contains(mKey) ||
+                              task.assignedTo.contains(m);
                           return GestureDetector(
                             onTap: _canEditStructure
     ? () {
-        final updated =
-            List<String>.from(task.assignedTo);
-
-        isSelected
-            ? updated.remove(m)
-            : updated.add(m);
-
+        // Build updated list using mKey (bare name) so the suffix
+        // is never written into storage.
+        final updated = List<String>.from(task.assignedTo)
+          ..removeWhere((a) => a == mKey || a == m);
+        if (!isSelected) updated.add(mKey);
         widget.onAssign(updated);
         setState(() {});
       }
@@ -1648,7 +1655,7 @@ else if (_canEditStructure)                          Row(
                                             .withOpacity(0.5)
                                         : const Color(0xFF4A6FA5),
                                     child: Text(
-                                      m[0].toUpperCase(),
+                                      mKey[0].toUpperCase(),
                                       style: const TextStyle(
                                           color: kWhite,
                                           fontSize: 7,

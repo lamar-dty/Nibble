@@ -30,7 +30,6 @@ class SpacesSheet extends StatefulWidget {
   final List<Space> spaces;
   final void Function(Space) onSpaceTap;
   final VoidCallback onAdd;
-  final VoidCallback onJoin;
   final void Function(Space) onDelete;
   final int inProgress;
   final int completed;
@@ -42,7 +41,6 @@ class SpacesSheet extends StatefulWidget {
     required this.spaces,
     required this.onSpaceTap,
     required this.onAdd,
-    required this.onJoin,
     required this.onDelete,
     required this.inProgress,
     required this.completed,
@@ -120,7 +118,6 @@ class _SpacesSheetState extends State<SpacesSheet> {
               inProgress: widget.inProgress,
               completed: widget.completed,
               notStarted: widget.notStarted,
-              onJoin: widget.onJoin,
               onSetFilter: _setFilter,
             ),
           ),
@@ -216,7 +213,6 @@ class _SpacesSheetHeader extends StatelessWidget {
   final int inProgress;
   final int completed;
   final int notStarted;
-  final VoidCallback onJoin;
   final void Function(String?) onSetFilter;
 
   const _SpacesSheetHeader({
@@ -225,7 +221,6 @@ class _SpacesSheetHeader extends StatelessWidget {
     required this.inProgress,
     required this.completed,
     required this.notStarted,
-    required this.onJoin,
     required this.onSetFilter,
   });
 
@@ -260,19 +255,6 @@ class _SpacesSheetHeader extends StatelessWidget {
                     color: kNavyDark,
                     fontSize: 20,
                     fontWeight: FontWeight.bold),
-              ),
-              GestureDetector(
-                onTap: onJoin,
-                child: Container(
-                  width: 30,
-                  height: 30,
-                  decoration: const BoxDecoration(
-                    color: kNavyDark,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.add_rounded,
-                      color: kWhite, size: 18),
-                ),
               ),
             ],
           ),

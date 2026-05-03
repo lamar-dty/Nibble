@@ -196,11 +196,23 @@ class SpaceStore extends ChangeNotifier {
         continue; // corrupt patch for this space — skip
       }
 
-      // Build a fingerprint of every task's assignee list so that a pure
-      // assignment change (no task count / status / member count change)
-      // still triggers a sync for user B.
+      // Fingerprint every mutable field of every SpaceTask so that ANY
+      // change — status, description, assignees, attachments, or title —
+      // triggers a sync for the other user.
+      //
+      // Fields covered:
+      //   title        — editable by creator
+      //   status       — cycleable by creator + assigned members
+      //   description  — editable by creator + assigned members
+      //   assignedTo   — sorted before hashing so order doesn't matter
+      //   attachments  — sorted by name for the same reason
       String assignFingerprint(List<SpaceTask> tasks) => tasks
-          .map((t) => '${t.title}:${(List<String>.from(t.assignedTo)..sort()).join(',')}')
+          .map((t) =>
+              '${t.title}'
+              ':${t.status}'
+              ':${t.description}'
+              ':${(List<String>.from(t.assignedTo)..sort()).join(',')}'
+              ':${(t.attachments.map((a) => a.name).toList()..sort()).join(',')}')
           .join('|');
 
       final needsUpdate = patched.tasks.length != space.tasks.length ||

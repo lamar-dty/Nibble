@@ -670,7 +670,6 @@ class SpacesScreenState extends State<SpacesScreen>
                     spaces: _spaces,
                     onSpaceTap: _selectSpace,
                     onAdd: _onAddSpace,
-                    onJoin: _onJoinSpace,
                     onDelete: _onDeleteSpace,
                     inProgress: _inProgressCount,
                     completed: _completedCount,
