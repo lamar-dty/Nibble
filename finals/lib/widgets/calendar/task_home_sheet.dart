@@ -253,7 +253,7 @@ class _TaskSheetHeader extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  'My Tasks',
+                  'Tasks',
                   style: TextStyle(
                       color: kNavyDark,
                       fontSize: 20,

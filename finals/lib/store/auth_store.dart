@@ -536,15 +536,21 @@ class AuthStore extends ChangeNotifier {
 
   // ── Edit profile ──────────────────────────────────────────
 
-  /// Changes the current user's username to [newUsername].
+  /// Changes the current user's username to [newUsername] after verifying
+  /// [currentPassword].
   ///
   /// Validates format, checks uniqueness, persists via [_saveUsers].
   /// Returns null on success or a human-readable error string.
   ///
   /// After a successful return, call [SpaceStore.renameUserInSpaces] to keep
   /// creatorName / members / assignedTo consistent in local spaces.
-  Future<String?> updateUsername(String newUsername) async {
+  Future<String?> updateUsername(String newUsername,
+      {required String currentPassword}) async {
     if (_currentUser == null) return 'Not logged in.';
+
+    if (_hashPassword(currentPassword) != _currentUser!.passwordHash) {
+      return 'Current password is incorrect.';
+    }
 
     final normalised = _normaliseUsername(newUsername);
 
@@ -574,6 +580,58 @@ class AuthStore extends ChangeNotifier {
     _currentUser = updated;
 
     await _saveUsers();
+    notifyListeners();
+    return null;
+  }
+
+  // ── Update email ──────────────────────────────────────────
+
+  /// Changes the current user's email to [newEmail] after verifying
+  /// [currentPassword].
+  ///
+  /// Returns null on success or a human-readable error string.
+  /// The session key (kAuthSessionUser) is stored by email, so it is
+  /// updated here to avoid logging the user out on next load.
+  Future<String?> updateEmail({
+    required String newEmail,
+    required String currentPassword,
+  }) async {
+    if (_currentUser == null) return 'Not logged in.';
+
+    if (_hashPassword(currentPassword) != _currentUser!.passwordHash) {
+      return 'Current password is incorrect.';
+    }
+
+    final trimmed = newEmail.trim().toLowerCase();
+    if (trimmed.isEmpty) return 'Email must not be empty.';
+    if (!trimmed.contains('@') || !trimmed.contains('.')) {
+      return 'Please enter a valid email address.';
+    }
+
+    // No-op if unchanged.
+    if (trimmed == _currentUser!.email) return null;
+
+    if (_users.any((u) => u.email == trimmed && u.id != _currentUser!.id)) {
+      return 'An account with that email already exists.';
+    }
+
+    final updated = UserRecord(
+      id:               _currentUser!.id,
+      username:         _currentUser!.username,
+      displayName:      _currentUser!.displayName,
+      email:            trimmed,
+      passwordHash:     _currentUser!.passwordHash,
+      previousUsername: _currentUser!.previousUsername,
+      avatarSeed:       _currentUser!.avatarSeed,
+    );
+
+    final idx = _users.indexWhere((u) => u.id == updated.id);
+    if (idx == -1) return 'User record not found.';
+    _users[idx] = updated;
+    _currentUser = updated;
+
+    await _saveUsers();
+    await _saveSession(); // session key is email — must update
     notifyListeners();
     return null;
   }

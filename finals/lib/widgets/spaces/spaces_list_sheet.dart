@@ -250,7 +250,7 @@ class _SpacesSheetHeader extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Your Spaces',
+                'Spaces',
                 style: TextStyle(
                     color: kNavyDark,
                     fontSize: 20,

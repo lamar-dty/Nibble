@@ -34,16 +34,36 @@ class _EditProfileSheetState extends State<EditProfileSheet>
 
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _usernameCtrl;
+  late final TextEditingController _emailCtrl;
+  late final TextEditingController _passwordCtrl;
 
   bool _saving = false;
   String? _errorBanner;
+  bool _editingEmail = false;
+  bool _obscurePassword = true;
+
+  // Track whether any field has diverged from the saved values so we know
+  // when to show the password confirmation field.
+  bool get _hasChanges {
+    final usernameChanged =
+        _usernameCtrl.text.trim().toLowerCase() != AuthStore.instance.username;
+    final emailChanged = _editingEmail &&
+        _emailCtrl.text.trim().toLowerCase() !=
+            AuthStore.instance.displayEmail;
+    return usernameChanged || emailChanged;
+  }
 
   @override
   void initState() {
     super.initState();
-    _usernameCtrl = TextEditingController(
-      text: AuthStore.instance.username,
-    );
+    _usernameCtrl = TextEditingController(text: AuthStore.instance.username);
+    _emailCtrl    = TextEditingController(text: AuthStore.instance.displayEmail);
+    _passwordCtrl = TextEditingController();
+
+    // Rebuild when text changes so _hasChanges stays reactive.
+    _usernameCtrl.addListener(() => setState(() {}));
+    _emailCtrl.addListener(() => setState(() {}));
+
     _fadeCtrl = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 260));
     _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
@@ -54,6 +74,8 @@ class _EditProfileSheetState extends State<EditProfileSheet>
   void dispose() {
     _fadeCtrl.dispose();
     _usernameCtrl.dispose();
+    _emailCtrl.dispose();
+    _passwordCtrl.dispose();
     super.dispose();
   }
 
@@ -61,48 +83,74 @@ class _EditProfileSheetState extends State<EditProfileSheet>
     setState(() => _errorBanner = null);
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    final oldName = AuthStore.instance.username;
-    final newName = _usernameCtrl.text.trim().toLowerCase();
+    final oldName      = AuthStore.instance.username;
+    final newName      = _usernameCtrl.text.trim().toLowerCase();
+    final newEmail     = _emailCtrl.text.trim().toLowerCase();
+    final currentEmail = AuthStore.instance.displayEmail;
+    final password     = _passwordCtrl.text;
 
-    if (newName == oldName) {
+    final usernameChanged = newName != oldName;
+    final emailChanged    = _editingEmail && newEmail != currentEmail;
+
+    if (!usernameChanged && !emailChanged) {
       Navigator.of(context).pop();
       return;
     }
 
     setState(() => _saving = true);
 
-    final error = await AuthStore.instance.updateUsername(newName);
-    if (!mounted) return;
-
-    if (error != null) {
-      setState(() { _saving = false; _errorBanner = error; });
-      return;
+    // ── Update email (requires password) ──────────────────
+    if (emailChanged) {
+      final error = await AuthStore.instance.updateEmail(
+        newEmail: newEmail,
+        currentPassword: password,
+      );
+      if (!mounted) return;
+      if (error != null) {
+        setState(() { _saving = false; _errorBanner = error; });
+        return;
+      }
     }
 
-    await SpaceStore.instance.renameUserInSpaces(oldName, newName);
-    if (!mounted) return;
+    // ── Update username (requires password) ───────────────
+    if (usernameChanged) {
+      final error = await AuthStore.instance.updateUsername(
+        newName,
+        currentPassword: password,
+      );
+      if (!mounted) return;
+      if (error != null) {
+        setState(() { _saving = false; _errorBanner = error; });
+        return;
+      }
 
-    // Rewrite chat message sender fields so isOwn / unread detection stays
-    // correct for messages that were sent under the old username.
-    final spaceCodes = SpaceStore.instance.spaces
-        .map((s) => s.inviteCode)
-        .toList();
-    await SpaceChatStore.instance
-        .renameSenderInMessages(oldName, newName, spaceCodes);
-    if (!mounted) return;
+      await SpaceStore.instance.renameUserInSpaces(oldName, newName);
+      if (!mounted) return;
+
+      final spaceCodes = SpaceStore.instance.spaces
+          .map((s) => s.inviteCode)
+          .toList();
+      await SpaceChatStore.instance
+          .renameSenderInMessages(oldName, newName, spaceCodes);
+      if (!mounted) return;
+    }
 
     setState(() => _saving = false);
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      SnackBar(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: Color(0xFF1A2A5E),
-        shape: RoundedRectangleBorder(
+        backgroundColor: const Color(0xFF1A2A5E),
+        shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(12))),
-        duration: Duration(seconds: 3),
+        duration: const Duration(seconds: 3),
         content: Text(
-          'Username updated.',
-          style: TextStyle(color: Colors.white, fontSize: 13),
+          emailChanged && usernameChanged
+              ? 'Profile updated.'
+              : emailChanged
+                  ? 'Email updated.'
+                  : 'Username updated.',
+          style: const TextStyle(color: Colors.white, fontSize: 13),
         ),
       ),
     );
@@ -128,6 +176,7 @@ class _EditProfileSheetState extends State<EditProfileSheet>
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Drag handle
                 Center(
                   child: Container(
                     width: 40,
@@ -153,63 +202,90 @@ class _EditProfileSheetState extends State<EditProfileSheet>
                   style: TextStyle(color: kWhite.withOpacity(0.55), fontSize: 13),
                 ),
                 const SizedBox(height: 24),
-                _ReadOnlyField(
-                  label: 'Email',
-                  value: AuthStore.instance.displayEmail,
-                ),
+
+                // ── Email field ──────────────────────────────
+                if (!_editingEmail) ...[
+                  _ReadOnlyField(
+                    label: 'Email',
+                    value: AuthStore.instance.displayEmail,
+                    onEdit: () => setState(() { _editingEmail = true; }),
+                  ),
+                ] else ...[
+                  TextFormField(
+                    controller: _emailCtrl,
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    style: const TextStyle(color: kWhite, fontSize: 14),
+                    autocorrect: false,
+                    enableSuggestions: false,
+                    decoration: _inputDecoration(
+                      label: 'New Email',
+                      hint: 'you@example.com',
+                    ),
+                    validator: (v) {
+                      final trimmed = v?.trim() ?? '';
+                      if (trimmed.isEmpty) return 'Email must not be empty.';
+                      if (!trimmed.contains('@') || !trimmed.contains('.')) {
+                        return 'Please enter a valid email address.';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 6),
+                  GestureDetector(
+                    onTap: () => setState(() {
+                      _editingEmail = false;
+                      _emailCtrl.text = AuthStore.instance.displayEmail;
+                      _passwordCtrl.clear();
+                    }),
+                    child: Text(
+                      'Cancel email change',
+                      style: TextStyle(
+                        color: kTeal.withOpacity(0.8),
+                        fontSize: 12,
+                        decoration: TextDecoration.underline,
+                        decorationColor: kTeal.withOpacity(0.5),
+                      ),
+                    ),
+                  ),
+                ],
+
                 const SizedBox(height: 14),
+
+                // ── Error banner ─────────────────────────────
                 if (_errorBanner != null) ...[
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
                     margin: const EdgeInsets.only(bottom: 12),
                     decoration: BoxDecoration(
                       color: Colors.redAccent.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.redAccent.withOpacity(0.45)),
+                      border: Border.all(
+                          color: Colors.redAccent.withOpacity(0.45)),
                     ),
                     child: Text(
                       _errorBanner!,
-                      style: const TextStyle(color: Colors.redAccent, fontSize: 13),
+                      style: const TextStyle(
+                          color: Colors.redAccent, fontSize: 13),
                     ),
                   ),
                 ],
+
+                // ── Username field ───────────────────────────
                 TextFormField(
                   controller: _usernameCtrl,
-                  textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (_) => _submit(),
+                  textInputAction:
+                      _hasChanges ? TextInputAction.next : TextInputAction.done,
+                  onFieldSubmitted: (_) =>
+                      _hasChanges ? FocusScope.of(context).nextFocus() : _submit(),
                   style: const TextStyle(color: kWhite, fontSize: 14),
                   autocorrect: false,
                   enableSuggestions: false,
-                  decoration: InputDecoration(
-                    labelText: 'Username',
-                    labelStyle: TextStyle(color: kWhite.withOpacity(0.55), fontSize: 13),
-                    hintText: 'lowercase letters, numbers, underscores',
-                    hintStyle: TextStyle(color: kWhite.withOpacity(0.25), fontSize: 12),
-                    filled: true,
-                    fillColor: kNavyDark.withOpacity(0.55),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: kCardBorder.withOpacity(0.6)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: kCardBorder.withOpacity(0.6)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: kTeal, width: 1.5),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Colors.redAccent),
-                    ),
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
-                    ),
-                    errorStyle: const TextStyle(color: Colors.redAccent, fontSize: 11),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: _inputDecoration(
+                    label: 'Username',
+                    hint: 'lowercase letters, numbers, underscores',
                   ),
                   validator: (v) =>
                       AuthStore.instance.validateUsernameInput(v?.trim() ?? ''),
@@ -217,9 +293,48 @@ class _EditProfileSheetState extends State<EditProfileSheet>
                 const SizedBox(height: 6),
                 Text(
                   '3–20 characters. Lowercase letters, numbers, underscores only.',
-                  style: TextStyle(color: kWhite.withOpacity(0.35), fontSize: 11),
+                  style: TextStyle(
+                      color: kWhite.withOpacity(0.35), fontSize: 11),
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 14),
+
+                // ── Password confirmation (shown when any change is pending) ──
+                if (_hasChanges) ...[
+                  TextFormField(
+                    controller: _passwordCtrl,
+                    obscureText: _obscurePassword,
+                    textInputAction: TextInputAction.done,
+                    onFieldSubmitted: (_) => _submit(),
+                    style: const TextStyle(color: kWhite, fontSize: 14),
+                    decoration: _inputDecoration(
+                      label: 'Current Password',
+                      hint: 'Required to save changes',
+                    ).copyWith(
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: kWhite.withOpacity(0.45),
+                          size: 20,
+                        ),
+                        onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword),
+                      ),
+                    ),
+                    validator: (v) {
+                      if (v == null || v.isEmpty) {
+                        return 'Password is required to save changes.';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                ],
+
+                const SizedBox(height: 14),
+
+                // ── Save button ──────────────────────────────
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -259,16 +374,60 @@ class _EditProfileSheetState extends State<EditProfileSheet>
       ),
     );
   }
+
+  InputDecoration _inputDecoration(
+      {required String label, required String hint}) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle:
+          TextStyle(color: kWhite.withOpacity(0.55), fontSize: 13),
+      hintText: hint,
+      hintStyle:
+          TextStyle(color: kWhite.withOpacity(0.25), fontSize: 12),
+      filled: true,
+      fillColor: kNavyDark.withOpacity(0.55),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: kCardBorder.withOpacity(0.6)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: kCardBorder.withOpacity(0.6)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: kTeal, width: 1.5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.redAccent),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide:
+            const BorderSide(color: Colors.redAccent, width: 1.5),
+      ),
+      errorStyle:
+          const TextStyle(color: Colors.redAccent, fontSize: 11),
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    );
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
-// Read-only display field (email)
+// Read-only display field (with optional "Change" button)
 // ─────────────────────────────────────────────────────────────
 class _ReadOnlyField extends StatelessWidget {
   final String label;
   final String value;
+  final VoidCallback? onEdit;
 
-  const _ReadOnlyField({required this.label, required this.value});
+  const _ReadOnlyField({
+    required this.label,
+    required this.value,
+    this.onEdit,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -280,14 +439,43 @@ class _ReadOnlyField extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: kCardBorder.withOpacity(0.4)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(label,
-              style: TextStyle(color: kWhite.withOpacity(0.45), fontSize: 11)),
-          const SizedBox(height: 3),
-          Text(value,
-              style: TextStyle(color: kWhite.withOpacity(0.55), fontSize: 14)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label,
+                    style: TextStyle(
+                        color: kWhite.withOpacity(0.45), fontSize: 11)),
+                const SizedBox(height: 3),
+                Text(value,
+                    style: TextStyle(
+                        color: kWhite.withOpacity(0.55), fontSize: 14)),
+              ],
+            ),
+          ),
+          if (onEdit != null)
+            GestureDetector(
+              onTap: onEdit,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: kTeal.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: kTeal.withOpacity(0.35)),
+                ),
+                child: Text(
+                  'Change',
+                  style: TextStyle(
+                    color: kTeal.withOpacity(0.9),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
