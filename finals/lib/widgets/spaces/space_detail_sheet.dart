@@ -6,6 +6,7 @@ import '../../models/space.dart';
 import '../../store/space_store.dart';
 import '../../store/auth_store.dart';
 import 'space_painters.dart'; // SemiGaugePainter, DashedLinePainter
+import '../../constants/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Background B: selected space gauge + task list
@@ -98,7 +99,7 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
         ? const Color(0xFF3BBFA3)
         : daysLeft <= 2
             ? const Color(0xFFE87070)
-            : kSubtitle;
+            : AppColors.subtitle;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
@@ -118,16 +119,16 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
-                        color: kWhite.withOpacity(0.15),
+                        color: AppColors.text.withOpacity(0.15),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.arrow_back_ios_new_rounded,
-                          color: kWhite, size: 14),
+                      child: Icon(Icons.arrow_back_ios_new_rounded,
+                          color: AppColors.text, size: 14),
                     ),
                     const SizedBox(width: 8),
-                    const Text('Spaces',
+                    Text('Spaces',
                         style: TextStyle(
-                            color: kWhite,
+                            color: AppColors.text,
                             fontSize: 13,
                             fontWeight: FontWeight.w500)),
                   ],
@@ -193,7 +194,7 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
   Text(
     'No Tasks Yet',
     style: TextStyle(
-      color: kWhite.withOpacity(0.9),
+      color: AppColors.text.withOpacity(0.9),
       fontSize: 24,
       fontWeight: FontWeight.bold,
     ),
@@ -202,7 +203,7 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
   Text(
     'Tap + to start planning',
     style: TextStyle(
-      color: kWhite.withOpacity(0.45),
+      color: AppColors.text.withOpacity(0.45),
       fontSize: 12,
     ),
   ),
@@ -212,29 +213,29 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
     text: TextSpan(children: [
       TextSpan(
         text: '${space.completedTasks} ',
-        style: const TextStyle(
-            color: kWhite,
+        style: TextStyle(
+            color: AppColors.text,
             fontSize: 32,
             fontWeight: FontWeight.bold),
       ),
-      const TextSpan(
+      TextSpan(
         text: 'out of ',
         style:
-            TextStyle(color: kSubtitle, fontSize: 14),
+            TextStyle(color: AppColors.subtitle, fontSize: 14),
       ),
       TextSpan(
         text: '${space.totalTasks}',
-        style: const TextStyle(
-            color: kWhite,
+        style: TextStyle(
+            color: AppColors.text,
             fontSize: 32,
             fontWeight: FontWeight.bold),
       ),
     ]),
   ),
-  const Text(
+  Text(
     'Tasks Completed',
     style: TextStyle(
-      color: kSubtitle,
+      color: AppColors.subtitle,
       fontSize: 11,
     ),
   ),
@@ -261,8 +262,8 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
                       TextField(
                         controller: _nameController,
                         autofocus: true,
-                        style: const TextStyle(
-                          color: kWhite,
+                        style: TextStyle(
+                          color: AppColors.text,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -272,7 +273,7 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
                           border: InputBorder.none,
                           hintText: 'Space name',
                           hintStyle: TextStyle(
-                            color: kWhite.withOpacity(0.3),
+                            color: AppColors.text.withOpacity(0.3),
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -293,8 +294,8 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
                             Flexible(
                               child: Text(
                                 space.name,
-                                style: const TextStyle(
-                                    color: kWhite,
+                                style: TextStyle(
+                                    color: AppColors.text,
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold),
                               ),
@@ -302,7 +303,7 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
                             if (space.isCreator) ...[
                               const SizedBox(width: 6),
                               Icon(Icons.edit_rounded,
-                                  color: kWhite.withOpacity(0.35), size: 13),
+                                  color: AppColors.text.withOpacity(0.35), size: 13),
                             ],
                           ],
                         ),
@@ -321,14 +322,14 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
-                                color: kWhite.withOpacity(0.06),
+                                color: AppColors.text.withOpacity(0.06),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                    color: kWhite.withOpacity(0.15)),
+                                    color: AppColors.text.withOpacity(0.15)),
                               ),
                               child: Text('Cancel',
                                   style: TextStyle(
-                                      color: kWhite.withOpacity(0.5),
+                                      color: AppColors.text.withOpacity(0.5),
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600)),
                             ),
@@ -415,14 +416,14 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: kWhite.withOpacity(0.06),
+                            color: AppColors.text.withOpacity(0.06),
                             borderRadius: BorderRadius.circular(20),
                             border:
-                                Border.all(color: kWhite.withOpacity(0.15)),
+                                Border.all(color: AppColors.text.withOpacity(0.15)),
                           ),
                           child: Text('Cancel',
                               style: TextStyle(
-                                  color: kWhite.withOpacity(0.5),
+                                  color: AppColors.text.withOpacity(0.5),
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600)),
                         ),
@@ -457,13 +458,13 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
             width: double.infinity,
             decoration: BoxDecoration(
               color: _isEditingDesc
-                  ? kWhite.withOpacity(0.08)
-                  : kWhite.withOpacity(0.06),
+                  ? AppColors.text.withOpacity(0.08)
+                  : AppColors.text.withOpacity(0.06),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                   color: _isEditingDesc
                       ? space.accentColor.withOpacity(0.4)
-                      : kWhite.withOpacity(0.1)),
+                      : AppColors.text.withOpacity(0.1)),
             ),
             padding: const EdgeInsets.all(14),
             child: _isEditingDesc
@@ -473,12 +474,12 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
                     maxLines: null,
                     minLines: 3,
                     style:
-                        TextStyle(color: kWhite.withOpacity(0.85), fontSize: 13),
+                        TextStyle(color: AppColors.text.withOpacity(0.85), fontSize: 13),
                     cursorColor: space.accentColor,
                     decoration: InputDecoration.collapsed(
                       hintText: 'Add a description…',
                       hintStyle: TextStyle(
-                          color: kWhite.withOpacity(0.3),
+                          color: AppColors.text.withOpacity(0.3),
                           fontSize: 13,
                           fontStyle: FontStyle.italic),
                     ),
@@ -487,8 +488,8 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
                     space.description,
                     style: TextStyle(
                       color: space.description == 'No description.'
-                          ? kWhite.withOpacity(0.3)
-                          : kSubtitle,
+                          ? AppColors.text.withOpacity(0.3)
+                          : AppColors.subtitle,
                       fontSize: 12,
                       fontStyle: space.description == 'No description.'
                           ? FontStyle.italic
@@ -502,11 +503,11 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
           // Date range
           Row(
             children: [
-              const Icon(Icons.access_time_rounded,
-                  color: kSubtitle, size: 13),
+              Icon(Icons.access_time_rounded,
+                  color: AppColors.subtitle, size: 13),
               const SizedBox(width: 4),
               Text(space.dateRange,
-                  style: const TextStyle(color: kSubtitle, fontSize: 12)),
+                  style: TextStyle(color: AppColors.subtitle, fontSize: 12)),
             ],
           ),
 
@@ -515,11 +516,11 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
           // Members header
           Row(
             children: [
-              const Icon(Icons.group_rounded, color: kSubtitle, size: 13),
+              Icon(Icons.group_rounded, color: AppColors.subtitle, size: 13),
               const SizedBox(width: 4),
               Text(
                 '${space.memberCount} ${space.memberCount == 1 ? 'Person' : 'People'}',
-                style: const TextStyle(color: kSubtitle, fontSize: 12),
+                style: TextStyle(color: AppColors.subtitle, fontSize: 12),
               ),
               if (space.pendingMembers.isNotEmpty) ...[
                 const SizedBox(width: 6),
@@ -544,11 +545,11 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: kWhite.withOpacity(0.15),
+                      color: AppColors.text.withOpacity(0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.person_add_rounded,
-                        color: kWhite, size: 14),
+                    child: Icon(Icons.person_add_rounded,
+                        color: AppColors.text, size: 14),
                   ),
                 ),
               ],
@@ -593,9 +594,9 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("Your Team's Tasks",
+              Text("Your Team's Tasks",
                   style: TextStyle(
-                      color: kWhite,
+                      color: AppColors.text,
                       fontSize: 16,
                       fontWeight: FontWeight.bold)),
              if (space.isCreator)
@@ -605,12 +606,12 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
       width: 28,
       height: 28,
       decoration: BoxDecoration(
-        color: kWhite.withOpacity(0.15),
+        color: AppColors.text.withOpacity(0.15),
         shape: BoxShape.circle,
       ),
-      child: const Icon(
+      child: Icon(
         Icons.add_rounded,
-        color: kWhite,
+        color: AppColors.text,
         size: 18,
       ),
     ),
@@ -633,7 +634,7 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
                         space.isCreator
                             ? Icons.add_task_rounded
                             : Icons.hourglass_empty_rounded,
-                        color: kWhite.withOpacity(0.25),
+                        color: AppColors.text.withOpacity(0.25),
                         size: 36,
                       ),
                       const SizedBox(height: 8),
@@ -641,14 +642,14 @@ class _SelectedBackgroundState extends State<SelectedBackground> {
                         space.isCreator
                             ? 'No tasks yet — tap to add one'
                             : 'No tasks yet',
-                        style: TextStyle(color: kSubtitle, fontSize: 13),
+                        style: TextStyle(color: AppColors.subtitle, fontSize: 13),
                       ),
                       if (!space.isCreator) ...[
                         const SizedBox(height: 4),
                         Text(
                           'Tasks added by the creator will appear here',
                           style: TextStyle(
-                              color: kSubtitle.withOpacity(0.6),
+                              color: AppColors.subtitle.withOpacity(0.6),
                               fontSize: 11),
                         ),
                       ],
@@ -764,8 +765,8 @@ class SelectedTaskItem extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(task.title,
-                              style: const TextStyle(
-                                  color: kWhite,
+                              style: TextStyle(
+                                  color: AppColors.text,
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold)),
                         ),
@@ -797,7 +798,7 @@ class SelectedTaskItem extends StatelessWidget {
                           index: index,
                           child: Icon(
                             Icons.drag_indicator_rounded,
-                            color: kWhite.withOpacity(0.25),
+                            color: AppColors.text.withOpacity(0.25),
                             size: 18,
                           ),
                         ),
@@ -811,7 +812,7 @@ class SelectedTaskItem extends StatelessWidget {
                           ? task.description
                           : 'No notes',
                       style: TextStyle(
-                          color: kWhite.withOpacity(
+                          color: AppColors.text.withOpacity(
                               task.description.isNotEmpty ? 0.55 : 0.25),
                           fontSize: 12,
                           fontStyle: task.description.isEmpty
@@ -843,11 +844,11 @@ class SelectedTaskItem extends StatelessWidget {
                                         child: CircleAvatar(
                                           radius: 8,
                                           backgroundColor:
-                                              kWhite.withOpacity(0.15),
+                                              AppColors.text.withOpacity(0.15),
                                           child: Text(
                                             '+$overflow',
-                                            style: const TextStyle(
-                                                color: kWhite,
+                                            style: TextStyle(
+                                                color: AppColors.text,
                                                 fontSize: 6,
                                                 fontWeight:
                                                     FontWeight.bold),
@@ -860,15 +861,15 @@ class SelectedTaskItem extends StatelessWidget {
                                         child: CircleAvatar(
                                           radius: 8,
                                           backgroundColor: [
-                                            const Color(0xFF4A6FA5),
+                                            AppColors.link,
                                             const Color(0xFF3A5280),
                                             const Color(0xFF2A3D60),
                                           ][i % 3],
                                           child: Text(
                                             task.assignedTo[i][0]
                                                 .toUpperCase(),
-                                            style: const TextStyle(
-                                                color: kWhite,
+                                            style: TextStyle(
+                                                color: AppColors.text,
                                                 fontSize: 7,
                                                 fontWeight:
                                                     FontWeight.bold),
@@ -886,19 +887,19 @@ class SelectedTaskItem extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
-                                color: kWhite.withOpacity(0.10),
+                                color: AppColors.text.withOpacity(0.10),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(Icons.attach_file_rounded,
-                                      color: kWhite.withOpacity(0.6),
+                                      color: AppColors.text.withOpacity(0.6),
                                       size: 11),
                                   const SizedBox(width: 4),
                                   Text('${task.attachments.length}',
                                       style: TextStyle(
-                                          color: kWhite.withOpacity(0.75),
+                                          color: AppColors.text.withOpacity(0.75),
                                           fontSize: 10)),
                                 ],
                               ),
@@ -937,16 +938,16 @@ class MemberChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: kWhite.withOpacity(0.1),
+        color: AppColors.text.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: kWhite.withOpacity(0.15)),
+        border: Border.all(color: AppColors.text.withOpacity(0.15)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.person_rounded, color: kSubtitle, size: 12),
+          Icon(Icons.person_rounded, color: AppColors.subtitle, size: 12),
           const SizedBox(width: 5),
-          Text(name, style: const TextStyle(color: kWhite, fontSize: 11)),
+          Text(name, style: TextStyle(color: AppColors.text, fontSize: 11)),
           if (canKick) ...[
             const SizedBox(width: 6),
             GestureDetector(
@@ -974,7 +975,7 @@ class _PendingMemberChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: kWhite.withOpacity(0.04),
+        color: AppColors.text.withOpacity(0.04),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: const Color(0xFFE8A870).withOpacity(0.35)),
       ),
@@ -982,10 +983,10 @@ class _PendingMemberChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.person_outline_rounded,
-              color: kWhite.withOpacity(0.35), size: 12),
+              color: AppColors.text.withOpacity(0.35), size: 12),
           const SizedBox(width: 5),
           Text(name,
-              style: TextStyle(color: kWhite.withOpacity(0.4), fontSize: 11)),
+              style: TextStyle(color: AppColors.text.withOpacity(0.4), fontSize: 11)),
           const SizedBox(width: 6),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
@@ -1003,7 +1004,7 @@ class _PendingMemberChip extends StatelessWidget {
             GestureDetector(
               onTap: onCancel,
               child: Icon(Icons.close_rounded,
-                  size: 13, color: kWhite.withOpacity(0.4)),
+                  size: 13, color: AppColors.text.withOpacity(0.4)),
             ),
           ],
         ],
@@ -1215,7 +1216,7 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
     setState(() => _isEditingTitle = false);
   }
 
-  // ── 1. Background color: Color(0xFF12213F) ──────────────────
+  // ── 1. Background color: AppColors.bgDeep ──────────────────
   // ── 2. Sheet sizes: initial 0.65 / min 0.4 / max 0.92 ──────
   // ── 3. Layout: SingleChildScrollView + Column ───────────────
   @override
@@ -1229,8 +1230,8 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
       maxChildSize: 0.92,
       shouldCloseOnMinExtent: true,
       builder: (_, controller) => Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFF12213F),
+        decoration: BoxDecoration(
+          color: AppColors.bgDeep,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
@@ -1242,7 +1243,7 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: kWhite.withOpacity(0.2),
+                  color: AppColors.text.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -1268,8 +1269,8 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
                                 TextField(
                                   controller: _titleController,
                                   autofocus: true,
-                                  style: const TextStyle(
-                                    color: kWhite,
+                                  style: TextStyle(
+                                    color: AppColors.text,
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -1279,7 +1280,7 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
                                     border: InputBorder.none,
                                     hintText: 'Task title',
                                     hintStyle: TextStyle(
-                                      color: kWhite.withOpacity(0.3),
+                                      color: AppColors.text.withOpacity(0.3),
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -1298,8 +1299,8 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
                                       Flexible(
                                         child: Text(
                                           task.title,
-                                          style: const TextStyle(
-                                            color: kWhite,
+                                          style: TextStyle(
+                                            color: AppColors.text,
                                             fontSize: 20,
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -1309,7 +1310,7 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
   const SizedBox(width: 6),
   Icon(
     Icons.edit_rounded,
-    color: kWhite.withOpacity(0.3),
+    color: AppColors.text.withOpacity(0.3),
     size: 14,
   ),
 ],
@@ -1333,17 +1334,17 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 10, vertical: 4),
                                         decoration: BoxDecoration(
-                                          color: kWhite.withOpacity(0.06),
+                                          color: AppColors.text.withOpacity(0.06),
                                           borderRadius:
                                               BorderRadius.circular(20),
                                           border: Border.all(
                                               color:
-                                                  kWhite.withOpacity(0.15)),
+                                                  AppColors.text.withOpacity(0.15)),
                                         ),
                                         child: Text('Cancel',
                                             style: TextStyle(
                                                 color:
-                                                    kWhite.withOpacity(0.5),
+                                                    AppColors.text.withOpacity(0.5),
                                                 fontSize: 11,
                                                 fontWeight:
                                                     FontWeight.w600)),
@@ -1481,14 +1482,14 @@ else if (_canEditStructure)                          Row(
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 10, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: kWhite.withOpacity(0.06),
+                                    color: AppColors.text.withOpacity(0.06),
                                     borderRadius: BorderRadius.circular(20),
                                     border: Border.all(
-                                        color: kWhite.withOpacity(0.15)),
+                                        color: AppColors.text.withOpacity(0.15)),
                                   ),
                                   child: Text('Cancel',
                                       style: TextStyle(
-                                          color: kWhite.withOpacity(0.5),
+                                          color: AppColors.text.withOpacity(0.5),
                                           fontSize: 11,
                                           fontWeight: FontWeight.w600)),
                                 ),
@@ -1524,13 +1525,13 @@ else if (_canEditStructure)                          Row(
                       width: double.infinity,
                       decoration: BoxDecoration(
                         color: _isEditingNotes
-                            ? kWhite.withOpacity(0.08)
-                            : kWhite.withOpacity(0.06),
+                            ? AppColors.text.withOpacity(0.08)
+                            : AppColors.text.withOpacity(0.06),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                             color: _isEditingNotes
                                 ? widget.space.accentColor.withOpacity(0.4)
-                                : kWhite.withOpacity(0.1)),
+                                : AppColors.text.withOpacity(0.1)),
                       ),
                       padding: const EdgeInsets.all(14),
                       child: _isEditingNotes
@@ -1540,13 +1541,13 @@ else if (_canEditStructure)                          Row(
                               maxLines: null,
                               minLines: 3,
                               style: TextStyle(
-                                  color: kWhite.withOpacity(0.85),
+                                  color: AppColors.text.withOpacity(0.85),
                                   fontSize: 13),
                               cursorColor: widget.space.accentColor,
                               decoration: InputDecoration.collapsed(
                                 hintText: 'Add notes…',
                                 hintStyle: TextStyle(
-                                    color: kWhite.withOpacity(0.3),
+                                    color: AppColors.text.withOpacity(0.3),
                                     fontSize: 13,
                                     fontStyle: FontStyle.italic),
                               ),
@@ -1557,8 +1558,8 @@ else if (_canEditStructure)                          Row(
                                   : 'No notes added.',
                               style: TextStyle(
                                 color: task.description.isNotEmpty
-                                    ? kWhite.withOpacity(0.75)
-                                    : kWhite.withOpacity(0.3),
+                                    ? AppColors.text.withOpacity(0.75)
+                                    : AppColors.text.withOpacity(0.3),
                                 fontSize: 13,
                                 fontStyle: task.description.isEmpty
                                     ? FontStyle.italic
@@ -1588,20 +1589,20 @@ else if (_canEditStructure)                          Row(
                                 horizontal: 10, vertical: 5),
                             decoration: BoxDecoration(
                               color: task.assignedTo.isEmpty
-                                  ? kWhite.withOpacity(0.18)
-                                  : kWhite.withOpacity(0.06),
+                                  ? AppColors.text.withOpacity(0.18)
+                                  : AppColors.text.withOpacity(0.06),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
                                   color: task.assignedTo.isEmpty
-                                      ? kWhite.withOpacity(0.4)
-                                      : kWhite.withOpacity(0.12)),
+                                      ? AppColors.text.withOpacity(0.4)
+                                      : AppColors.text.withOpacity(0.12)),
                             ),
                             child: Text(
                               'Unassigned',
                               style: TextStyle(
                                 color: task.assignedTo.isEmpty
-                                    ? kWhite
-                                    : kWhite.withOpacity(0.4),
+                                    ? AppColors.text
+                                    : AppColors.text.withOpacity(0.4),
                                 fontSize: 11,
                               ),
                             ),
@@ -1637,13 +1638,13 @@ else if (_canEditStructure)                          Row(
                               decoration: BoxDecoration(
                                 color: isSelected
                                     ? widget.space.accentColor.withOpacity(0.2)
-                                    : kWhite.withOpacity(0.06),
+                                    : AppColors.text.withOpacity(0.06),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
                                     color: isSelected
                                         ? widget.space.accentColor
                                             .withOpacity(0.5)
-                                        : kWhite.withOpacity(0.12)),
+                                        : AppColors.text.withOpacity(0.12)),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -1653,11 +1654,11 @@ else if (_canEditStructure)                          Row(
                                     backgroundColor: isSelected
                                         ? widget.space.accentColor
                                             .withOpacity(0.5)
-                                        : const Color(0xFF4A6FA5),
+                                        : AppColors.link,
                                     child: Text(
                                       mKey[0].toUpperCase(),
-                                      style: const TextStyle(
-                                          color: kWhite,
+                                      style: TextStyle(
+                                          color: AppColors.text,
                                           fontSize: 7,
                                           fontWeight: FontWeight.bold),
                                     ),
@@ -1666,8 +1667,8 @@ else if (_canEditStructure)                          Row(
                                   Text(m,
                                       style: TextStyle(
                                           color: isSelected
-                                              ? kWhite
-                                              : kWhite.withOpacity(0.55),
+                                              ? AppColors.text
+                                              : AppColors.text.withOpacity(0.55),
                                           fontSize: 11)),
                                 ],
                               ),
@@ -1741,7 +1742,7 @@ else if (_canEditStructure)                          Row(
                                   child: Text(
                                     a.name,
                                     style: TextStyle(
-                                        color: kWhite.withOpacity(0.8),
+                                        color: AppColors.text.withOpacity(0.8),
                                         fontSize: 11),
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -1766,7 +1767,7 @@ else if (_canEditStructure)                          Row(
                     else
                       Text('No attachments yet.',
                           style: TextStyle(
-                              color: kWhite.withOpacity(0.3),
+                              color: AppColors.text.withOpacity(0.3),
                               fontSize: 13,
                               fontStyle: FontStyle.italic)),
 
@@ -1826,7 +1827,7 @@ else if (_canEditStructure)                          Row(
 }
 
 // ─────────────────────────────────────────────────────────────
-// ── 5. Section label: kWhite.withOpacity(0.45), no accent ───
+// ── 5. Section label: AppColors.text.withOpacity(0.45), no accent ───
 // ─────────────────────────────────────────────────────────────
 class _SectionLabel extends StatelessWidget {
   final String label;
@@ -1836,7 +1837,7 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) => Text(
         label.toUpperCase(),
         style: TextStyle(
-          color: kWhite.withOpacity(0.45),
+          color: AppColors.text.withOpacity(0.45),
           fontSize: 10,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.2,
@@ -1852,24 +1853,24 @@ class _TaskSheetAssigneeChip extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: kWhite.withOpacity(0.1),
+          color: AppColors.text.withOpacity(0.1),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: kWhite.withOpacity(0.15)),
+          border: Border.all(color: AppColors.text.withOpacity(0.15)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             CircleAvatar(
               radius: 8,
-              backgroundColor: const Color(0xFF4A6FA5),
+              backgroundColor: AppColors.link,
               child: Text(
                 name[0].toUpperCase(),
-                style: const TextStyle(
-                    color: kWhite, fontSize: 7, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: AppColors.text, fontSize: 7, fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(width: 6),
-            Text(name, style: const TextStyle(color: kWhite, fontSize: 11)),
+            Text(name, style: TextStyle(color: AppColors.text, fontSize: 11)),
           ],
         ),
       );

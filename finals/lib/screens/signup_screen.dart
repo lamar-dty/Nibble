@@ -4,6 +4,7 @@ import '../constants/colors.dart';
 import '../store/auth_store.dart';
 import 'login_screen.dart';
 import '../main.dart';
+import '../constants/app_colors.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -150,7 +151,7 @@ class _SignupScreenState extends State<SignupScreen>
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: kNavyDark,
+      backgroundColor: AppColors.bg,
       resizeToAvoidBottomInset: true,
       body: AnimatedBuilder(
         animation: _entryController,
@@ -258,12 +259,12 @@ class _SignupCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Title
-          const Text(
+          Text(
             'Create your account',
             style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.bold,
-              color: kNavyDark,
+              color: AppColors.bg,
             ),
           ),
           const SizedBox(height: 4),
@@ -344,7 +345,7 @@ class _SignupCard extends StatelessWidget {
             child: ElevatedButton(
               onPressed: loading ? null : onCreate,
               style: ElevatedButton.styleFrom(
-                backgroundColor: kTeal,
+                backgroundColor: AppColors.accent,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14)),
                 elevation: 0,
@@ -403,16 +404,16 @@ class _SignupCard extends StatelessWidget {
               onTap: onLogin,
               child: RichText(
                 text: TextSpan(
-                  style: const TextStyle(fontSize: 13, color: kNavyDark),
+                  style: TextStyle(fontSize: 13, color: AppColors.bg),
                   children: [
                     const TextSpan(text: 'Already have an account? '),
-                    const TextSpan(
+                    TextSpan(
                       text: 'Log In',
                       style: TextStyle(
-                        color: kTeal,
+                        color: AppColors.accent,
                         fontWeight: FontWeight.bold,
                         decoration: TextDecoration.underline,
-                        decorationColor: kTeal,
+                        decorationColor: AppColors.accent,
                       ),
                     ),
                   ],
@@ -448,9 +449,9 @@ class _UsernameField extends StatelessWidget {
         ? Colors.red
         : isAvailable
             ? Colors.green
-            : kTeal.withOpacity(0.3);
+            : AppColors.accent.withOpacity(0.3);
     final focusBorderColor =
-        hasError ? Colors.red : isAvailable ? Colors.green : kTeal;
+        hasError ? Colors.red : isAvailable ? Colors.green : AppColors.accent;
 
     Widget? trailing;
     if (controller.text.isNotEmpty) {
@@ -471,13 +472,13 @@ class _UsernameField extends StatelessWidget {
       ],
       autocorrect: false,
       enableSuggestions: false,
-      style: const TextStyle(fontSize: 14, color: kNavyDark),
+      style: TextStyle(fontSize: 14, color: AppColors.bg),
       decoration: InputDecoration(
         hintText: 'e.g. jane_doe (lowercase letters)',
         hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
         prefixText: '@',
-        prefixStyle: const TextStyle(
-            color: kTeal, fontWeight: FontWeight.w600, fontSize: 14),
+        prefixStyle: TextStyle(
+            color: AppColors.accent, fontWeight: FontWeight.w600, fontSize: 14),
         filled:      true,
         fillColor:   const Color(0xFFEFF6F6),
         suffixIcon:  trailing,
@@ -520,8 +521,8 @@ class _FieldLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      style: const TextStyle(
-          fontWeight: FontWeight.w600, fontSize: 14, color: kNavyDark),
+      style: TextStyle(
+          fontWeight: FontWeight.w600, fontSize: 14, color: AppColors.bg),
     );
   }
 }
@@ -584,7 +585,7 @@ class _AuthField extends StatelessWidget {
       keyboardType: keyboardType,
       autocorrect:  false,
       enableSuggestions: false,
-      style: const TextStyle(fontSize: 14, color: kNavyDark),
+      style: TextStyle(fontSize: 14, color: AppColors.bg),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
@@ -599,11 +600,11 @@ class _AuthField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: kTeal.withOpacity(0.3)),
+          borderSide: BorderSide(color: AppColors.accent.withOpacity(0.3)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: kTeal, width: 1.5),
+          borderSide: BorderSide(color: AppColors.accent, width: 1.5),
         ),
       ),
     );

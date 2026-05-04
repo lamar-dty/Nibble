@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import '../constants/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────
 // SpaceAttachment
@@ -46,12 +47,12 @@ class SpaceAttachment {
     switch (type) {
       case 'image':   return const Color(0xFF9B88E8);
       case 'pdf':     return const Color(0xFFE87070);
-      case 'doc':     return const Color(0xFF4A90D9);
+      case 'doc':     return AppColors.link;
       case 'sheet':   return const Color(0xFF3BBFA3);
       case 'slides':  return const Color(0xFFE8A070);
-      case 'archive': return const Color(0xFFB0BAD3);
+      case 'archive': return AppColors.subtitle;
       case 'video':   return const Color(0xFF70B8E8);
-      default:        return const Color(0xFFB0BAD3);
+      default:        return AppColors.subtitle;
     }
   }
 }
@@ -93,9 +94,9 @@ class SpaceTask {
 
   static Color colorFor(String status) {
     switch (status) {
-      case 'In Progress': return const Color(0xFF4A90D9);
+      case 'In Progress': return AppColors.link;
       case 'Completed':   return const Color(0xFF3BBFA3);
-      default:            return const Color(0xFFB0BAD3);
+      default:            return AppColors.subtitle;
     }
   }
 
@@ -104,7 +105,7 @@ class SpaceTask {
         title:       title,
         description: description,
         status:      'Not Started',
-        statusColor: const Color(0xFFB0BAD3),
+        statusColor: AppColors.subtitle,
       );
 
   void cycleStatus() {
@@ -312,10 +313,10 @@ class Space {
       statusColor = const Color(0xFF3BBFA3);
     } else if (completedTasks > 0 || hasInProgress) {
       status      = 'In Progress';
-      statusColor = const Color(0xFF4A90D9);
+      statusColor = AppColors.link;
     } else {
       status      = 'Not Started';
-      statusColor = const Color(0xFFB0BAD3);
+      statusColor = AppColors.subtitle;
     }
   }
 

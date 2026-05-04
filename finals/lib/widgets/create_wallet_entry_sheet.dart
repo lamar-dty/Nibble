@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../constants/colors.dart';
 import '../widgets/wallet/wallet_sheet.dart';
 import '../store/wallet_store.dart';
+import '../constants/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Entry point
@@ -188,8 +189,8 @@ class _CreateWalletEntrySheetState extends State<_CreateWalletEntrySheet>
       child: Container(
         margin: EdgeInsets.only(bottom: bottom),
         height: mq.size.height * 0.78,
-        decoration: const BoxDecoration(
-          color: Color(0xFF1A2D5A),
+        decoration: BoxDecoration(
+          color: AppColors.bgDeep,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: Column(
@@ -200,7 +201,7 @@ class _CreateWalletEntrySheetState extends State<_CreateWalletEntrySheet>
               width: 36, height: 4,
               margin: const EdgeInsets.only(top: 12),
               decoration: BoxDecoration(
-                color: kWhite.withOpacity(0.18),
+                color: AppColors.text.withOpacity(0.18),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -227,14 +228,14 @@ class _CreateWalletEntrySheetState extends State<_CreateWalletEntrySheet>
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Log Transaction',
+                      Text('Log Transaction',
                           style: TextStyle(
-                              color: kWhite,
+                              color: AppColors.text,
                               fontSize: 17,
                               fontWeight: FontWeight.bold)),
                       Text('Fill in the details below',
                           style: TextStyle(
-                              color: kWhite.withOpacity(0.4),
+                              color: AppColors.text.withOpacity(0.4),
                               fontSize: 12)),
                     ],
                   ),
@@ -244,11 +245,11 @@ class _CreateWalletEntrySheetState extends State<_CreateWalletEntrySheet>
                     child: Container(
                       width: 32, height: 32,
                       decoration: BoxDecoration(
-                        color: kWhite.withOpacity(0.07),
+                        color: AppColors.text.withOpacity(0.07),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(Icons.close_rounded,
-                          color: kWhite.withOpacity(0.5), size: 17),
+                          color: AppColors.text.withOpacity(0.5), size: 17),
                     ),
                   ),
                 ],
@@ -256,7 +257,7 @@ class _CreateWalletEntrySheetState extends State<_CreateWalletEntrySheet>
             ),
 
             const SizedBox(height: 16),
-            Divider(height: 1, color: kWhite.withOpacity(0.07)),
+            Divider(height: 1, color: AppColors.text.withOpacity(0.07)),
 
             // ── Scrollable body ─────────────────────────────────
             Expanded(
@@ -327,7 +328,7 @@ class _CreateWalletEntrySheetState extends State<_CreateWalletEntrySheet>
             Container(
               decoration: BoxDecoration(
                 border: Border(
-                    top: BorderSide(color: kWhite.withOpacity(0.07))),
+                    top: BorderSide(color: AppColors.text.withOpacity(0.07))),
               ),
               padding: EdgeInsets.fromLTRB(
                   20, 14, 20, 14 + mq.padding.bottom),
@@ -354,21 +355,21 @@ class _CreateWalletEntrySheetState extends State<_CreateWalletEntrySheet>
                       onTap: _saving ? null : _save,
                       child: Center(
                         child: _saving
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 20, height: 20,
                                 child: CircularProgressIndicator(
                                     strokeWidth: 2,
                                     valueColor:
-                                        AlwaysStoppedAnimation(kWhite)))
-                            : const Row(
+                                        AlwaysStoppedAnimation(AppColors.text)))
+                            : Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(Icons.check_rounded,
-                                      color: kWhite, size: 18),
+                                      color: AppColors.text, size: 18),
                                   SizedBox(width: 7),
                                   Text('Save',
                                       style: TextStyle(
-                                          color: kWhite,
+                                          color: AppColors.text,
                                           fontSize: 15,
                                           fontWeight: FontWeight.bold,
                                           letterSpacing: 0.3)),
@@ -442,7 +443,7 @@ class _ExpenseSection extends StatelessWidget {
           const Spacer(),
           Text('optional',
               style: TextStyle(
-                  color: kWhite.withOpacity(0.25),
+                  color: AppColors.text.withOpacity(0.25),
                   fontSize: 10,
                   fontStyle: FontStyle.italic)),
           if (dueDate != null) ...[
@@ -453,16 +454,16 @@ class _ExpenseSection extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: kWhite.withOpacity(0.06),
+                  color: AppColors.text.withOpacity(0.06),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
                   Icon(Icons.close_rounded,
-                      size: 11, color: kWhite.withOpacity(0.35)),
+                      size: 11, color: AppColors.text.withOpacity(0.35)),
                   const SizedBox(width: 3),
                   Text('Clear',
                       style: TextStyle(
-                          color: kWhite.withOpacity(0.35),
+                          color: AppColors.text.withOpacity(0.35),
                           fontSize: 10,
                           fontWeight: FontWeight.w600)),
                 ]),
@@ -545,7 +546,7 @@ class _SimpleSection extends StatelessWidget {
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(cfg.currentLabel,
                       style: TextStyle(
-                          color: kWhite.withOpacity(0.4),
+                          color: AppColors.text.withOpacity(0.4),
                           fontSize: 9,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.6)),
@@ -555,7 +556,7 @@ class _SimpleSection extends StatelessWidget {
                         : '₱${current.toStringAsFixed(2)}${cfg.valueSuffix}',
                     style: TextStyle(
                         color: current == 0
-                            ? kWhite.withOpacity(0.3)
+                            ? AppColors.text.withOpacity(0.3)
                             : cfg.color,
                         fontSize: 16,
                         fontWeight: FontWeight.bold),
@@ -579,7 +580,7 @@ class _SimpleSection extends StatelessWidget {
                 Expanded(
                   child: Text(cfg.tip,
                       style: TextStyle(
-                          color: kWhite.withOpacity(0.4),
+                          color: AppColors.text.withOpacity(0.4),
                           fontSize: 11.5,
                           height: 1.45,
                           fontStyle: FontStyle.italic)),
@@ -619,7 +620,7 @@ class _BudgetProgress extends StatelessWidget {
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Text('This month',
               style: TextStyle(
-                  color: kWhite.withOpacity(0.4),
+                  color: AppColors.text.withOpacity(0.4),
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.3)),
@@ -637,7 +638,7 @@ class _BudgetProgress extends StatelessWidget {
           child: LinearProgressIndicator(
             value: fraction,
             minHeight: 6,
-            backgroundColor: kWhite.withOpacity(0.08),
+            backgroundColor: AppColors.text.withOpacity(0.08),
             valueColor: AlwaysStoppedAnimation<Color>(barColor),
           ),
         ),
@@ -673,21 +674,21 @@ class _DueDateRow extends StatelessWidget {
         decoration: BoxDecoration(
           color: set
               ? accent.withOpacity(0.09)
-              : kWhite.withOpacity(0.04),
+              : AppColors.text.withOpacity(0.04),
           borderRadius: BorderRadius.circular(13),
           border: Border.all(
-              color: set ? accent.withOpacity(0.3) : kWhite.withOpacity(0.09)),
+              color: set ? accent.withOpacity(0.3) : AppColors.text.withOpacity(0.09)),
         ),
         child: Row(children: [
           Icon(
             set ? Icons.event_rounded : Icons.add_circle_outline_rounded,
             size: 14,
-            color: set ? accent : kWhite.withOpacity(0.28),
+            color: set ? accent : AppColors.text.withOpacity(0.28),
           ),
           const SizedBox(width: 9),
           Text(_label(),
               style: TextStyle(
-                  color: set ? accent : kWhite.withOpacity(0.32),
+                  color: set ? accent : AppColors.text.withOpacity(0.32),
                   fontSize: 13,
                   fontWeight:
                       set ? FontWeight.w700 : FontWeight.w600)),
@@ -717,14 +718,14 @@ class _TabConfig {
   });
 }
 
-const _tabConfig = <_EntryType, _TabConfig>{
+final _tabConfig = <_EntryType, _TabConfig>{
   _EntryType.allowance: _TabConfig(
     fieldLabel:   'Daily Allowance',
     currentLabel: 'CURRENT ALLOWANCE',
     valueSuffix:  ' / day',
     tip: 'Sets your daily spending limit. The wallet uses this to show how much you have left today.',
     icon:  Icons.credit_card_rounded,
-    color: Color(0xFF4A90D9),
+    color: AppColors.link,
   ),
   _EntryType.budget: _TabConfig(
     fieldLabel:   'Monthly Budget',
@@ -756,9 +757,9 @@ class _TypeSelector extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: kWhite.withOpacity(0.05),
+        color: AppColors.text.withOpacity(0.05),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: kWhite.withOpacity(0.08)),
+        border: Border.all(color: AppColors.text.withOpacity(0.08)),
       ),
       child: Row(
         children: _tabs.map((tab) {
@@ -780,11 +781,11 @@ class _TypeSelector extends StatelessWidget {
                   children: [
                     Icon(tab.icon,
                         size: 14,
-                        color: sel ? kWhite : kWhite.withOpacity(0.4)),
+                        color: sel ? AppColors.text : AppColors.text.withOpacity(0.4)),
                     const SizedBox(width: 5),
                     Text(tab.label,
                         style: TextStyle(
-                          color: sel ? kWhite : kWhite.withOpacity(0.4),
+                          color: sel ? AppColors.text : AppColors.text.withOpacity(0.4),
                           fontSize: 12,
                           fontWeight: sel
                               ? FontWeight.bold
@@ -812,11 +813,11 @@ class _FieldLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(children: [
-      Icon(icon, color: kSubtitle, size: 12),
+      Icon(icon, color: AppColors.subtitle, size: 12),
       const SizedBox(width: 5),
       Text(label,
-          style: const TextStyle(
-              color: kSubtitle,
+          style: TextStyle(
+              color: AppColors.subtitle,
               fontSize: 11,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.5)),
@@ -843,23 +844,23 @@ class _NameField extends StatelessWidget {
         AnimatedContainer(
           duration: const Duration(milliseconds: 150),
           decoration: BoxDecoration(
-            color: kWhite.withOpacity(0.05),
+            color: AppColors.text.withOpacity(0.05),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: hasError ? const Color(0xFFE87070) : kWhite.withOpacity(0.1)),
+            border: Border.all(color: hasError ? const Color(0xFFE87070) : AppColors.text.withOpacity(0.1)),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
           child: TextField(
             controller: controller,
             focusNode: focusNode,
             onChanged: (_) => onChanged(),
-            style: const TextStyle(
-                color: kWhite, fontSize: 15, fontWeight: FontWeight.w600),
+            style: TextStyle(
+                color: AppColors.text, fontSize: 15, fontWeight: FontWeight.w600),
             maxLines: 1,
             textCapitalization: TextCapitalization.sentences,
             decoration: InputDecoration(
               hintText: 'e.g. Electric bill, School fee…',
               hintStyle: TextStyle(
-                  color: kWhite.withOpacity(0.22),
+                  color: AppColors.text.withOpacity(0.22),
                   fontSize: 15,
                   fontWeight: FontWeight.w600),
               border: InputBorder.none,
@@ -899,15 +900,15 @@ class _AmountField extends StatelessWidget {
         AnimatedContainer(
           duration: const Duration(milliseconds: 150),
           decoration: BoxDecoration(
-            color: kWhite.withOpacity(0.05),
+            color: AppColors.text.withOpacity(0.05),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: hasError ? const Color(0xFFE87070) : kWhite.withOpacity(0.1)),
+            border: Border.all(color: hasError ? const Color(0xFFE87070) : AppColors.text.withOpacity(0.1)),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
           child: Row(children: [
             Text('₱',
                 style: TextStyle(
-                    color: kWhite.withOpacity(0.45),
+                    color: AppColors.text.withOpacity(0.45),
                     fontSize: 17,
                     fontWeight: FontWeight.w700)),
             const SizedBox(width: 6),
@@ -921,13 +922,13 @@ class _AmountField extends StatelessWidget {
                   FilteringTextInputFormatter.allow(
                       RegExp(r'^\d*\.?\d{0,2}'))
                 ],
-                style: const TextStyle(
-                    color: kWhite, fontSize: 17, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                    color: AppColors.text, fontSize: 17, fontWeight: FontWeight.w600),
                 cursorColor: const Color(0xFFE8A870),
                 decoration: InputDecoration(
                   hintText: '0.00',
                   hintStyle: TextStyle(
-                      color: kWhite.withOpacity(0.22),
+                      color: AppColors.text.withOpacity(0.22),
                       fontSize: 17,
                       fontWeight: FontWeight.w600),
                   border: InputBorder.none,
@@ -977,22 +978,22 @@ class _CategoryChips extends StatelessWidget {
             decoration: BoxDecoration(
               color: sel
                   ? cat.color.withOpacity(0.14)
-                  : kWhite.withOpacity(0.04),
+                  : AppColors.text.withOpacity(0.04),
               borderRadius: BorderRadius.circular(11),
               border: Border.all(
                   color: sel
                       ? cat.color.withOpacity(0.55)
-                      : kWhite.withOpacity(0.08),
+                      : AppColors.text.withOpacity(0.08),
                   width: sel ? 1.5 : 1),
             ),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
               Icon(cat.icon,
                   size: 13,
-                  color: sel ? cat.color : kWhite.withOpacity(0.3)),
+                  color: sel ? cat.color : AppColors.text.withOpacity(0.3)),
               const SizedBox(width: 5),
               Text(cat.label,
                   style: TextStyle(
-                      color: sel ? cat.color : kWhite.withOpacity(0.35),
+                      color: sel ? cat.color : AppColors.text.withOpacity(0.35),
                       fontSize: 12,
                       fontWeight: sel
                           ? FontWeight.w700
@@ -1073,9 +1074,9 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
     return Container(
       margin: EdgeInsets.fromLTRB(12, 0, 12, 24 + mq.padding.bottom),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A2D5A),
+        color: AppColors.bgDeep,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: kWhite.withOpacity(0.08)),
+        border: Border.all(color: AppColors.text.withOpacity(0.08)),
         boxShadow: [BoxShadow(
             color: Colors.black.withOpacity(0.45),
             blurRadius: 40,
@@ -1086,7 +1087,7 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
           width: 36, height: 4,
           margin: const EdgeInsets.only(top: 12),
           decoration: BoxDecoration(
-              color: kWhite.withOpacity(0.18),
+              color: AppColors.text.withOpacity(0.18),
               borderRadius: BorderRadius.circular(2)),
         ),
         Padding(
@@ -1105,14 +1106,14 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
             ),
             const SizedBox(width: 12),
             Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('Set Due Date',
+              Text('Set Due Date',
                   style: TextStyle(
-                      color: kWhite,
+                      color: AppColors.text,
                       fontSize: 16,
                       fontWeight: FontWeight.bold)),
               Text('Scroll to choose',
                   style: TextStyle(
-                      color: kWhite.withOpacity(0.38), fontSize: 12)),
+                      color: AppColors.text.withOpacity(0.38), fontSize: 12)),
             ]),
             const Spacer(),
             GestureDetector(
@@ -1120,16 +1121,16 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
               child: Container(
                 width: 30, height: 30,
                 decoration: BoxDecoration(
-                    color: kWhite.withOpacity(0.07),
+                    color: AppColors.text.withOpacity(0.07),
                     shape: BoxShape.circle),
                 child: Icon(Icons.close_rounded,
-                    color: kWhite.withOpacity(0.45), size: 16),
+                    color: AppColors.text.withOpacity(0.45), size: 16),
               ),
             ),
           ]),
         ),
         const SizedBox(height: 18),
-        Divider(height: 1, color: kWhite.withOpacity(0.07)),
+        Divider(height: 1, color: AppColors.text.withOpacity(0.07)),
         const SizedBox(height: 8),
 
         SizedBox(
@@ -1140,9 +1141,9 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
               left: 16, right: 16, height: _itemH,
               child: Container(
                 decoration: BoxDecoration(
-                  color: kWhite.withOpacity(0.07),
+                  color: AppColors.text.withOpacity(0.07),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: kWhite.withOpacity(0.1)),
+                  border: Border.all(color: AppColors.text.withOpacity(0.1)),
                 ),
               ),
             ),
@@ -1152,7 +1153,7 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
                 child: Container(decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                    colors: [const Color(0xFF1A2D5A), const Color(0xFF1A2D5A).withOpacity(0)],
+                    colors: [AppColors.bgDeep, AppColors.bgDeep.withOpacity(0)],
                   ),
                 )),
               ),
@@ -1163,7 +1164,7 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
                 child: Container(decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.bottomCenter, end: Alignment.topCenter,
-                    colors: [const Color(0xFF1A2D5A), const Color(0xFF1A2D5A).withOpacity(0)],
+                    colors: [AppColors.bgDeep, AppColors.bgDeep.withOpacity(0)],
                   ),
                 )),
               ),
@@ -1196,7 +1197,7 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
           ]),
         ),
         const SizedBox(height: 12),
-        Divider(height: 1, color: kWhite.withOpacity(0.07)),
+        Divider(height: 1, color: AppColors.text.withOpacity(0.07)),
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
           child: SizedBox(
@@ -1218,12 +1219,12 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
                   onTap: () => Navigator.pop(context, _result),
                   child: Center(
                     child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      const Icon(Icons.check_rounded,
-                          color: kWhite, size: 18),
+                      Icon(Icons.check_rounded,
+                          color: AppColors.text, size: 18),
                       const SizedBox(width: 7),
                       Text(_fmtResult(_result),
-                          style: const TextStyle(
-                              color: kWhite,
+                          style: TextStyle(
+                              color: AppColors.text,
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.3)),
@@ -1292,8 +1293,8 @@ class _WheelItem extends StatelessWidget {
       child: Text(label,
           style: TextStyle(
             color: dimmed
-                ? kWhite.withOpacity(0.18)
-                : kWhite.withOpacity(0.85),
+                ? AppColors.text.withOpacity(0.18)
+                : AppColors.text.withOpacity(0.85),
             fontSize: 16,
             fontWeight: FontWeight.w500,
           )),

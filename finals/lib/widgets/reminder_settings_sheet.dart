@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
+import '../constants/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Entry point
@@ -73,8 +74,8 @@ class _ReminderSettingsSheetState extends State<ReminderSettingsSheet>
       opacity: _fadeAnim,
       child: Container(
         height: mq.size.height * 0.88,
-        decoration: const BoxDecoration(
-          color: Color(0xFF1A2D5A),
+        decoration: BoxDecoration(
+          color: AppColors.bgDeep,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: Column(
@@ -84,7 +85,7 @@ class _ReminderSettingsSheetState extends State<ReminderSettingsSheet>
               width: 36, height: 4,
               margin: const EdgeInsets.only(top: 12),
               decoration: BoxDecoration(
-                color: kWhite.withOpacity(0.18),
+                color: AppColors.text.withOpacity(0.18),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -110,14 +111,14 @@ class _ReminderSettingsSheetState extends State<ReminderSettingsSheet>
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Reminder Settings',
+                      Text('Reminder Settings',
                           style: TextStyle(
-                              color: kWhite,
+                              color: AppColors.text,
                               fontSize: 17,
                               fontWeight: FontWeight.bold)),
                       Text('Manage your notification preferences',
                           style: TextStyle(
-                              color: kWhite.withOpacity(0.4), fontSize: 12)),
+                              color: AppColors.text.withOpacity(0.4), fontSize: 12)),
                     ],
                   ),
                   const Spacer(),
@@ -126,11 +127,11 @@ class _ReminderSettingsSheetState extends State<ReminderSettingsSheet>
                     child: Container(
                       width: 32, height: 32,
                       decoration: BoxDecoration(
-                        color: kWhite.withOpacity(0.07),
+                        color: AppColors.text.withOpacity(0.07),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(Icons.close_rounded,
-                          color: kWhite.withOpacity(0.5), size: 17),
+                          color: AppColors.text.withOpacity(0.5), size: 17),
                     ),
                   ),
                 ],
@@ -138,7 +139,7 @@ class _ReminderSettingsSheetState extends State<ReminderSettingsSheet>
             ),
 
             const SizedBox(height: 16),
-            Divider(height: 1, color: kWhite.withOpacity(0.07)),
+            Divider(height: 1, color: AppColors.text.withOpacity(0.07)),
 
             // Body
             Expanded(
@@ -154,7 +155,7 @@ class _ReminderSettingsSheetState extends State<ReminderSettingsSheet>
                     _SettingsCard(children: [
                       _ToggleTile(
                         icon: Icons.task_alt_rounded,
-                        iconColor: kTeal,
+                        iconColor: AppColors.accent,
                         title: 'Task Deadlines',
                         subtitle: 'Get reminded before tasks are due',
                         value: _taskDeadlines,
@@ -172,7 +173,7 @@ class _ReminderSettingsSheetState extends State<ReminderSettingsSheet>
                       _Divider(),
                       _ToggleTile(
                         icon: Icons.people_rounded,
-                        iconColor: const Color(0xFF4A90D9),
+                        iconColor: AppColors.link,
                         title: 'Member Activity',
                         subtitle: 'When members complete tasks',
                         value: _memberActivity,
@@ -220,11 +221,11 @@ class _ReminderSettingsSheetState extends State<ReminderSettingsSheet>
                           children: [
                             Row(children: [
                               Icon(Icons.timer_rounded,
-                                  color: kTeal, size: 16),
+                                  color: AppColors.accent, size: 16),
                               const SizedBox(width: 8),
-                              const Text('Before deadline',
+                              Text('Before deadline',
                                   style: TextStyle(
-                                      color: kWhite,
+                                      color: AppColors.text,
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600)),
                             ]),
@@ -247,14 +248,14 @@ class _ReminderSettingsSheetState extends State<ReminderSettingsSheet>
                                           vertical: 9),
                                       decoration: BoxDecoration(
                                         color: selected
-                                            ? kTeal.withOpacity(0.18)
-                                            : kWhite.withOpacity(0.05),
+                                            ? AppColors.accent.withOpacity(0.18)
+                                            : AppColors.text.withOpacity(0.05),
                                         borderRadius:
                                             BorderRadius.circular(10),
                                         border: Border.all(
                                           color: selected
-                                              ? kTeal.withOpacity(0.5)
-                                              : kWhite.withOpacity(0.08),
+                                              ? AppColors.accent.withOpacity(0.5)
+                                              : AppColors.text.withOpacity(0.08),
                                         ),
                                       ),
                                       child: Text(
@@ -262,8 +263,8 @@ class _ReminderSettingsSheetState extends State<ReminderSettingsSheet>
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           color: selected
-                                              ? kTeal
-                                              : kWhite.withOpacity(0.45),
+                                              ? AppColors.accent
+                                              : AppColors.text.withOpacity(0.45),
                                           fontSize: 12,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -316,7 +317,7 @@ class _ReminderSettingsSheetState extends State<ReminderSettingsSheet>
                                   const EdgeInsets.symmetric(horizontal: 10),
                               child: Text('to',
                                   style: TextStyle(
-                                      color: kWhite.withOpacity(0.3),
+                                      color: AppColors.text.withOpacity(0.3),
                                       fontSize: 13)),
                             ),
                             Expanded(
@@ -344,21 +345,21 @@ class _ReminderSettingsSheetState extends State<ReminderSettingsSheet>
                       width: double.infinity,
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: kWhite.withOpacity(0.03),
+                        color: AppColors.text.withOpacity(0.03),
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: kWhite.withOpacity(0.07)),
+                        border: Border.all(color: AppColors.text.withOpacity(0.07)),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Icon(Icons.info_outline_rounded,
-                              color: kWhite.withOpacity(0.3), size: 15),
+                              color: AppColors.text.withOpacity(0.3), size: 15),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
                               'These settings are a preview. Full notification control will be available in the next update.',
                               style: TextStyle(
-                                color: kWhite.withOpacity(0.4),
+                                color: AppColors.text.withOpacity(0.4),
                                 fontSize: 12,
                                 height: 1.5,
                               ),
@@ -373,7 +374,7 @@ class _ReminderSettingsSheetState extends State<ReminderSettingsSheet>
             ),
 
             // Footer save button
-            Divider(height: 1, color: kWhite.withOpacity(0.07)),
+            Divider(height: 1, color: AppColors.text.withOpacity(0.07)),
             Padding(
               padding: EdgeInsets.fromLTRB(16, 14, 16, 14 + mq.padding.bottom),
               child: SizedBox(
@@ -452,7 +453,7 @@ class _SectionLabel extends StatelessWidget {
     return Row(children: [
       Text(label,
           style: TextStyle(
-              color: kWhite.withOpacity(0.35),
+              color: AppColors.text.withOpacity(0.35),
               fontSize: 10,
               fontWeight: FontWeight.w800,
               letterSpacing: 1.2)),
@@ -468,9 +469,9 @@ class _SettingsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: kWhite.withOpacity(0.04),
+        color: AppColors.text.withOpacity(0.04),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: kWhite.withOpacity(0.08)),
+        border: Border.all(color: AppColors.text.withOpacity(0.08)),
       ),
       child: Column(children: children),
     );
@@ -514,24 +515,24 @@ class _ToggleTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title,
-                    style: const TextStyle(
-                        color: kWhite,
+                    style: TextStyle(
+                        color: AppColors.text,
                         fontSize: 13,
                         fontWeight: FontWeight.w600)),
                 const SizedBox(height: 2),
                 Text(subtitle,
                     style: TextStyle(
-                        color: kWhite.withOpacity(0.4), fontSize: 11)),
+                        color: AppColors.text.withOpacity(0.4), fontSize: 11)),
               ],
             ),
           ),
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: kTeal,
-            activeTrackColor: kTeal.withOpacity(0.25),
-            inactiveThumbColor: kWhite.withOpacity(0.3),
-            inactiveTrackColor: kWhite.withOpacity(0.08),
+            activeColor: AppColors.accent,
+            activeTrackColor: AppColors.accent.withOpacity(0.25),
+            inactiveThumbColor: AppColors.text.withOpacity(0.3),
+            inactiveTrackColor: AppColors.text.withOpacity(0.08),
           ),
         ],
       ),
@@ -542,7 +543,7 @@ class _ToggleTile extends StatelessWidget {
 class _Divider extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
-      Divider(height: 1, color: kWhite.withOpacity(0.06), indent: 14, endIndent: 14);
+      Divider(height: 1, color: AppColors.text.withOpacity(0.06), indent: 14, endIndent: 14);
 }
 
 class _TimeSelector extends StatelessWidget {

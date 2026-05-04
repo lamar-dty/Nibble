@@ -11,10 +11,12 @@ import 'language_sheet.dart';
 import 'reminder_settings_sheet.dart';
 import 'class_alerts_sheet.dart';
 import '../store/task_store.dart';
+import '../store/theme_store.dart';
 import '../store/space_chat_store.dart';
 import 'change_password_sheet.dart';
 import 'edit_profile_sheet.dart';
 import 'manage_account_sheet.dart';
+import '../constants/app_colors.dart';
 
 
 class AppDrawer extends StatefulWidget {
@@ -186,7 +188,7 @@ class _AppDrawerState extends State<AppDrawer>
     }
 
     return Drawer(
-      backgroundColor: kTeal,
+      backgroundColor: ThemeStore.instance.isDark ? AppColors.bgMid : AppColors.accent,
       width: MediaQuery.of(context).size.width * 0.78,
       child: SafeArea(
         child: Column(
@@ -220,8 +222,8 @@ class _AppDrawerState extends State<AppDrawer>
                             AuthStore.instance.username.isNotEmpty
                                 ? AuthStore.instance.username
                                 : 'Unknown',
-                            style: const TextStyle(
-                                color: kWhite,
+                            style: TextStyle(
+                                color: AppColors.text,
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold),
                             overflow: TextOverflow.ellipsis,
@@ -231,14 +233,14 @@ class _AppDrawerState extends State<AppDrawer>
                             final tag = AuthStore.instance.userTag;
                             if (tag.isNotEmpty) {
                               return Text(tag,
-                                  style: const TextStyle(
-                                      color: kWhite, fontSize: 12));
+                                  style: TextStyle(
+                                      color: AppColors.text, fontSize: 12));
                             }
                             return const SizedBox.shrink();
                           }(),
                           Text(AuthStore.instance.displayEmail,
                               style:
-                                  const TextStyle(color: kWhite, fontSize: 12)),
+                                  TextStyle(color: AppColors.text, fontSize: 12)),
                         ],
                       ),
                       ),
@@ -250,7 +252,7 @@ class _AppDrawerState extends State<AppDrawer>
 
             const SizedBox(height: 16),
             Divider(
-                color: kWhite.withOpacity(0.3),
+                color: AppColors.text.withOpacity(0.3),
                 thickness: 1,
                 indent: 20,
                 endIndent: 20),
@@ -267,7 +269,7 @@ class _AppDrawerState extends State<AppDrawer>
 
             // ── LOGOUT ───────────────────────────────────
             Divider(
-                color: kWhite.withOpacity(0.3),
+                color: AppColors.text.withOpacity(0.3),
                 thickness: 1,
                 indent: 20,
                 endIndent: 20),
@@ -290,13 +292,13 @@ class _AppDrawerState extends State<AppDrawer>
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                     child: Row(
-                      children: const [
+                      children: [
                         Icon(Icons.logout_rounded,
-                            color: kWhite, size: 22),
+                            color: AppColors.text, size: 22),
                         SizedBox(width: 12),
                         Text('Log Out',
                             style: TextStyle(
-                                color: kWhite,
+                                color: AppColors.text,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500)),
                       ],
@@ -320,8 +322,8 @@ class _AppDrawerState extends State<AppDrawer>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Spaces',
-              style: const TextStyle(
-                  color: kWhite,
+              style: TextStyle(
+                  color: AppColors.text,
                   fontSize: 16,
                   fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
@@ -334,22 +336,22 @@ class _AppDrawerState extends State<AppDrawer>
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
               child: Row(
                 children: [
-                  const Icon(Icons.mail_outline_rounded, color: kWhite, size: 20),
+                  Icon(Icons.mail_outline_rounded, color: AppColors.text, size: 20),
                   const SizedBox(width: 12),
                   Text('Invites',
                       style: TextStyle(
-                          color: kWhite.withOpacity(0.9), fontSize: 14)),
+                          color: AppColors.text.withOpacity(0.9), fontSize: 14)),
                   if (count > 0) ...[
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                       decoration: BoxDecoration(
-                        color: kNavyDark,
+                        color: AppColors.accent,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text('$count',
-                          style: const TextStyle(
-                              color: kWhite,
+                          style: TextStyle(
+                              color: AppColors.bg,
                               fontSize: 11,
                               fontWeight: FontWeight.bold)),
                     ),
@@ -359,7 +361,7 @@ class _AppDrawerState extends State<AppDrawer>
                     _invitesExpanded
                         ? Icons.keyboard_arrow_up_rounded
                         : Icons.keyboard_arrow_down_rounded,
-                    color: kWhite.withOpacity(0.6),
+                    color: AppColors.text.withOpacity(0.6),
                     size: 18,
                   ),
                 ],
@@ -378,7 +380,7 @@ class _AppDrawerState extends State<AppDrawer>
                     height: 18,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: kWhite.withOpacity(0.5),
+                      color: AppColors.text.withOpacity(0.5),
                     ),
                   ),
                 ),
@@ -388,7 +390,7 @@ class _AppDrawerState extends State<AppDrawer>
                 padding: const EdgeInsets.fromLTRB(4, 4, 0, 8),
                 child: Text('No pending invites',
                     style: TextStyle(
-                        color: kWhite.withOpacity(0.45), fontSize: 12)),
+                        color: AppColors.text.withOpacity(0.45), fontSize: 12)),
               )
             else
               ...(_pendingInvites.map((invite) => _InviteCard(
@@ -467,8 +469,8 @@ class _AppDrawerState extends State<AppDrawer>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(section.title,
-              style: const TextStyle(
-                  color: kWhite,
+              style: TextStyle(
+                  color: AppColors.text,
                   fontSize: 16,
                   fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
@@ -529,6 +531,10 @@ class _AppDrawerState extends State<AppDrawer>
         showClassAlertsSheet(context);
       };
     }
+    if (tap == null && item.label == 'Dark Mode') {
+      tap = () => ThemeStore.instance.toggle();
+    }
+    final isDarkModeItem = item.label == 'Dark Mode';
     return InkWell(
       onTap: tap ?? () {},
       borderRadius: BorderRadius.circular(8),
@@ -536,11 +542,64 @@ class _AppDrawerState extends State<AppDrawer>
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
         child: Row(
           children: [
-            Icon(item.icon, color: kWhite, size: 20),
+            ListenableBuilder(
+              listenable: ThemeStore.instance,
+              builder: (_, __) => Icon(
+                isDarkModeItem
+                    ? (ThemeStore.instance.isDark
+                        ? Icons.light_mode_outlined
+                        : Icons.dark_mode_outlined)
+                    : item.icon,
+                color: AppColors.text,
+                size: 20,
+              ),
+            ),
             const SizedBox(width: 12),
-            Text(item.label,
-                style: TextStyle(
-                    color: kWhite.withOpacity(0.9), fontSize: 14)),
+            Expanded(
+              child: Text(item.label,
+                  style: TextStyle(
+                      color: AppColors.text.withOpacity(0.9), fontSize: 14)),
+            ),
+            if (isDarkModeItem)
+              ListenableBuilder(
+                listenable: ThemeStore.instance,
+                builder: (_, __) {
+                  final on = ThemeStore.instance.isDark;
+                  return GestureDetector(
+                    onTap: () => ThemeStore.instance.toggle(),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: 36,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: on
+                            ? AppColors.accent.withOpacity(0.55)
+                            : AppColors.text.withOpacity(0.12),
+                        border: Border.all(
+                            color: AppColors.text.withOpacity(on ? 0.4 : 0.2),
+                            width: 0.5),
+                      ),
+                      child: AnimatedAlign(
+                        duration: const Duration(milliseconds: 200),
+                        alignment:
+                            on ? Alignment.centerRight : Alignment.centerLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 2),
+                          child: Container(
+                            width: 14,
+                            height: 14,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: on ? AppColors.accent : AppColors.text.withOpacity(0.35),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
           ],
         ),
       ),
@@ -568,7 +627,7 @@ class _InviteCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: kNavyDark.withOpacity(0.55),
+        color: ThemeStore.instance.isDark ? AppColors.bgMid : AppColors.bg.withOpacity(0.55),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: invite.accentColor.withOpacity(0.35)),
       ),
@@ -590,8 +649,8 @@ class _InviteCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   invite.name,
-                  style: const TextStyle(
-                      color: kWhite,
+                  style: TextStyle(
+                      color: AppColors.text,
                       fontSize: 13,
                       fontWeight: FontWeight.w600),
                   overflow: TextOverflow.ellipsis,
@@ -604,7 +663,7 @@ class _InviteCard extends StatelessWidget {
           Text(
             'Invited by ${invite.creatorName}',
             style: TextStyle(
-                color: kWhite.withOpacity(0.5), fontSize: 11),
+                color: AppColors.text.withOpacity(0.5), fontSize: 11),
           ),
           const SizedBox(height: 10),
           // Accept / Decline buttons
@@ -616,13 +675,13 @@ class _InviteCard extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 7),
                     decoration: BoxDecoration(
-                      color: kWhite.withOpacity(0.08),
+                      color: AppColors.text.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Center(
                       child: Text('Decline',
                           style: TextStyle(
-                              color: kWhite.withOpacity(0.55),
+                              color: AppColors.text.withOpacity(0.55),
                               fontSize: 12,
                               fontWeight: FontWeight.w600)),
                     ),
@@ -639,10 +698,10 @@ class _InviteCard extends StatelessWidget {
                       color: invite.accentColor,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Center(
+                    child: Center(
                       child: Text('Accept',
                           style: TextStyle(
-                              color: kWhite,
+                              color: AppColors.text,
                               fontSize: 12,
                               fontWeight: FontWeight.w700)),
                     ),

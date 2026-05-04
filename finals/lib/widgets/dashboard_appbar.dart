@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../constants/colors.dart';
 import '../store/auth_store.dart';
 import 'manage_account_sheet.dart';
+import '../constants/app_colors.dart';
 
 class DashboardAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onMenuTap;
@@ -14,7 +15,7 @@ class DashboardAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: kNavyDark,
+      backgroundColor: AppColors.bg,
       elevation: 0,
       automaticallyImplyLeading: false,
       titleSpacing: 0,
@@ -69,7 +70,7 @@ class _HamburgerPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = kTeal
+      ..color = AppColors.accent
       ..strokeWidth = 3.0
       ..strokeCap = StrokeCap.round;
 
@@ -79,5 +80,5 @@ class _HamburgerPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter _) => true;
 }

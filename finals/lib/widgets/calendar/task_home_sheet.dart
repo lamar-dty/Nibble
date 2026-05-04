@@ -5,6 +5,7 @@ import '../../models/task.dart';
 import '../../store/task_store.dart';
 import 'task_detail_sheet.dart';
 import '../create_task_sheet.dart';
+import '../../constants/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────
 // TaskHomeSheet — live task list with timeline-style layout
@@ -53,7 +54,7 @@ class _TaskHomeSheetState extends State<TaskHomeSheet> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               behavior: SnackBarBehavior.floating,
-              backgroundColor: const Color(0xFF1A2A5E),
+              backgroundColor: AppColors.bgDeep,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
               content: const Text('This task no longer exists.',
@@ -163,7 +164,7 @@ class _TaskHomeSheetState extends State<TaskHomeSheet> {
         SliverAppBar(
           pinned: true,
           automaticallyImplyLeading: false,
-          backgroundColor: kWhite,
+          backgroundColor: AppColors.text,
           surfaceTintColor: Colors.transparent,
           shadowColor: Colors.transparent,
           elevation: 0,
@@ -229,7 +230,7 @@ class _TaskSheetHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: kWhite,
+      color: AppColors.text,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -252,10 +253,10 @@ class _TaskSheetHeader extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Tasks',
                   style: TextStyle(
-                      color: kNavyDark,
+                      color: AppColors.bg,
                       fontSize: 20,
                       fontWeight: FontWeight.bold),
                 ),
@@ -263,13 +264,13 @@ class _TaskSheetHeader extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: kTeal.withOpacity(0.12),
+                      color: AppColors.accent.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: kTeal.withOpacity(0.3)),
+                      border: Border.all(color: AppColors.accent.withOpacity(0.3)),
                     ),
                     child: Text(
                       '${(store.completionPercent * 100).round()}%',
-                      style: const TextStyle(color: kTeal, fontSize: 12, fontWeight: FontWeight.w800),
+                      style: TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.w800),
                     ),
                   ),
               ],
@@ -298,16 +299,16 @@ class _TaskSheetHeader extends StatelessWidget {
                           children: [
                             Text(
                               '${(store.completionPercent * 100).round()}%',
-                              style: const TextStyle(
-                                color: kNavyDark,
+                              style: TextStyle(
+                                color: AppColors.bg,
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const Text(
+                            Text(
                               'done',
                               style: TextStyle(
-                                color: Color(0xFF6B7A99),
+                                color: AppColors.icon,
                                 fontSize: 10,
                               ),
                             ),
@@ -324,14 +325,14 @@ class _TaskSheetHeader extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _DonutStatRow(
-                          color: const Color(0xFF4A90D9),
+                          color: AppColors.link,
                           label: 'In Progress',
                           count: store.inProgress,
                           total: store.total,
                         ),
                         const SizedBox(height: 12),
                         _DonutStatRow(
-                          color: const Color(0xFFB0BAD3),
+                          color: AppColors.subtitle,
                           label: 'Not Started',
                           count: store.notStarted,
                           total: store.total,
@@ -351,7 +352,7 @@ class _TaskSheetHeader extends StatelessWidget {
             ),
 
           const SizedBox(height: 20),
-          Divider(height: 1, color: const Color(0xFF6B7A99).withOpacity(0.15), indent: 20, endIndent: 20),
+          Divider(height: 1, color: AppColors.icon.withOpacity(0.15), indent: 20, endIndent: 20),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 6),
             child: Row(
@@ -359,7 +360,7 @@ class _TaskSheetHeader extends StatelessWidget {
               children: [
                 Text(
                   tasks.isEmpty ? '' : '${tasks.length} task${tasks.length == 1 ? '' : 's'}',
-                  style: TextStyle(color: const Color(0xFF6B7A99).withOpacity(0.6), fontSize: 11),
+                  style: TextStyle(color: AppColors.icon.withOpacity(0.6), fontSize: 11),
                 ),
                 GestureDetector(
                   onTap: store.total > 0 ? onShowManage : null,
@@ -369,21 +370,21 @@ class _TaskSheetHeader extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF6B7A99).withOpacity(0.08),
+                        color: AppColors.icon.withOpacity(0.08),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: const Color(0xFF6B7A99).withOpacity(0.18)),
+                        border: Border.all(color: AppColors.icon.withOpacity(0.18)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.sort_rounded, size: 12, color: Color(0xFF6B7A99)),
+                          Icon(Icons.sort_rounded, size: 12, color: AppColors.icon),
                           const SizedBox(width: 4),
                           Text(
                             sortLabel,
-                            style: const TextStyle(color: Color(0xFF6B7A99), fontSize: 11, fontWeight: FontWeight.w700),
+                            style: TextStyle(color: AppColors.icon, fontSize: 11, fontWeight: FontWeight.w700),
                           ),
                           const SizedBox(width: 3),
-                          const Icon(Icons.keyboard_arrow_down_rounded, size: 12, color: Color(0xFF6B7A99)),
+                          Icon(Icons.keyboard_arrow_down_rounded, size: 12, color: AppColors.icon),
                         ],
                       ),
                     ),
@@ -432,9 +433,9 @@ class _ManageSheet extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
       constraints: BoxConstraints(maxHeight: maxH),
       decoration: BoxDecoration(
-        color: const Color(0xFF1B2D5B),
+        color: AppColors.bgDeep,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: kWhite.withOpacity(0.08)),
+        border: Border.all(color: AppColors.text.withOpacity(0.08)),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 40, offset: const Offset(0, -4))],
       ),
       child: SingleChildScrollView(
@@ -445,7 +446,7 @@ class _ManageSheet extends StatelessWidget {
             Container(
               width: 36, height: 4,
               margin: const EdgeInsets.only(top: 14, bottom: 18),
-              decoration: BoxDecoration(color: kWhite.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
+              decoration: BoxDecoration(color: AppColors.text.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
             ),
 
             // Header
@@ -455,22 +456,22 @@ class _ManageSheet extends StatelessWidget {
                 Container(
                   width: 42, height: 42,
                   decoration: BoxDecoration(
-                    color: kTeal.withOpacity(0.14),
+                    color: AppColors.accent.withOpacity(0.14),
                     shape: BoxShape.circle,
-                    border: Border.all(color: kTeal.withOpacity(0.3), width: 1.5),
+                    border: Border.all(color: AppColors.accent.withOpacity(0.3), width: 1.5),
                   ),
-                  child: const Icon(Icons.tune_rounded, color: kTeal, size: 21),
+                  child: Icon(Icons.tune_rounded, color: AppColors.accent, size: 21),
                 ),
                 const SizedBox(width: 13),
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text('Sort & Manage', style: TextStyle(color: kWhite, fontSize: 17, fontWeight: FontWeight.bold)),
-                  Text('Organise your task list', style: TextStyle(color: kWhite.withOpacity(0.4), fontSize: 12)),
+                  Text('Sort & Manage', style: TextStyle(color: AppColors.text, fontSize: 17, fontWeight: FontWeight.bold)),
+                  Text('Organise your task list', style: TextStyle(color: AppColors.text.withOpacity(0.4), fontSize: 12)),
                 ]),
               ]),
             ),
 
             const SizedBox(height: 16),
-            Divider(color: kWhite.withOpacity(0.07), thickness: 1, indent: 22, endIndent: 22),
+            Divider(color: AppColors.text.withOpacity(0.07), thickness: 1, indent: 22, endIndent: 22),
             const SizedBox(height: 6),
 
             // Sort by label
@@ -478,7 +479,7 @@ class _ManageSheet extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(22, 2, 22, 10),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text('SORT BY', style: TextStyle(color: kWhite.withOpacity(0.28), fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.2)),
+                child: Text('SORT BY', style: TextStyle(color: AppColors.text.withOpacity(0.28), fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.2)),
               ),
             ),
 
@@ -488,10 +489,10 @@ class _ManageSheet extends StatelessWidget {
               child: Column(
                 children: _sorts.map((s) {
                   final selected = s.$1 == currentSort;
-                  const c = kTeal;
+                  final c = AppColors.accent;
                   return _ManageRow(
                     icon: s.$2,
-                    iconColor: selected ? c : kWhite.withOpacity(0.4),
+                    iconColor: selected ? c : AppColors.text.withOpacity(0.4),
                     label: s.$3,
                     subtitle: s.$4,
                     selected: selected,
@@ -503,7 +504,7 @@ class _ManageSheet extends StatelessWidget {
             ),
 
             const SizedBox(height: 4),
-            Divider(color: kWhite.withOpacity(0.07), thickness: 1, indent: 22, endIndent: 22),
+            Divider(color: AppColors.text.withOpacity(0.07), thickness: 1, indent: 22, endIndent: 22),
             const SizedBox(height: 6),
 
             // Actions label
@@ -511,7 +512,7 @@ class _ManageSheet extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(22, 2, 22, 10),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text('ACTIONS', style: TextStyle(color: kWhite.withOpacity(0.28), fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.2)),
+                child: Text('ACTIONS', style: TextStyle(color: AppColors.text.withOpacity(0.28), fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.2)),
               ),
             ),
 
@@ -521,7 +522,7 @@ class _ManageSheet extends StatelessWidget {
               child: Column(children: [
                 _ManageRow(
                   icon: Icons.check_circle_outline_rounded,
-                  iconColor: hasCompleted ? const Color(0xFF3BBFA3) : kWhite.withOpacity(0.2),
+                  iconColor: hasCompleted ? const Color(0xFF3BBFA3) : AppColors.text.withOpacity(0.2),
                   label: 'Clear Completed',
                   subtitle: 'Remove all finished tasks',
                   selected: false,
@@ -532,7 +533,7 @@ class _ManageSheet extends StatelessWidget {
                 ),
                 _ManageRow(
                   icon: Icons.delete_sweep_rounded,
-                  iconColor: hasTasks ? const Color(0xFFE87070) : kWhite.withOpacity(0.2),
+                  iconColor: hasTasks ? const Color(0xFFE87070) : AppColors.text.withOpacity(0.2),
                   label: 'Clear All Tasks',
                   subtitle: 'Permanently remove everything',
                   selected: false,
@@ -562,15 +563,15 @@ class _ManageSheet extends StatelessWidget {
         builder: (confirmCtx) => Container(
           margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
           decoration: BoxDecoration(
-            color: const Color(0xFF1B2D5B),
+            color: AppColors.bgDeep,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: kWhite.withOpacity(0.08)),
+            border: Border.all(color: AppColors.text.withOpacity(0.08)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(width: 36, height: 4, margin: const EdgeInsets.only(top: 12, bottom: 18),
-                  decoration: BoxDecoration(color: kWhite.withOpacity(0.18), borderRadius: BorderRadius.circular(2))),
+                  decoration: BoxDecoration(color: AppColors.text.withOpacity(0.18), borderRadius: BorderRadius.circular(2))),
               Container(
                 width: 52, height: 52,
                 decoration: BoxDecoration(
@@ -581,9 +582,9 @@ class _ManageSheet extends StatelessWidget {
                 child: const Icon(Icons.delete_sweep_rounded, color: Color(0xFFE87070), size: 26),
               ),
               const SizedBox(height: 12),
-              const Text('Clear All Tasks?', style: TextStyle(color: kWhite, fontSize: 16, fontWeight: FontWeight.bold)),
+              Text('Clear All Tasks?', style: TextStyle(color: AppColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
-              Text('This will permanently remove all tasks', style: TextStyle(color: kWhite.withOpacity(0.4), fontSize: 13)),
+              Text('This will permanently remove all tasks', style: TextStyle(color: AppColors.text.withOpacity(0.4), fontSize: 13)),
               const SizedBox(height: 24),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -593,8 +594,8 @@ class _ManageSheet extends StatelessWidget {
                       onTap: () => Navigator.pop(confirmCtx),
                       child: Container(
                         height: 46,
-                        decoration: BoxDecoration(color: kWhite.withOpacity(0.07), borderRadius: BorderRadius.circular(12)),
-                        child: const Center(child: Text('Cancel', style: TextStyle(color: kWhite, fontWeight: FontWeight.w600))),
+                        decoration: BoxDecoration(color: AppColors.text.withOpacity(0.07), borderRadius: BorderRadius.circular(12)),
+                        child: Center(child: Text('Cancel', style: TextStyle(color: AppColors.text, fontWeight: FontWeight.w600))),
                       ),
                     ),
                   ),
@@ -668,10 +669,10 @@ class _ManageRowState extends State<_ManageRow> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
         decoration: BoxDecoration(
-          color: active ? c.withOpacity(0.10) : kWhite.withOpacity(0.04),
+          color: active ? c.withOpacity(0.10) : AppColors.text.withOpacity(0.04),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: active ? c.withOpacity(0.45) : kWhite.withOpacity(0.07),
+            color: active ? c.withOpacity(0.45) : AppColors.text.withOpacity(0.07),
             width: 1.2,
           ),
         ),
@@ -687,22 +688,22 @@ class _ManageRowState extends State<_ManageRow> {
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(widget.label, style: TextStyle(
-              color: widget.enabled ? (widget.destructive ? const Color(0xFFE87070) : kWhite) : kWhite.withOpacity(0.25),
+              color: widget.enabled ? (widget.destructive ? const Color(0xFFE87070) : AppColors.text) : AppColors.text.withOpacity(0.25),
               fontSize: 14, fontWeight: FontWeight.w600,
             )),
             const SizedBox(height: 2),
-            Text(widget.subtitle, style: TextStyle(color: kWhite.withOpacity(widget.enabled ? 0.35 : 0.18), fontSize: 11)),
+            Text(widget.subtitle, style: TextStyle(color: AppColors.text.withOpacity(widget.enabled ? 0.35 : 0.18), fontSize: 11)),
           ])),
           if (widget.selected)
             Container(
               width: 20, height: 20,
               decoration: BoxDecoration(color: c, shape: BoxShape.circle),
-              child: const Icon(Icons.check_rounded, color: kWhite, size: 13),
+              child: Icon(Icons.check_rounded, color: AppColors.text, size: 13),
             )
           else
             Icon(
               Icons.chevron_right_rounded,
-              color: kWhite.withOpacity(widget.enabled ? 0.18 : 0.08), size: 18,
+              color: AppColors.text.withOpacity(widget.enabled ? 0.18 : 0.08), size: 18,
             ),
         ]),
       ),
@@ -739,7 +740,7 @@ class _DonutPainter extends CustomPainter {
         Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = stroke
-          ..color = const Color(0xFFE8EBF2));
+          ..color = AppColors.lightFill);
 
     if (total == 0) return;
 
@@ -758,15 +759,15 @@ class _DonutPainter extends CustomPainter {
     final nsSweep = 2 * pi * (notStarted / total);
     final cSweep  = 2 * pi * (completed / total);
 
-    arc(start, ipSweep, const Color(0xFF4A90D9));
+    arc(start, ipSweep, AppColors.link);
     start += ipSweep + 0.05;
-    arc(start, nsSweep, const Color(0xFFB0BAD3));
+    arc(start, nsSweep, AppColors.subtitle);
     start += nsSweep + 0.05;
     arc(start, cSweep, const Color(0xFF3BBFA3));
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter _) => false;
+  bool shouldRepaint(covariant CustomPainter _) => true;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -801,12 +802,12 @@ class _DonutStatRow extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(label,
-                    style: const TextStyle(color: Color(0xFF6B7A99), fontSize: 11)),
+                    style: TextStyle(color: AppColors.icon, fontSize: 11)),
               ],
             ),
             Text('$count/$total',
-                style: const TextStyle(
-                  color: kNavyDark,
+                style: TextStyle(
+                  color: AppColors.bg,
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                 )),
@@ -818,7 +819,7 @@ class _DonutStatRow extends StatelessWidget {
           child: LinearProgressIndicator(
             value: total > 0 ? count / total : 0,
             minHeight: 4,
-            backgroundColor: const Color(0xFFE8EBF2),
+            backgroundColor: AppColors.lightFill,
             valueColor: AlwaysStoppedAnimation<Color>(color),
           ),
         ),
@@ -845,17 +846,17 @@ class _EmptyState extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Icons.task_alt_rounded,
-                  size: 60, color: kNavyDark.withOpacity(0.1)),
+                  size: 60, color: AppColors.bg.withOpacity(0.1)),
               const SizedBox(height: 14),
               Text('No tasks yet',
                   style: TextStyle(
-                      color: kNavyDark.withOpacity(0.4),
+                      color: AppColors.bg.withOpacity(0.4),
                       fontSize: 15,
                       fontWeight: FontWeight.w600)),
               const SizedBox(height: 6),
               Text('Tap to add your first task',
                   style: TextStyle(
-                      color: kNavyDark.withOpacity(0.25), fontSize: 13)),
+                      color: AppColors.bg.withOpacity(0.25), fontSize: 13)),
             ],
           ),
         ),
@@ -890,9 +891,9 @@ class _TaskRowState extends State<_TaskRow> {
     TaskStatus.completed:  'Completed',
   };
 
-  static const _statusColor = {
-    TaskStatus.notStarted: Color(0xFF8FA6C8),
-    TaskStatus.inProgress: Color(0xFF4A90D9),
+  static final _statusColor = {
+    TaskStatus.notStarted: AppColors.subtitle,
+    TaskStatus.inProgress: AppColors.link,
     TaskStatus.completed:  Color(0xFF3BBFA3),
   };
 
@@ -943,7 +944,7 @@ class _TaskRowState extends State<_TaskRow> {
       onTapCancel: () => setState(() => _pressed = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 120),
-        color: _pressed ? const Color(0xFF6B7A99).withOpacity(0.05) : Colors.transparent,
+        color: _pressed ? AppColors.icon.withOpacity(0.05) : Colors.transparent,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
           child: Row(
@@ -992,11 +993,11 @@ class _TaskRowState extends State<_TaskRow> {
                       Text(
                         task.name,
                         style: TextStyle(
-                          color: isDone ? const Color(0xFF8FA6C8) : kNavyDark,
+                          color: isDone ? AppColors.subtitle : AppColors.bg,
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
                           decoration: isDone ? TextDecoration.lineThrough : null,
-                          decorationColor: const Color(0xFF8FA6C8),
+                          decorationColor: AppColors.subtitle,
                           decorationThickness: 2,
                         ),
                       ),
@@ -1008,7 +1009,7 @@ class _TaskRowState extends State<_TaskRow> {
                         style: TextStyle(
                           color: task.isOverdue
                               ? const Color(0xFFE87070)
-                              : const Color(0xFF6B7A99),
+                              : AppColors.icon,
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),
@@ -1019,7 +1020,7 @@ class _TaskRowState extends State<_TaskRow> {
                         Text(task.notes!,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(color: Color(0xFF8FA6C8), fontSize: 11)),
+                            style: TextStyle(color: AppColors.subtitle, fontSize: 11)),
                       ],
 
                       const SizedBox(height: 8),

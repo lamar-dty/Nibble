@@ -8,6 +8,7 @@ import '../store/auth_store.dart';
 import '../store/space_chat_store.dart';
 import '../services/notification_router.dart';
 import '../store/wallet_store.dart';
+import '../constants/app_colors.dart';
 
 class HomeScreen extends StatefulWidget {
   final ValueNotifier<int> tabNotifier;
@@ -156,17 +157,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           Text(
                             greeting,
-                            style: const TextStyle(
-                              color: kWhite,
+                            style: TextStyle(
+                              color: AppColors.text,
                               fontSize: 26,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.2,
                             ),
                           ),
                           const SizedBox(height: 6),
-                          const Text(
+                          Text(
                             "Here's your overview for today",
-                            style: TextStyle(color: kSubtitle, fontSize: 14),
+                            style: TextStyle(color: AppColors.subtitle, fontSize: 14),
                           ),
                         ],
                       ),
@@ -194,7 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               const SizedBox(width: 10),
                               _HomeStatCard(
                                 icon: Icons.account_balance_wallet_rounded,
-                                iconColor: const Color(0xFF4A90D9),
+                                iconColor: AppColors.link,
                                 title: 'Wallet Balance',
                                 value: dailySet
                                     ? (dailyRemaining >= 0
@@ -275,7 +276,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       topRight: Radius.circular(28),
                     ),
                     child: ColoredBox(
-                      color: kWhite,
+                      color: AppColors.text,
                       child: _NotificationSheet(
                         notifications: store.notifications,
                         onClearAll: () => TaskStore.instance.clearNotifications(),
@@ -335,9 +336,9 @@ class _HomeStatCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: kNavyMid,
+          color: AppColors.bgMid,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: kWhite.withOpacity(0.12)),
+          border: Border.all(color: AppColors.text.withOpacity(0.12)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -350,7 +351,7 @@ class _HomeStatCard extends StatelessWidget {
                   child: Text(
                     title,
                     style: TextStyle(
-                      color: kWhite.withOpacity(0.65),
+                      color: AppColors.text.withOpacity(0.65),
                       fontSize: 10,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -361,8 +362,8 @@ class _HomeStatCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               value,
-              style: const TextStyle(
-                color: kWhite,
+              style: TextStyle(
+                color: AppColors.text,
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
@@ -374,7 +375,7 @@ class _HomeStatCard extends StatelessWidget {
                 child: LinearProgressIndicator(
                   value: progressValue,
                   minHeight: 3,
-                  backgroundColor: kWhite.withOpacity(0.12),
+                  backgroundColor: AppColors.text.withOpacity(0.12),
                   valueColor: AlwaysStoppedAnimation<Color>(
                       progressColor ?? iconColor),
                 ),
@@ -384,7 +385,7 @@ class _HomeStatCard extends StatelessWidget {
             Text(
               subtitle,
               style: TextStyle(
-                color: subtitleColor ?? kWhite.withOpacity(0.45),
+                color: subtitleColor ?? AppColors.text.withOpacity(0.45),
                 fontSize: 10,
               ),
             ),
@@ -542,7 +543,7 @@ class _NotificationSheetState extends State<_NotificationSheet> {
         SliverAppBar(
           pinned: true,
           automaticallyImplyLeading: false,
-          backgroundColor: kWhite,
+          backgroundColor: AppColors.text,
           surfaceTintColor: Colors.transparent,
           shadowColor: Colors.transparent,
           elevation: 0,
@@ -574,13 +575,13 @@ class _NotificationSheetState extends State<_NotificationSheet> {
                     Icon(
                       Icons.notifications_none_rounded,
                       size: 72,
-                      color: kNavyDark.withOpacity(0.12),
+                      color: AppColors.bg.withOpacity(0.12),
                     ),
                     const SizedBox(height: 14),
                     Text(
                       'No notifications yet',
                       style: TextStyle(
-                        color: kNavyDark.withOpacity(0.4),
+                        color: AppColors.bg.withOpacity(0.4),
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                       ),
@@ -589,7 +590,7 @@ class _NotificationSheetState extends State<_NotificationSheet> {
                     Text(
                       "It’s quiet here…",
                       style: TextStyle(
-                        color: kNavyDark.withOpacity(0.28),
+                        color: AppColors.bg.withOpacity(0.28),
                         fontSize: 13,
                       ),
                     ),
@@ -612,7 +613,7 @@ class _NotificationSheetState extends State<_NotificationSheet> {
                         child: Text(
                           'No More Notifications',
                           style: TextStyle(
-                            color: kNavyDark.withOpacity(0.28),
+                            color: AppColors.bg.withOpacity(0.28),
                             fontSize: 13,
                           ),
                         ),
@@ -684,7 +685,7 @@ class _NotificationSheetHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: kWhite,
+      color: AppColors.text,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -709,10 +710,10 @@ class _NotificationSheetHeader extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Text(
+                    Text(
                       'Notifications',
                       style: TextStyle(
-                        color: kNavyDark,
+                        color: AppColors.bg,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
@@ -728,8 +729,8 @@ class _NotificationSheetHeader extends StatelessWidget {
                         ),
                         child: Text(
                           '$unread',
-                          style: const TextStyle(
-                            color: kWhite,
+                          style: TextStyle(
+                            color: AppColors.text,
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                           ),
@@ -746,14 +747,14 @@ class _NotificationSheetHeader extends StatelessWidget {
                       children: [
                         Text(
                           'Sorted by: $sortLabel',
-                          style: const TextStyle(
-                            color: Color(0xFF6B7A99),
+                          style: TextStyle(
+                            color: AppColors.icon,
                             fontSize: 13,
                           ),
                         ),
                         const SizedBox(width: 3),
-                        const Icon(Icons.arrow_drop_down,
-                            color: Color(0xFF6B7A99), size: 20),
+                        Icon(Icons.arrow_drop_down,
+                            color: AppColors.icon, size: 20),
                       ],
                     ),
                   ),
@@ -824,7 +825,7 @@ class _SortSheet extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
       decoration: BoxDecoration(
-        color: kWhite,
+        color: AppColors.text,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -845,14 +846,14 @@ class _SortSheet extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          const Padding(
+          Padding(
             padding: EdgeInsets.fromLTRB(20, 0, 20, 16),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 'Sort Notifications',
                 style: TextStyle(
-                  color: kNavyDark,
+                  color: AppColors.bg,
                   fontSize: 17,
                   fontWeight: FontWeight.bold,
                 ),
@@ -918,13 +919,13 @@ class _SortOption extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: selected
                         ? const Color(0xFF9B88E8).withOpacity(0.12)
-                        : const Color(0xFFF4F5F7),
+                        : AppColors.lightFill,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(icon,
                       color: selected
                           ? const Color(0xFF9B88E8)
-                          : const Color(0xFF6B7A99),
+                          : AppColors.icon,
                       size: 18),
                 ),
                 const SizedBox(width: 14),
@@ -935,7 +936,7 @@ class _SortOption extends StatelessWidget {
                       Text(
                         label,
                         style: TextStyle(
-                          color: kNavyDark,
+                          color: AppColors.bg,
                           fontSize: 15,
                           fontWeight: selected
                               ? FontWeight.w700
@@ -946,8 +947,8 @@ class _SortOption extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(
                           subtitle!,
-                          style: const TextStyle(
-                            color: Color(0xFF6B7A99),
+                          style: TextStyle(
+                            color: AppColors.icon,
                             fontSize: 11,
                           ),
                         ),
@@ -980,7 +981,7 @@ class _ClearConfirmSheet extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
       decoration: BoxDecoration(
-        color: kWhite,
+        color: AppColors.text,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -1011,10 +1012,10 @@ class _ClearConfirmSheet extends StatelessWidget {
                 color: Color(0xFFE87070), size: 28),
           ),
           const SizedBox(height: 14),
-          const Text(
+          Text(
             'Clear all notifications?',
             style: TextStyle(
-              color: kNavyDark,
+              color: AppColors.bg,
               fontSize: 17,
               fontWeight: FontWeight.bold,
             ),
@@ -1024,7 +1025,7 @@ class _ClearConfirmSheet extends StatelessWidget {
             'This will remove all notifications.\nThis action cannot be undone.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: kNavyDark.withOpacity(0.45),
+              color: AppColors.bg.withOpacity(0.45),
               fontSize: 13,
               height: 1.5,
             ),
@@ -1041,14 +1042,14 @@ class _ClearConfirmSheet extends StatelessWidget {
                     child: Container(
                       height: 48,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF4F5F7),
+                        color: AppColors.lightFill,
                         borderRadius: BorderRadius.circular(13),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text(
                           'Cancel',
                           style: TextStyle(
-                            color: Color(0xFF6B7A99),
+                            color: AppColors.icon,
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
                           ),
@@ -1071,11 +1072,11 @@ class _ClearConfirmSheet extends StatelessWidget {
                         color: const Color(0xFFE87070),
                         borderRadius: BorderRadius.circular(13),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text(
                           'Clear All',
                           style: TextStyle(
-                            color: kWhite,
+                            color: AppColors.text,
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                           ),

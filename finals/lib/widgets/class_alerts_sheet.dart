@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import '../constants/colors.dart';
 import '../models/class_schedule.dart';
 import '../store/class_schedule_store.dart';
+import '../constants/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Entry point
@@ -66,8 +67,8 @@ class _ClassAlertsSheetState extends State<ClassAlertsSheet>
       opacity: _fadeAnim,
       child: Container(
         height: mq.size.height * 0.88,
-        decoration: const BoxDecoration(
-          color: Color(0xFF1A2D5A),
+        decoration: BoxDecoration(
+          color: AppColors.bgDeep,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: Column(
@@ -77,7 +78,7 @@ class _ClassAlertsSheetState extends State<ClassAlertsSheet>
               width: 36, height: 4,
               margin: const EdgeInsets.only(top: 12),
               decoration: BoxDecoration(
-                color: kWhite.withOpacity(0.18),
+                color: AppColors.text.withOpacity(0.18),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -90,21 +91,21 @@ class _ClassAlertsSheetState extends State<ClassAlertsSheet>
                   Container(
                     width: 42, height: 42,
                     decoration: BoxDecoration(
-                      color: kTeal.withOpacity(0.14),
+                      color: AppColors.accent.withOpacity(0.14),
                       shape: BoxShape.circle,
-                      border: Border.all(color: kTeal.withOpacity(0.3), width: 1.5),
+                      border: Border.all(color: AppColors.accent.withOpacity(0.3), width: 1.5),
                     ),
-                    child: const Icon(Icons.school_rounded, color: kTeal, size: 21),
+                    child: Icon(Icons.school_rounded, color: AppColors.accent, size: 21),
                   ),
                   const SizedBox(width: 13),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Class Alerts',
+                      Text('Class Alerts',
                           style: TextStyle(
-                              color: kWhite, fontSize: 17, fontWeight: FontWeight.bold)),
+                              color: AppColors.text, fontSize: 17, fontWeight: FontWeight.bold)),
                       Text('Your weekly class schedule',
-                          style: TextStyle(color: kWhite.withOpacity(0.4), fontSize: 12)),
+                          style: TextStyle(color: AppColors.text.withOpacity(0.4), fontSize: 12)),
                     ],
                   ),
                   const Spacer(),
@@ -115,11 +116,11 @@ class _ClassAlertsSheetState extends State<ClassAlertsSheet>
                       child: Container(
                         width: 34, height: 34,
                         decoration: BoxDecoration(
-                          color: kTeal.withOpacity(0.15),
+                          color: AppColors.accent.withOpacity(0.15),
                           shape: BoxShape.circle,
-                          border: Border.all(color: kTeal.withOpacity(0.35)),
+                          border: Border.all(color: AppColors.accent.withOpacity(0.35)),
                         ),
-                        child: const Icon(Icons.add_rounded, color: kTeal, size: 20),
+                        child: Icon(Icons.add_rounded, color: AppColors.accent, size: 20),
                       ),
                     ),
                   const SizedBox(width: 8),
@@ -128,11 +129,11 @@ class _ClassAlertsSheetState extends State<ClassAlertsSheet>
                     child: Container(
                       width: 32, height: 32,
                       decoration: BoxDecoration(
-                        color: kWhite.withOpacity(0.07),
+                        color: AppColors.text.withOpacity(0.07),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(Icons.close_rounded,
-                          color: kWhite.withOpacity(0.5), size: 17),
+                          color: AppColors.text.withOpacity(0.5), size: 17),
                     ),
                   ),
                 ],
@@ -140,7 +141,7 @@ class _ClassAlertsSheetState extends State<ClassAlertsSheet>
             ),
 
             const SizedBox(height: 16),
-            Divider(height: 1, color: kWhite.withOpacity(0.07)),
+            Divider(height: 1, color: AppColors.text.withOpacity(0.07)),
 
             // ── Body ──────────────────────────────────────
             Expanded(
@@ -200,9 +201,9 @@ class _ScheduleList extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 10),
           child: Container(
             decoration: BoxDecoration(
-              color: kWhite.withOpacity(0.04),
+              color: AppColors.text.withOpacity(0.04),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: kWhite.withOpacity(0.08)),
+              border: Border.all(color: AppColors.text.withOpacity(0.08)),
             ),
             child: _ClassCard(schedule: sorted[index]),
           ),
@@ -224,10 +225,10 @@ class _ClassCard extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF1A2D5A),
+        backgroundColor: AppColors.bgDeep,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: const Text('Remove Class',
-            style: TextStyle(color: Color(0xFFFFFFFF), fontSize: 16, fontWeight: FontWeight.bold)),
+        title: Text('Remove Class',
+            style: TextStyle(color: AppColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
         content: Text(
           'Remove "${schedule.name}" from your schedule?',
           style: const TextStyle(color: Color(0x66FFFFFF), fontSize: 13),
@@ -260,14 +261,14 @@ class _ClassCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
             decoration: BoxDecoration(
-              color: kTeal.withOpacity(0.1),
+              color: AppColors.accent.withOpacity(0.1),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: kTeal.withOpacity(0.25)),
+              border: Border.all(color: AppColors.accent.withOpacity(0.25)),
             ),
             child: Text(
               schedule.timeLabel,
-              style: const TextStyle(
-                  color: kTeal, fontSize: 11, fontWeight: FontWeight.w700),
+              style: TextStyle(
+                  color: AppColors.accent, fontSize: 11, fontWeight: FontWeight.w700),
             ),
           ),
           const SizedBox(width: 12),
@@ -277,8 +278,8 @@ class _ClassCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(schedule.name,
-                    style: const TextStyle(
-                        color: kWhite,
+                    style: TextStyle(
+                        color: AppColors.text,
                         fontSize: 13,
                         fontWeight: FontWeight.w600)),
                 if (schedule.room != null && schedule.room!.isNotEmpty) ...[
@@ -286,11 +287,11 @@ class _ClassCard extends StatelessWidget {
                   Row(
                     children: [
                       Icon(Icons.location_on_outlined,
-                          size: 11, color: kWhite.withOpacity(0.35)),
+                          size: 11, color: AppColors.text.withOpacity(0.35)),
                       const SizedBox(width: 3),
                       Text(schedule.room!,
                           style: TextStyle(
-                              color: kWhite.withOpacity(0.4), fontSize: 11)),
+                              color: AppColors.text.withOpacity(0.4), fontSize: 11)),
                     ],
                   ),
                 ],
@@ -298,11 +299,11 @@ class _ClassCard extends StatelessWidget {
                 Row(
                   children: [
                     Icon(Icons.notifications_outlined,
-                        size: 11, color: kWhite.withOpacity(0.3)),
+                        size: 11, color: AppColors.text.withOpacity(0.3)),
                     const SizedBox(width: 3),
                     Text('${schedule.reminderMinutes} min before',
                         style: TextStyle(
-                            color: kWhite.withOpacity(0.3), fontSize: 10)),
+                            color: AppColors.text.withOpacity(0.3), fontSize: 10)),
                   ],
                 ),
               ],
@@ -315,12 +316,12 @@ class _ClassCard extends StatelessWidget {
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
                 decoration: BoxDecoration(
-                  color: kNavyDark.withOpacity(0.7),
+                  color: AppColors.bg.withOpacity(0.7),
                   borderRadius: BorderRadius.circular(5),
                 ),
                 child: Text(ClassSchedule.dayLabel(d),
                     style: TextStyle(
-                        color: kWhite.withOpacity(0.45),
+                        color: AppColors.text.withOpacity(0.45),
                         fontSize: 9,
                         fontWeight: FontWeight.w700)),
               );
@@ -364,21 +365,21 @@ class _EmptyState extends StatelessWidget {
             Container(
               width: 72, height: 72,
               decoration: BoxDecoration(
-                color: kTeal.withOpacity(0.1),
+                color: AppColors.accent.withOpacity(0.1),
                 shape: BoxShape.circle,
-                border: Border.all(color: kTeal.withOpacity(0.2)),
+                border: Border.all(color: AppColors.accent.withOpacity(0.2)),
               ),
-              child: Icon(Icons.school_rounded, color: kTeal.withOpacity(0.6), size: 32),
+              child: Icon(Icons.school_rounded, color: AppColors.accent.withOpacity(0.6), size: 32),
             ),
             const SizedBox(height: 20),
-            const Text('No Classes Yet',
+            Text('No Classes Yet',
                 style: TextStyle(
-                    color: kWhite, fontSize: 16, fontWeight: FontWeight.bold)),
+                    color: AppColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Text(
               'Add your class schedule and get notified before each one.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: kWhite.withOpacity(0.4), fontSize: 13, height: 1.5),
+              style: TextStyle(color: AppColors.text.withOpacity(0.4), fontSize: 13, height: 1.5),
             ),
             const SizedBox(height: 24),
             GestureDetector(
@@ -386,18 +387,18 @@ class _EmptyState extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 decoration: BoxDecoration(
-                  color: kTeal.withOpacity(0.15),
+                  color: AppColors.accent.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: kTeal.withOpacity(0.35)),
+                  border: Border.all(color: AppColors.accent.withOpacity(0.35)),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.add_rounded, color: kTeal, size: 18),
+                    Icon(Icons.add_rounded, color: AppColors.accent, size: 18),
                     SizedBox(width: 8),
                     Text('Add a Class',
                         style: TextStyle(
-                            color: kTeal,
+                            color: AppColors.accent,
                             fontSize: 14,
                             fontWeight: FontWeight.w700)),
                   ],
@@ -549,20 +550,20 @@ class _AddClassFormState extends State<_AddClassForm> {
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
                             color: selected
-                                ? kTeal.withOpacity(0.18)
-                                : kWhite.withOpacity(0.05),
+                                ? AppColors.accent.withOpacity(0.18)
+                                : AppColors.text.withOpacity(0.05),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                               color: selected
-                                  ? kTeal.withOpacity(0.5)
-                                  : kWhite.withOpacity(0.08),
+                                  ? AppColors.accent.withOpacity(0.5)
+                                  : AppColors.text.withOpacity(0.08),
                             ),
                           ),
                           child: Text(
                             ClassSchedule.dayLabel(day),
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: selected ? kTeal : kWhite.withOpacity(0.4),
+                              color: selected ? AppColors.accent : AppColors.text.withOpacity(0.4),
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                             ),
@@ -584,25 +585,25 @@ class _AddClassFormState extends State<_AddClassForm> {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                     decoration: BoxDecoration(
-                      color: kWhite.withOpacity(0.04),
+                      color: AppColors.text.withOpacity(0.04),
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: kWhite.withOpacity(0.08)),
+                      border: Border.all(color: AppColors.text.withOpacity(0.08)),
                     ),
                     child: Row(
                       children: [
                         Icon(Icons.access_time_rounded,
-                            color: kTeal.withOpacity(0.8), size: 18),
+                            color: AppColors.accent.withOpacity(0.8), size: 18),
                         const SizedBox(width: 10),
                         Text(
                           _fmtTime(_selectedTime),
-                          style: const TextStyle(
-                              color: kWhite,
+                          style: TextStyle(
+                              color: AppColors.text,
                               fontSize: 15,
                               fontWeight: FontWeight.w600),
                         ),
                         const Spacer(),
                         Icon(Icons.chevron_right_rounded,
-                            color: kWhite.withOpacity(0.3), size: 18),
+                            color: AppColors.text.withOpacity(0.3), size: 18),
                       ],
                     ),
                   ),
@@ -628,20 +629,20 @@ class _AddClassFormState extends State<_AddClassForm> {
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
                             color: selected
-                                ? kTeal.withOpacity(0.18)
-                                : kWhite.withOpacity(0.05),
+                                ? AppColors.accent.withOpacity(0.18)
+                                : AppColors.text.withOpacity(0.05),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                               color: selected
-                                  ? kTeal.withOpacity(0.5)
-                                  : kWhite.withOpacity(0.08),
+                                  ? AppColors.accent.withOpacity(0.5)
+                                  : AppColors.text.withOpacity(0.08),
                             ),
                           ),
                           child: Text(
                             label,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: selected ? kTeal : kWhite.withOpacity(0.4),
+                              color: selected ? AppColors.accent : AppColors.text.withOpacity(0.4),
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                             ),
@@ -672,7 +673,7 @@ class _AddClassFormState extends State<_AddClassForm> {
         ),
 
         // ── Footer buttons ────────────────────────────────
-        Divider(height: 1, color: kWhite.withOpacity(0.07)),
+        Divider(height: 1, color: AppColors.text.withOpacity(0.07)),
         Padding(
           padding: EdgeInsets.fromLTRB(16, 14, 16, 14 + mq.padding.bottom),
           child: Row(
@@ -684,14 +685,14 @@ class _AddClassFormState extends State<_AddClassForm> {
                   child: Container(
                     height: 50,
                     decoration: BoxDecoration(
-                      color: kWhite.withOpacity(0.06),
+                      color: AppColors.text.withOpacity(0.06),
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: kWhite.withOpacity(0.1)),
+                      border: Border.all(color: AppColors.text.withOpacity(0.1)),
                     ),
                     child: Center(
                       child: Text('Cancel',
                           style: TextStyle(
-                              color: kWhite.withOpacity(0.55),
+                              color: AppColors.text.withOpacity(0.55),
                               fontSize: 15,
                               fontWeight: FontWeight.w600)),
                     ),
@@ -709,11 +710,11 @@ class _AddClassFormState extends State<_AddClassForm> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(14),
                       gradient: LinearGradient(
-                        colors: [kTeal, kTeal.withOpacity(0.75)],
+                        colors: [AppColors.accent, AppColors.accent.withOpacity(0.75)],
                       ),
                       boxShadow: [
                         BoxShadow(
-                            color: kTeal.withOpacity(0.3),
+                            color: AppColors.accent.withOpacity(0.3),
                             blurRadius: 16,
                             offset: const Offset(0, 4)),
                       ],
@@ -759,7 +760,7 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(label,
         style: TextStyle(
-            color: kWhite.withOpacity(0.35),
+            color: AppColors.text.withOpacity(0.35),
             fontSize: 10,
             fontWeight: FontWeight.w800,
             letterSpacing: 1.2));
@@ -783,18 +784,18 @@ class _InputField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: kWhite.withOpacity(0.04),
+        color: AppColors.text.withOpacity(0.04),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: kWhite.withOpacity(0.08)),
+        border: Border.all(color: AppColors.text.withOpacity(0.08)),
       ),
       child: TextField(
         controller: controller,
         onChanged: onChanged,
-        style: const TextStyle(color: kWhite, fontSize: 14),
+        style: TextStyle(color: AppColors.text, fontSize: 14),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: kWhite.withOpacity(0.28), fontSize: 14),
-          prefixIcon: Icon(icon, color: kWhite.withOpacity(0.35), size: 18),
+          hintStyle: TextStyle(color: AppColors.text.withOpacity(0.28), fontSize: 14),
+          prefixIcon: Icon(icon, color: AppColors.text.withOpacity(0.35), size: 18),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 14),
         ),
@@ -865,9 +866,9 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
     return Container(
       margin: EdgeInsets.fromLTRB(12, 0, 12, 24 + mq.padding.bottom),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A2D5A),
+        color: AppColors.bgDeep,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: kWhite.withOpacity(0.08)),
+        border: Border.all(color: AppColors.text.withOpacity(0.08)),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.45), blurRadius: 40, offset: const Offset(0, -4))],
       ),
       child: Column(
@@ -877,7 +878,7 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
           Container(
             width: 36, height: 4,
             margin: const EdgeInsets.only(top: 12),
-            decoration: BoxDecoration(color: kWhite.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
+            decoration: BoxDecoration(color: AppColors.text.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
           ),
 
           // Header
@@ -888,18 +889,18 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
                 Container(
                   width: 38, height: 38,
                   decoration: BoxDecoration(
-                    color: kTeal.withOpacity(0.14),
+                    color: AppColors.accent.withOpacity(0.14),
                     shape: BoxShape.circle,
-                    border: Border.all(color: kTeal.withOpacity(0.3)),
+                    border: Border.all(color: AppColors.accent.withOpacity(0.3)),
                   ),
-                  child: const Icon(Icons.access_time_rounded, color: kTeal, size: 18),
+                  child: Icon(Icons.access_time_rounded, color: AppColors.accent, size: 18),
                 ),
                 const SizedBox(width: 12),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Set Time', style: TextStyle(color: kWhite, fontSize: 16, fontWeight: FontWeight.bold)),
-                    Text('Scroll to choose', style: TextStyle(color: kWhite.withOpacity(0.38), fontSize: 12)),
+                    Text('Set Time', style: TextStyle(color: AppColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
+                    Text('Scroll to choose', style: TextStyle(color: AppColors.text.withOpacity(0.38), fontSize: 12)),
                   ],
                 ),
                 const Spacer(),
@@ -907,8 +908,8 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
                   onTap: () => Navigator.pop(context),
                   child: Container(
                     width: 30, height: 30,
-                    decoration: BoxDecoration(color: kWhite.withOpacity(0.07), shape: BoxShape.circle),
-                    child: Icon(Icons.close_rounded, color: kWhite.withOpacity(0.45), size: 16),
+                    decoration: BoxDecoration(color: AppColors.text.withOpacity(0.07), shape: BoxShape.circle),
+                    child: Icon(Icons.close_rounded, color: AppColors.text.withOpacity(0.45), size: 16),
                   ),
                 ),
               ],
@@ -916,7 +917,7 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
           ),
 
           const SizedBox(height: 18),
-          Divider(height: 1, color: kWhite.withOpacity(0.07)),
+          Divider(height: 1, color: AppColors.text.withOpacity(0.07)),
           const SizedBox(height: 8),
 
           // Drum rolls
@@ -931,9 +932,9 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
                   height: _itemH,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: kWhite.withOpacity(0.07),
+                      color: AppColors.text.withOpacity(0.07),
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: kWhite.withOpacity(0.1)),
+                      border: Border.all(color: AppColors.text.withOpacity(0.1)),
                     ),
                   ),
                 ),
@@ -946,7 +947,7 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                          colors: [const Color(0xFF1A2D5A), const Color(0xFF1A2D5A).withOpacity(0)],
+                          colors: [AppColors.bgDeep, AppColors.bgDeep.withOpacity(0)],
                         ),
                       ),
                     ),
@@ -961,7 +962,7 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.bottomCenter, end: Alignment.topCenter,
-                          colors: [const Color(0xFF1A2D5A), const Color(0xFF1A2D5A).withOpacity(0)],
+                          colors: [AppColors.bgDeep, AppColors.bgDeep.withOpacity(0)],
                         ),
                       ),
                     ),
@@ -979,7 +980,7 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
                         onChanged: (i) => setState(() => _hour12 = (i % 12) + 1),
                       ),
                     ),
-                    Text(':', style: TextStyle(color: kWhite.withOpacity(0.6), fontSize: 28, fontWeight: FontWeight.w300)),
+                    Text(':', style: TextStyle(color: AppColors.text.withOpacity(0.6), fontSize: 28, fontWeight: FontWeight.w300)),
                     Expanded(
                       flex: 3,
                       child: _Wheel(
@@ -1006,7 +1007,7 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
           ),
 
           const SizedBox(height: 12),
-          Divider(height: 1, color: kWhite.withOpacity(0.07)),
+          Divider(height: 1, color: AppColors.text.withOpacity(0.07)),
 
           // Confirm button
           Padding(
@@ -1016,8 +1017,8 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
-                  gradient: LinearGradient(colors: [kTeal, kTeal.withOpacity(0.75)]),
-                  boxShadow: [BoxShadow(color: kTeal.withOpacity(0.35), blurRadius: 16, offset: const Offset(0, 4))],
+                  gradient: LinearGradient(colors: [AppColors.accent, AppColors.accent.withOpacity(0.75)]),
+                  boxShadow: [BoxShadow(color: AppColors.accent.withOpacity(0.35), blurRadius: 16, offset: const Offset(0, 4))],
                 ),
                 child: Material(
                   color: Colors.transparent,
@@ -1028,11 +1029,11 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.check_rounded, color: kWhite, size: 18),
+                          Icon(Icons.check_rounded, color: AppColors.text, size: 18),
                           const SizedBox(width: 7),
                           Text(
                             _formatPreview(_result),
-                            style: const TextStyle(color: kWhite, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.3),
+                            style: TextStyle(color: AppColors.text, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.3),
                           ),
                         ],
                       ),
@@ -1097,8 +1098,8 @@ class _WheelItem extends StatelessWidget {
     return Center(
       child: Text(
         label,
-        style: const TextStyle(
-          color: kWhite,
+        style: TextStyle(
+          color: AppColors.text,
           fontSize: 26,
           fontWeight: FontWeight.w300,
           letterSpacing: 0.5,

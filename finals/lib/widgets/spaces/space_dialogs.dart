@@ -7,6 +7,7 @@ import '../../store/space_store.dart';
 import '../../store/auth_store.dart';
 import '../../store/task_store.dart';
 import '../../widgets/spaces/space_detail_sheet.dart'; // for InviteCodeRow
+import '../../constants/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Add Member
@@ -23,7 +24,7 @@ void showAddMemberDialog(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setDlg) => Dialog(
-        backgroundColor: const Color(0xFF1A2D5A),
+        backgroundColor: AppColors.bgDeep,
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
@@ -36,10 +37,10 @@ void showAddMemberDialog(
                 Icon(Icons.person_add_alt_1_rounded,
                     color: space.accentColor, size: 20),
                 const SizedBox(width: 10),
-                const Text(
+                Text(
                   'Add Member',
                   style: TextStyle(
-                    color: kWhite,
+                    color: AppColors.text,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -51,7 +52,7 @@ void showAddMemberDialog(
               Text(
                 'Enter User ID',
                 style: TextStyle(
-                  color: kWhite.withOpacity(0.5),
+                  color: AppColors.text.withOpacity(0.5),
                   fontSize: 11,
                   letterSpacing: 0.6,
                   fontWeight: FontWeight.w700,
@@ -61,7 +62,7 @@ void showAddMemberDialog(
               Text(
                 'Ask the user to share their #ID from the drawer.',
                 style: TextStyle(
-                  color: kWhite.withOpacity(0.3),
+                  color: AppColors.text.withOpacity(0.3),
                   fontSize: 11,
                 ),
               ),
@@ -76,8 +77,8 @@ void showAddMemberDialog(
                   // Allow only # prefix + hex characters
                   FilteringTextInputFormatter.allow(RegExp(r'[#0-9a-fA-F]')),
                 ],
-                style: const TextStyle(
-                  color: kWhite,
+                style: TextStyle(
+                  color: AppColors.text,
                   fontSize: 14,
                   letterSpacing: 1.5,
                   fontWeight: FontWeight.w600,
@@ -86,14 +87,14 @@ void showAddMemberDialog(
                   hintText: '#a1b2c3d4',
                   counterText: '',
                   hintStyle: TextStyle(
-                    color: kWhite.withOpacity(0.25),
+                    color: AppColors.text.withOpacity(0.25),
                   ),
                   filled: true,
-                  fillColor: kWhite.withOpacity(0.06),
+                  fillColor: AppColors.text.withOpacity(0.06),
 
                   prefixIcon: Icon(
                     Icons.alternate_email_rounded,
-                    color: kWhite.withOpacity(0.35),
+                    color: AppColors.text.withOpacity(0.35),
                     size: 16,
                   ),
 
@@ -107,13 +108,13 @@ void showAddMemberDialog(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide:
-                        BorderSide(color: kWhite.withOpacity(0.1)),
+                        BorderSide(color: AppColors.text.withOpacity(0.1)),
                   ),
 
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide:
-                        BorderSide(color: kWhite.withOpacity(0.1)),
+                        BorderSide(color: AppColors.text.withOpacity(0.1)),
                   ),
 
                   focusedBorder: OutlineInputBorder(
@@ -131,7 +132,7 @@ void showAddMemberDialog(
               Row(children: [
                 Expanded(
                   child: Divider(
-                    color: kWhite.withOpacity(0.1),
+                    color: AppColors.text.withOpacity(0.1),
                     height: 1,
                   ),
                 ),
@@ -141,14 +142,14 @@ void showAddMemberDialog(
                   child: Text(
                     'or share invite code',
                     style: TextStyle(
-                      color: kWhite.withOpacity(0.3),
+                      color: AppColors.text.withOpacity(0.3),
                       fontSize: 10,
                     ),
                   ),
                 ),
                 Expanded(
                   child: Divider(
-                    color: kWhite.withOpacity(0.1),
+                    color: AppColors.text.withOpacity(0.1),
                     height: 1,
                   ),
                 ),
@@ -170,7 +171,7 @@ void showAddMemberDialog(
                     child: Text(
                       'Cancel',
                       style: TextStyle(
-                        color: kWhite.withOpacity(0.45),
+                        color: AppColors.text.withOpacity(0.45),
                       ),
                     ),
                   ),
@@ -279,7 +280,7 @@ void showAddTaskDialog(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setDlg) => Dialog(
-        backgroundColor: const Color(0xFF1A2D5A),
+        backgroundColor: AppColors.bgDeep,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -290,14 +291,14 @@ void showAddTaskDialog(
               Row(children: [
                 Icon(Icons.checklist_rounded, color: space.accentColor, size: 20),
                 const SizedBox(width: 10),
-                const Text('New Task',
+                Text('New Task',
                     style: TextStyle(
-                        color: kWhite, fontSize: 16, fontWeight: FontWeight.bold)),
+                        color: AppColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
               ]),
               const SizedBox(height: 16),
               Text('Task Title',
                   style: TextStyle(
-                      color: kWhite.withOpacity(0.5),
+                      color: AppColors.text.withOpacity(0.5),
                       fontSize: 11,
                       letterSpacing: 0.6,
                       fontWeight: FontWeight.w700)),
@@ -305,21 +306,21 @@ void showAddTaskDialog(
               TextField(
                 controller: titleCtrl,
                 autofocus: false,
-                style: const TextStyle(color: kWhite, fontSize: 14),
+                style: TextStyle(color: AppColors.text, fontSize: 14),
                 decoration: InputDecoration(
                   hintText: 'e.g. Research references',
-                  hintStyle: TextStyle(color: kWhite.withOpacity(0.25)),
+                  hintStyle: TextStyle(color: AppColors.text.withOpacity(0.25)),
                   filled: true,
-                  fillColor: kWhite.withOpacity(0.06),
+                  fillColor: AppColors.text.withOpacity(0.06),
                   errorText: error,
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: kWhite.withOpacity(0.1))),
+                      borderSide: BorderSide(color: AppColors.text.withOpacity(0.1))),
                   enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: kWhite.withOpacity(0.1))),
+                      borderSide: BorderSide(color: AppColors.text.withOpacity(0.1))),
                   focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide:
@@ -329,7 +330,7 @@ void showAddTaskDialog(
               const SizedBox(height: 12),
               Text('Note (Optional)',
                   style: TextStyle(
-                      color: kWhite.withOpacity(0.5),
+                      color: AppColors.text.withOpacity(0.5),
                       fontSize: 11,
                       letterSpacing: 0.6,
                       fontWeight: FontWeight.w700)),
@@ -337,20 +338,20 @@ void showAddTaskDialog(
               TextField(
                 controller: noteCtrl,
                 maxLines: 2,
-                style: const TextStyle(color: kWhite, fontSize: 13),
+                style: TextStyle(color: AppColors.text, fontSize: 13),
                 decoration: InputDecoration(
                   hintText: 'Add a short note…',
-                  hintStyle: TextStyle(color: kWhite.withOpacity(0.25)),
+                  hintStyle: TextStyle(color: AppColors.text.withOpacity(0.25)),
                   filled: true,
-                  fillColor: kWhite.withOpacity(0.06),
+                  fillColor: AppColors.text.withOpacity(0.06),
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: kWhite.withOpacity(0.1))),
+                      borderSide: BorderSide(color: AppColors.text.withOpacity(0.1))),
                   enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: kWhite.withOpacity(0.1))),
+                      borderSide: BorderSide(color: AppColors.text.withOpacity(0.1))),
                   focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide:
@@ -363,7 +364,7 @@ void showAddTaskDialog(
                   child: TextButton(
                     onPressed: () => Navigator.pop(ctx),
                     child: Text('Cancel',
-                        style: TextStyle(color: kWhite.withOpacity(0.45))),
+                        style: TextStyle(color: AppColors.text.withOpacity(0.45))),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -371,7 +372,7 @@ void showAddTaskDialog(
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: space.accentColor,
-                      foregroundColor: kWhite,
+                      foregroundColor: AppColors.text,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                     ),
@@ -407,7 +408,7 @@ void showConfirmDeleteSpace(
   showDialog(
     context: context,
     builder: (ctx) => Dialog(
-      backgroundColor: const Color(0xFF1A2D5A),
+      backgroundColor: AppColors.bgDeep,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -416,15 +417,15 @@ void showConfirmDeleteSpace(
           children: [
             const Icon(Icons.delete_rounded, color: Color(0xFFE87070), size: 36),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'Delete Space',
-              style: TextStyle(color: kWhite, fontSize: 17, fontWeight: FontWeight.bold),
+              style: TextStyle(color: AppColors.text, fontSize: 17, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               'Are you sure you want to delete "${space.name}"? This cannot be undone.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: kWhite.withOpacity(0.6), fontSize: 13),
+              style: TextStyle(color: AppColors.text.withOpacity(0.6), fontSize: 13),
             ),
             const SizedBox(height: 20),
             Row(children: [
@@ -432,7 +433,7 @@ void showConfirmDeleteSpace(
                 child: TextButton(
                   onPressed: () => Navigator.pop(ctx),
                   child: Text('Cancel',
-                      style: TextStyle(color: kWhite.withOpacity(0.45))),
+                      style: TextStyle(color: AppColors.text.withOpacity(0.45))),
                 ),
               ),
               const SizedBox(width: 8),
@@ -440,7 +441,7 @@ void showConfirmDeleteSpace(
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFE87070),
-                    foregroundColor: kWhite,
+                    foregroundColor: AppColors.text,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
@@ -470,7 +471,7 @@ void showConfirmLeaveSpace(
   showDialog(
     context: context,
     builder: (ctx) => Dialog(
-      backgroundColor: const Color(0xFF1A2D5A),
+      backgroundColor: AppColors.bgDeep,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -479,15 +480,15 @@ void showConfirmLeaveSpace(
           children: [
             const Icon(Icons.exit_to_app_rounded, color: Color(0xFFE87070), size: 36),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'Leave Space',
-              style: TextStyle(color: kWhite, fontSize: 17, fontWeight: FontWeight.bold),
+              style: TextStyle(color: AppColors.text, fontSize: 17, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               'Are you sure you want to leave "${space.name}"?',
               textAlign: TextAlign.center,
-              style: TextStyle(color: kWhite.withOpacity(0.6), fontSize: 13),
+              style: TextStyle(color: AppColors.text.withOpacity(0.6), fontSize: 13),
             ),
             const SizedBox(height: 20),
             Row(children: [
@@ -495,7 +496,7 @@ void showConfirmLeaveSpace(
                 child: TextButton(
                   onPressed: () => Navigator.pop(ctx),
                   child: Text('Cancel',
-                      style: TextStyle(color: kWhite.withOpacity(0.45))),
+                      style: TextStyle(color: AppColors.text.withOpacity(0.45))),
                 ),
               ),
               const SizedBox(width: 8),
@@ -503,7 +504,7 @@ void showConfirmLeaveSpace(
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFE87070),
-                    foregroundColor: kWhite,
+                    foregroundColor: AppColors.text,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
@@ -534,7 +535,7 @@ void showConfirmKickMember(
   showDialog(
     context: context,
     builder: (ctx) => Dialog(
-      backgroundColor: const Color(0xFF1A2D5A),
+      backgroundColor: AppColors.bgDeep,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -544,14 +545,14 @@ void showConfirmKickMember(
             const Icon(Icons.person_remove_rounded,
                 color: Color(0xFFE87070), size: 36),
             const SizedBox(height: 12),
-            const Text('Remove Member',
+            Text('Remove Member',
                 style: TextStyle(
-                    color: kWhite, fontSize: 17, fontWeight: FontWeight.bold)),
+                    color: AppColors.text, fontSize: 17, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Text(
               'Remove "$member" from this space?',
               textAlign: TextAlign.center,
-              style: TextStyle(color: kWhite.withOpacity(0.6), fontSize: 13),
+              style: TextStyle(color: AppColors.text.withOpacity(0.6), fontSize: 13),
             ),
             const SizedBox(height: 20),
             Row(children: [
@@ -559,7 +560,7 @@ void showConfirmKickMember(
                 child: TextButton(
                   onPressed: () => Navigator.pop(ctx),
                   child: Text('Cancel',
-                      style: TextStyle(color: kWhite.withOpacity(0.45))),
+                      style: TextStyle(color: AppColors.text.withOpacity(0.45))),
                 ),
               ),
               const SizedBox(width: 8),
@@ -567,7 +568,7 @@ void showConfirmKickMember(
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFE87070),
-                    foregroundColor: kWhite,
+                    foregroundColor: AppColors.text,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
@@ -601,7 +602,7 @@ void showJoinSpaceDialog(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setDlg) => Dialog(
-        backgroundColor: const Color(0xFF1A2D5A),
+        backgroundColor: AppColors.bgDeep,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -614,16 +615,16 @@ void showJoinSpaceDialog(
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: kTeal.withOpacity(0.14),
+                    color: AppColors.accent.withOpacity(0.14),
                     shape: BoxShape.circle,
-                    border: Border.all(color: kTeal.withOpacity(0.3)),
+                    border: Border.all(color: AppColors.accent.withOpacity(0.3)),
                   ),
-                  child: const Icon(Icons.link_rounded, color: kTeal, size: 18),
+                  child: Icon(Icons.link_rounded, color: AppColors.accent, size: 18),
                 ),
                 const SizedBox(width: 12),
-                const Text('Join a Space',
+                Text('Join a Space',
                     style: TextStyle(
-                        color: kWhite,
+                        color: AppColors.text,
                         fontSize: 16,
                         fontWeight: FontWeight.bold)),
               ]),
@@ -631,12 +632,12 @@ void showJoinSpaceDialog(
               Text(
                 'Enter the 8-character invite code shared by the space creator.',
                 style:
-                    TextStyle(color: kWhite.withOpacity(0.45), fontSize: 12),
+                    TextStyle(color: AppColors.text.withOpacity(0.45), fontSize: 12),
               ),
               const SizedBox(height: 16),
               Text('Invite Code',
                   style: TextStyle(
-                      color: kWhite.withOpacity(0.5),
+                      color: AppColors.text.withOpacity(0.5),
                       fontSize: 11,
                       letterSpacing: 0.6,
                       fontWeight: FontWeight.w700)),
@@ -646,8 +647,8 @@ void showJoinSpaceDialog(
                 autofocus: false,
                 textCapitalization: TextCapitalization.characters,
                 maxLength: 8,
-                style: const TextStyle(
-                  color: kWhite,
+                style: TextStyle(
+                  color: AppColors.text,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 4,
@@ -655,26 +656,26 @@ void showJoinSpaceDialog(
                 decoration: InputDecoration(
                   hintText: 'XXXXXXXX',
                   hintStyle: TextStyle(
-                      color: kWhite.withOpacity(0.2),
+                      color: AppColors.text.withOpacity(0.2),
                       fontSize: 18,
                       letterSpacing: 4,
                       fontWeight: FontWeight.bold),
                   filled: true,
-                  fillColor: kWhite.withOpacity(0.06),
+                  fillColor: AppColors.text.withOpacity(0.06),
                   counterText: '',
                   errorText: error,
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: kWhite.withOpacity(0.1))),
+                      borderSide: BorderSide(color: AppColors.text.withOpacity(0.1))),
                   enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: kWhite.withOpacity(0.1))),
+                      borderSide: BorderSide(color: AppColors.text.withOpacity(0.1))),
                   focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide:
-                          const BorderSide(color: kTeal, width: 1.5)),
+                          BorderSide(color: AppColors.accent, width: 1.5)),
                   errorBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide:
@@ -691,15 +692,15 @@ void showJoinSpaceDialog(
                   child: TextButton(
                     onPressed: () => Navigator.pop(ctx),
                     child: Text('Cancel',
-                        style: TextStyle(color: kWhite.withOpacity(0.45))),
+                        style: TextStyle(color: AppColors.text.withOpacity(0.45))),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: kTeal,
-                      foregroundColor: kNavyDark,
+                      backgroundColor: AppColors.accent,
+                      foregroundColor: AppColors.bg,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                     ),
@@ -745,7 +746,7 @@ void showConfirmDeleteTask(
   showDialog(
     context: context,
     builder: (ctx) => Dialog(
-      backgroundColor: const Color(0xFF1A2D5A),
+      backgroundColor: AppColors.bgDeep,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
@@ -762,10 +763,10 @@ void showConfirmDeleteTask(
 
             const SizedBox(height: 12),
 
-            const Text(
+            Text(
               'Delete Task',
               style: TextStyle(
-                color: kWhite,
+                color: AppColors.text,
                 fontSize: 17,
                 fontWeight: FontWeight.bold,
               ),
@@ -777,7 +778,7 @@ void showConfirmDeleteTask(
               'Are you sure you want to delete "${task.title}"?',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: kWhite.withOpacity(0.6),
+                color: AppColors.text.withOpacity(0.6),
                 fontSize: 13,
               ),
             ),
@@ -792,7 +793,7 @@ void showConfirmDeleteTask(
                     child: Text(
                       'Cancel',
                       style: TextStyle(
-                        color: kWhite.withOpacity(0.45),
+                        color: AppColors.text.withOpacity(0.45),
                       ),
                     ),
                   ),
@@ -804,7 +805,7 @@ void showConfirmDeleteTask(
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFE87070),
-                      foregroundColor: kWhite,
+                      foregroundColor: AppColors.text,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),

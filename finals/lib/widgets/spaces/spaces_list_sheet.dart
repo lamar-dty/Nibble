@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/colors.dart';
 import '../../models/space.dart';
+import '../../constants/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Sheet A: spaces list
@@ -105,7 +106,7 @@ class _SpacesSheetState extends State<SpacesSheet> {
         SliverAppBar(
           pinned: true,
           automaticallyImplyLeading: false,
-          backgroundColor: kWhite,
+          backgroundColor: AppColors.text,
           surfaceTintColor: Colors.transparent,
           shadowColor: Colors.transparent,
           elevation: 0,
@@ -141,14 +142,14 @@ class _SpacesSheetState extends State<SpacesSheet> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.group_work_outlined,
-                          size: 60, color: kNavyDark.withOpacity(0.1)),
+                          size: 60, color: AppColors.bg.withOpacity(0.1)),
                       const SizedBox(height: 14),
                       Text(
                         _activeFilter == null
                             ? 'No spaces yet'
                             : 'No $_activeFilter spaces',
                         style: TextStyle(
-                            color: kNavyDark.withOpacity(0.4),
+                            color: AppColors.bg.withOpacity(0.4),
                             fontSize: 15,
                             fontWeight: FontWeight.w600),
                       ),
@@ -158,7 +159,7 @@ class _SpacesSheetState extends State<SpacesSheet> {
                             ? 'Tap to add one'
                             : 'Try a different filter',
                         style: TextStyle(
-                            color: kNavyDark.withOpacity(0.25), fontSize: 13),
+                            color: AppColors.bg.withOpacity(0.25), fontSize: 13),
                       ),
                     ],
                   ),
@@ -175,13 +176,13 @@ class _SpacesSheetState extends State<SpacesSheet> {
                 (context, i) {
                   // Footer item — rendered as the last child.
                   if (i == filtered.length) {
-                    return const Padding(
+                    return Padding(
                       padding: EdgeInsets.symmetric(vertical: 16),
                       child: Center(
                         child: Text(
                           'No More Spaces',
                           style: TextStyle(
-                              color: Color(0xFFB0BAD3), fontSize: 13),
+                              color: AppColors.subtitle, fontSize: 13),
                         ),
                       ),
                     );
@@ -249,10 +250,10 @@ class _SpacesSheetHeader extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Spaces',
                 style: TextStyle(
-                    color: kNavyDark,
+                    color: AppColors.bg,
                     fontSize: 20,
                     fontWeight: FontWeight.bold),
               ),
@@ -271,7 +272,7 @@ class _SpacesSheetHeader extends StatelessWidget {
               SpaceFilterChip(
                 label: 'All',
                 count: spaces.length,
-                color: kNavyDark,
+                color: AppColors.bg,
                 isActive: activeFilter == null,
                 onTap: () => onSetFilter(null),
               ),
@@ -279,7 +280,7 @@ class _SpacesSheetHeader extends StatelessWidget {
               SpaceFilterChip(
                 label: 'In Progress',
                 count: inProgress,
-                color: const Color(0xFF4A90D9),
+                color: AppColors.link,
                 isActive: activeFilter == 'In Progress',
                 onTap: () => onSetFilter('In Progress'),
               ),
@@ -287,7 +288,7 @@ class _SpacesSheetHeader extends StatelessWidget {
               SpaceFilterChip(
                 label: 'Not Started',
                 count: notStarted,
-                color: const Color(0xFFB0BAD3),
+                color: AppColors.subtitle,
                 isActive: activeFilter == 'Not Started',
                 onTap: () => onSetFilter('Not Started'),
               ),
@@ -335,12 +336,12 @@ class SpaceCard extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
         decoration: BoxDecoration(
-          color: kWhite,
+          color: AppColors.text,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isUrgent
                 ? const Color(0xFFE87070).withOpacity(0.5)
-                : const Color(0xFFEEEEEE),
+                : AppColors.lightFill,
           ),
           boxShadow: [
             BoxShadow(
@@ -379,8 +380,8 @@ class SpaceCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               space.name,
-                              style: const TextStyle(
-                                  color: kNavyDark,
+                              style: TextStyle(
+                                  color: AppColors.bg,
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold),
                               overflow: TextOverflow.ellipsis,
@@ -416,7 +417,7 @@ class SpaceCard extends StatelessWidget {
                               child: LinearProgressIndicator(
                                 value: space.progress,
                                 minHeight: 5,
-                                backgroundColor: const Color(0xFFEEEEEE),
+                                backgroundColor: AppColors.lightFill,
                                 valueColor: AlwaysStoppedAnimation<Color>(
                                     space.accentColor),
                               ),
@@ -438,22 +439,22 @@ class SpaceCard extends StatelessWidget {
                       // Meta row
                       Row(
                         children: [
-                          const Icon(Icons.access_time_rounded,
-                              size: 11, color: Color(0xFF6B7A99)),
+                          Icon(Icons.access_time_rounded,
+                              size: 11, color: AppColors.icon),
                           const SizedBox(width: 3),
                           Text(
                             space.dateRange,
-                            style: const TextStyle(
-                                color: Color(0xFF6B7A99), fontSize: 10),
+                            style: TextStyle(
+                                color: AppColors.icon, fontSize: 10),
                           ),
                           const Spacer(),
-                          const Icon(Icons.group_rounded,
-                              size: 11, color: Color(0xFF6B7A99)),
+                          Icon(Icons.group_rounded,
+                              size: 11, color: AppColors.icon),
                           const SizedBox(width: 3),
                           Text(
                             '${space.memberCount}',
-                            style: const TextStyle(
-                                color: Color(0xFF6B7A99), fontSize: 10),
+                            style: TextStyle(
+                                color: AppColors.icon, fontSize: 10),
                           ),
                           if (isUrgent) ...[
                             const SizedBox(width: 8),
@@ -484,10 +485,10 @@ class SpaceCard extends StatelessWidget {
               ),
 
               // Arrow
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(right: 12),
                 child: Icon(Icons.arrow_forward_ios_rounded,
-                    size: 14, color: Color(0xFFB0BAD3)),
+                    size: 14, color: AppColors.subtitle),
               ),
             ],
           ),
@@ -534,7 +535,7 @@ class SpaceFilterChip extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                  color: isActive ? kWhite : color,
+                  color: isActive ? AppColors.text : color,
                   fontSize: 12,
                   fontWeight: FontWeight.w600),
             ),
@@ -543,14 +544,14 @@ class SpaceFilterChip extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
               decoration: BoxDecoration(
                 color: isActive
-                    ? kWhite.withOpacity(0.25)
+                    ? AppColors.text.withOpacity(0.25)
                     : color.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
                 '$count',
                 style: TextStyle(
-                    color: isActive ? kWhite : color,
+                    color: isActive ? AppColors.text : color,
                     fontSize: 10,
                     fontWeight: FontWeight.bold),
               ),

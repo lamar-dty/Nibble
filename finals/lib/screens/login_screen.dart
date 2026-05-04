@@ -4,6 +4,7 @@ import '../constants/colors.dart';
 import '../store/auth_store.dart';
 import 'signup_screen.dart';
 import '../main.dart';
+import '../constants/app_colors.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -141,7 +142,7 @@ class _LoginScreenState extends State<LoginScreen>
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: kNavyDark,
+      backgroundColor: AppColors.bg,
       resizeToAvoidBottomInset: true,
       body: AnimatedBuilder(
         animation: _entryController,
@@ -254,12 +255,12 @@ class _LoginCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Title
-          const Text(
+          Text(
             'Welcome back',
             style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.bold,
-              color: kNavyDark,
+              color: AppColors.bg,
             ),
           ),
           const SizedBox(height: 4),
@@ -273,12 +274,12 @@ class _LoginCard extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Username or Email
-          const Text(
+          Text(
             'Username or Email',
             style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
-                color: kNavyDark),
+                color: AppColors.bg),
           ),
           const SizedBox(height: 6),
           _AuthField(
@@ -295,12 +296,12 @@ class _LoginCard extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Password
-          const Text(
+          Text(
             'Password',
             style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
-                color: kNavyDark),
+                color: AppColors.bg),
           ),
           const SizedBox(height: 6),
           _AuthField(
@@ -336,7 +337,7 @@ class _LoginCard extends StatelessWidget {
             child: ElevatedButton(
               onPressed: loading ? null : onLogin,
               style: ElevatedButton.styleFrom(
-                backgroundColor: kTeal,
+                backgroundColor: AppColors.accent,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14)),
                 elevation: 0,
@@ -380,16 +381,16 @@ class _LoginCard extends StatelessWidget {
               onTap: onSignUp,
               child: RichText(
                 text: TextSpan(
-                  style: const TextStyle(fontSize: 13, color: kNavyDark),
+                  style: TextStyle(fontSize: 13, color: AppColors.bg),
                   children: [
                     const TextSpan(text: "Need an account? "),
                     TextSpan(
                       text: 'Sign Up',
-                      style: const TextStyle(
-                        color: kTeal,
+                      style: TextStyle(
+                        color: AppColors.accent,
                         fontWeight: FontWeight.bold,
                         decoration: TextDecoration.underline,
-                        decorationColor: kTeal,
+                        decorationColor: AppColors.accent,
                       ),
                     ),
                   ],
@@ -437,7 +438,7 @@ class _AuthField extends StatelessWidget {
           inputFormatters: inputFormatters,
           autocorrect: false,
           enableSuggestions: false,
-          style: const TextStyle(fontSize: 14, color: kNavyDark),
+          style: TextStyle(fontSize: 14, color: AppColors.bg),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
@@ -455,13 +456,13 @@ class _AuthField extends StatelessWidget {
               borderSide: BorderSide(
                 color: errorText != null
                     ? Colors.red.shade300
-                    : kTeal.withOpacity(0.3),
+                    : AppColors.accent.withOpacity(0.3),
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: errorText != null ? Colors.red : kTeal,
+                color: errorText != null ? Colors.red : AppColors.accent,
                 width: 1.5,
               ),
             ),

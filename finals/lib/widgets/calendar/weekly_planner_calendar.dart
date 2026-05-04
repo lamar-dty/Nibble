@@ -4,6 +4,7 @@ import '../../models/task.dart';
 import '../../models/event.dart';
 import '../../store/task_store.dart';
 import 'task_detail_sheet.dart';
+import '../../constants/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Models
@@ -98,13 +99,13 @@ class _WeeklyPlannerCalendarState extends State<WeeklyPlannerCalendar>
   final List<PlanCategory> _categories = [
     PlanCategory(id: _kCatAssignment,    name: 'Assignment',      color: const Color(0xFF9B88E8)),
     PlanCategory(id: _kCatProject,       name: 'Project',         color: const Color(0xFFE8D870)),
-    PlanCategory(id: _kCatAssessment,    name: 'Assessment',      color: const Color(0xFF90D0CB)),
+    PlanCategory(id: _kCatAssessment,    name: 'Assessment',      color: AppColors.accent),
     PlanCategory(id: _kCatPersonalTask,  name: 'Personal Task',   color: const Color(0xFFE8A870)),
-    PlanCategory(id: _kCatEventAcademic, name: 'Academic', color: const Color(0xFF4A90D9)),
+    PlanCategory(id: _kCatEventAcademic, name: 'Academic', color: AppColors.link),
     PlanCategory(id: _kCatEventPersonal, name: 'Organization', color: const Color(0xFFE8A870)),
     PlanCategory(id: _kCatEventSocial,   name: 'Social',   color: const Color(0xFFD96B8A)),
     PlanCategory(id: _kCatEventHealth,   name: 'Health',   color: const Color(0xFF3BBFA3)),
-    PlanCategory(id: _kCatEventOther,    name: 'Other',    color: const Color(0xFFB0BAD3)),
+    PlanCategory(id: _kCatEventOther,    name: 'Other',    color: AppColors.subtitle),
   ];
 
   @override
@@ -341,9 +342,9 @@ class _WeeklyPlannerCalendarState extends State<WeeklyPlannerCalendar>
               margin: const EdgeInsets.fromLTRB(12, 0, 12, 24),
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 28),
               decoration: BoxDecoration(
-                color: const Color(0xFF1B2D5B),
+                color: AppColors.bgDeep,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: kWhite.withOpacity(0.08)),
+                border: Border.all(color: AppColors.text.withOpacity(0.08)),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -355,7 +356,7 @@ class _WeeklyPlannerCalendarState extends State<WeeklyPlannerCalendar>
                       width: 36, height: 4,
                       margin: const EdgeInsets.only(bottom: 20),
                       decoration: BoxDecoration(
-                        color: kWhite.withOpacity(0.2),
+                        color: AppColors.text.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -364,12 +365,12 @@ class _WeeklyPlannerCalendarState extends State<WeeklyPlannerCalendar>
                   // Title
                   Row(
                     children: [
-                      const Icon(Icons.tune_rounded, color: kTeal, size: 18),
+                      Icon(Icons.tune_rounded, color: AppColors.accent, size: 18),
                       const SizedBox(width: 8),
-                      const Text(
+                      Text(
                         'Calendar Hours',
                         style: TextStyle(
-                          color: kWhite,
+                          color: AppColors.text,
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
                         ),
@@ -379,13 +380,13 @@ class _WeeklyPlannerCalendarState extends State<WeeklyPlannerCalendar>
                   const SizedBox(height: 6),
                   Text(
                     'Set the visible time range for your weekly planner.',
-                    style: TextStyle(color: kWhite.withOpacity(0.45), fontSize: 12),
+                    style: TextStyle(color: AppColors.text.withOpacity(0.45), fontSize: 12),
                   ),
 
                   const SizedBox(height: 28),
 
                   // Start hour
-                  Text('Start time', style: TextStyle(color: kWhite.withOpacity(0.6), fontSize: 12, fontWeight: FontWeight.w600)),
+                  Text('Start time', style: TextStyle(color: AppColors.text.withOpacity(0.6), fontSize: 12, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 10),
                   _HourSlider(
                     value: tempStart,
@@ -398,7 +399,7 @@ class _WeeklyPlannerCalendarState extends State<WeeklyPlannerCalendar>
                   const SizedBox(height: 24),
 
                   // End hour
-                  Text('End time', style: TextStyle(color: kWhite.withOpacity(0.6), fontSize: 12, fontWeight: FontWeight.w600)),
+                  Text('End time', style: TextStyle(color: AppColors.text.withOpacity(0.6), fontSize: 12, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 10),
                   _HourSlider(
                     value: tempEnd,
@@ -415,13 +416,13 @@ class _WeeklyPlannerCalendarState extends State<WeeklyPlannerCalendar>
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                       decoration: BoxDecoration(
-                        color: kTeal.withOpacity(0.12),
+                        color: AppColors.accent.withOpacity(0.12),
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: kTeal.withOpacity(0.25)),
+                        border: Border.all(color: AppColors.accent.withOpacity(0.25)),
                       ),
                       child: Text(
                         '${_fmt(tempStart)} → ${_fmt(tempEnd)}  ·  ${tempEnd - tempStart}h visible',
-                        style: const TextStyle(color: kTeal, fontSize: 12, fontWeight: FontWeight.w600),
+                        style: TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.w600),
                       ),
                     ),
                   ),
@@ -436,11 +437,11 @@ class _WeeklyPlannerCalendarState extends State<WeeklyPlannerCalendar>
                         child: OutlinedButton(
                           onPressed: () => setModal(() { tempStart = 6; tempEnd = 22; }),
                           style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: kWhite.withOpacity(0.2)),
+                            side: BorderSide(color: AppColors.text.withOpacity(0.2)),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
-                          child: Text('Reset', style: TextStyle(color: kWhite.withOpacity(0.6), fontSize: 14)),
+                          child: Text('Reset', style: TextStyle(color: AppColors.text.withOpacity(0.6), fontSize: 14)),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -453,7 +454,7 @@ class _WeeklyPlannerCalendarState extends State<WeeklyPlannerCalendar>
                             Navigator.pop(ctx);
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: kTeal,
+                            backgroundColor: AppColors.accent,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             elevation: 0,
@@ -527,13 +528,13 @@ class _WeeklyPlannerCalendarState extends State<WeeklyPlannerCalendar>
                 Container(
                   width: 3, height: 14,
                   decoration: BoxDecoration(
-                    color: kTeal, borderRadius: BorderRadius.circular(2)),
+                    color: AppColors.accent, borderRadius: BorderRadius.circular(2)),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   'Week of ${weekDays.first.day} ${_shortMonth(weekDays.first.month)}',
                   style: TextStyle(
-                    color: kWhite.withOpacity(0.75),
+                    color: AppColors.text.withOpacity(0.75),
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -550,14 +551,14 @@ class _WeeklyPlannerCalendarState extends State<WeeklyPlannerCalendar>
                           key: ValueKey('t$_visibleTaskCount'),
                           padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
                           decoration: BoxDecoration(
-                            color: kTeal.withOpacity(0.15),
+                            color: AppColors.accent.withOpacity(0.15),
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: kTeal.withOpacity(0.3)),
+                            border: Border.all(color: AppColors.accent.withOpacity(0.3)),
                           ),
                           child: Text(
                             '$_visibleTaskCount task${_visibleTaskCount == 1 ? '' : 's'}',
-                            style: const TextStyle(
-                                color: kTeal, fontSize: 10, fontWeight: FontWeight.w600),
+                            style: TextStyle(
+                                color: AppColors.accent, fontSize: 10, fontWeight: FontWeight.w600),
                           ),
                         ),
                       ),
@@ -570,14 +571,14 @@ class _WeeklyPlannerCalendarState extends State<WeeklyPlannerCalendar>
                           key: ValueKey('e$_visibleEventCount'),
                           padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF4A90D9).withOpacity(0.15),
+                            color: AppColors.link.withOpacity(0.15),
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: const Color(0xFF4A90D9).withOpacity(0.3)),
+                            border: Border.all(color: AppColors.link.withOpacity(0.3)),
                           ),
                           child: Text(
                             '$_visibleEventCount event${_visibleEventCount == 1 ? '' : 's'}',
-                            style: const TextStyle(
-                                color: Color(0xFF4A90D9), fontSize: 10, fontWeight: FontWeight.w600),
+                            style: TextStyle(
+                                color: AppColors.link, fontSize: 10, fontWeight: FontWeight.w600),
                           ),
                         ),
                       ),
@@ -585,14 +586,14 @@ class _WeeklyPlannerCalendarState extends State<WeeklyPlannerCalendar>
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
                         decoration: BoxDecoration(
-                          color: kTeal.withOpacity(0.15),
+                          color: AppColors.accent.withOpacity(0.15),
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: kTeal.withOpacity(0.3)),
+                          border: Border.all(color: AppColors.accent.withOpacity(0.3)),
                         ),
-                        child: const Text(
+                        child: Text(
                           '0 tasks',
                           style: TextStyle(
-                              color: kTeal, fontSize: 10, fontWeight: FontWeight.w600),
+                              color: AppColors.accent, fontSize: 10, fontWeight: FontWeight.w600),
                         ),
                       ),
                   ],
@@ -604,12 +605,12 @@ class _WeeklyPlannerCalendarState extends State<WeeklyPlannerCalendar>
                   child: Container(
                     padding: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
-                      color: kWhite.withOpacity(0.07),
+                      color: AppColors.text.withOpacity(0.07),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: kWhite.withOpacity(0.1)),
+                      border: Border.all(color: AppColors.text.withOpacity(0.1)),
                     ),
                     child: Icon(Icons.access_time_rounded,
-                        color: kWhite.withOpacity(0.55), size: 14),
+                        color: AppColors.text.withOpacity(0.55), size: 14),
                   ),
                 ),
               ],
@@ -672,8 +673,8 @@ class _HourSlider extends StatelessWidget {
           width: 52,
           child: Text(
             formatter(value),
-            style: const TextStyle(
-              color: kTeal,
+            style: TextStyle(
+              color: AppColors.accent,
               fontSize: 13,
               fontWeight: FontWeight.bold,
             ),
@@ -682,10 +683,10 @@ class _HourSlider extends StatelessWidget {
         Expanded(
           child: SliderTheme(
             data: SliderTheme.of(context).copyWith(
-              activeTrackColor: kTeal,
-              inactiveTrackColor: kWhite.withOpacity(0.1),
-              thumbColor: kTeal,
-              overlayColor: kTeal.withOpacity(0.15),
+              activeTrackColor: AppColors.accent,
+              inactiveTrackColor: AppColors.text.withOpacity(0.1),
+              thumbColor: AppColors.accent,
+              overlayColor: AppColors.accent.withOpacity(0.15),
               trackHeight: 3,
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
             ),
@@ -737,8 +738,8 @@ class _MiniCalendar extends StatelessWidget {
           children: [
             _IconBtn(icon: Icons.chevron_left_rounded, onTap: onPrev),
             Text(monthLabel,
-              style: const TextStyle(
-                color: kWhite, fontSize: 13,
+              style: TextStyle(
+                color: AppColors.text, fontSize: 13,
                 fontWeight: FontWeight.bold, letterSpacing: 0.1)),
             _IconBtn(icon: Icons.chevron_right_rounded, onTap: onNext),
           ],
@@ -751,7 +752,7 @@ class _MiniCalendar extends StatelessWidget {
                     child: Center(
                       child: Text(d,
                         style: TextStyle(
-                          color: kTeal.withOpacity(0.6),
+                          color: AppColors.accent.withOpacity(0.6),
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.3,
@@ -796,9 +797,9 @@ class _MiniCalendar extends StatelessWidget {
                 duration: const Duration(milliseconds: 180),
                 decoration: BoxDecoration(
                   color: isSel
-                      ? kTeal
+                      ? AppColors.accent
                       : isToday
-                          ? kWhite.withOpacity(0.12)
+                          ? AppColors.text.withOpacity(0.12)
                           : Colors.transparent,
                   borderRadius: BorderRadius.circular(7),
                 ),
@@ -808,10 +809,10 @@ class _MiniCalendar extends StatelessWidget {
                     Text('${day.day}',
                       style: TextStyle(
                         color: isSel
-                            ? kNavyDark
+                            ? AppColors.bg
                             : isCur
-                                ? kWhite
-                                : kWhite.withOpacity(0.18),
+                                ? AppColors.text
+                                : AppColors.text.withOpacity(0.18),
                         fontSize: 11,
                         fontWeight: isToday || isSel
                             ? FontWeight.bold
@@ -857,10 +858,10 @@ class _IconBtn extends StatelessWidget {
         child: Container(
           width: 28, height: 28,
           decoration: BoxDecoration(
-            color: kWhite.withOpacity(0.08),
+            color: AppColors.text.withOpacity(0.08),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, color: kWhite.withOpacity(0.7), size: 18),
+          child: Icon(icon, color: AppColors.text.withOpacity(0.7), size: 18),
         ),
       );
 }
@@ -952,7 +953,7 @@ class _LegendPanelState extends State<_LegendPanel> {
               child: AnimatedDefaultTextStyle(
                 duration: const Duration(milliseconds: 160),
                 style: TextStyle(
-                  color: cat.visible ? kNavyDark : kNavyDark.withOpacity(0.25),
+                  color: cat.visible ? AppColors.bg : AppColors.bg.withOpacity(0.25),
                   fontSize: 9.5,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1001,7 +1002,7 @@ class _LegendPanelState extends State<_LegendPanel> {
           Expanded(
             child: Text(label,
               style: TextStyle(
-                color: (allVisible || someVisible) ? kNavyDark : kNavyDark.withOpacity(0.25),
+                color: (allVisible || someVisible) ? AppColors.bg : AppColors.bg.withOpacity(0.25),
                 fontSize: 9.5,
                 fontWeight: FontWeight.w700,
               ),
@@ -1010,7 +1011,7 @@ class _LegendPanelState extends State<_LegendPanel> {
           AnimatedRotation(
             turns: expanded ? 0 : -0.25,
             duration: const Duration(milliseconds: 160),
-            child: Icon(Icons.expand_more_rounded, size: 13, color: kNavyDark.withOpacity(0.4)),
+            child: Icon(Icons.expand_more_rounded, size: 13, color: AppColors.bg.withOpacity(0.4)),
           ),
         ],
       ),
@@ -1026,7 +1027,7 @@ class _LegendPanelState extends State<_LegendPanel> {
       width: 120,
       padding: const EdgeInsets.fromLTRB(10, 10, 8, 15.6),
       decoration: BoxDecoration(
-        color: kWhite,
+        color: AppColors.text,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
@@ -1042,11 +1043,11 @@ class _LegendPanelState extends State<_LegendPanel> {
           // ── Header ──────────────────────────────────
           Row(
             children: [
-              Icon(Icons.tune_rounded, size: 10, color: kNavyDark.withOpacity(0.4)),
+              Icon(Icons.tune_rounded, size: 10, color: AppColors.bg.withOpacity(0.4)),
               const SizedBox(width: 4),
               Text('FILTER',
                 style: TextStyle(
-                  color: kNavyDark.withOpacity(0.38),
+                  color: AppColors.bg.withOpacity(0.38),
                   fontSize: 8,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.2,
@@ -1085,7 +1086,7 @@ class _LegendPanelState extends State<_LegendPanel> {
             label: 'Events',
             allVisible: _allEventsVisible,
             someVisible: _someEventsVisible,
-            color: const Color(0xFF4A90D9),
+            color: AppColors.link,
             expanded: _eventsExpanded,
             onToggleAll: _toggleAllEvents,
             onToggleExpand: () => setState(() => _eventsExpanded = !_eventsExpanded),
@@ -1173,7 +1174,7 @@ class _WeeklyGridState extends State<_WeeklyGrid> {
                     children: [
                       Text(dayNames[i],
                         style: TextStyle(
-                          color: isToday ? kTeal : kWhite.withOpacity(0.38),
+                          color: isToday ? AppColors.accent : AppColors.text.withOpacity(0.38),
                           fontSize: 8,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.4,
@@ -1184,13 +1185,13 @@ class _WeeklyGridState extends State<_WeeklyGrid> {
                         duration: const Duration(milliseconds: 200),
                         width: 22, height: 22,
                         decoration: BoxDecoration(
-                          color: isToday ? kTeal : Colors.transparent,
+                          color: isToday ? AppColors.accent : Colors.transparent,
                           shape: BoxShape.circle,
                         ),
                         child: Center(
                           child: Text('${d.day}',
                             style: TextStyle(
-                              color: isToday ? kNavyDark : kWhite,
+                              color: isToday ? AppColors.bg : AppColors.text,
                               fontSize: 11,
                               fontWeight: isToday
                                   ? FontWeight.bold
@@ -1249,7 +1250,7 @@ class _WeeklyGridState extends State<_WeeklyGrid> {
                 child: Text(_timeLabel(hour),
                   textAlign: TextAlign.right,
                   style: TextStyle(
-                    color: kWhite.withOpacity(0.50),
+                    color: AppColors.text.withOpacity(0.50),
                     fontSize: 9,
                     fontWeight: FontWeight.w600,
                   ),
@@ -1263,18 +1264,18 @@ class _WeeklyGridState extends State<_WeeklyGrid> {
               return Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isWknd ? kWhite.withOpacity(0.03) : Colors.transparent,
+                    color: isWknd ? AppColors.text.withOpacity(0.03) : Colors.transparent,
                     border: Border(
                       top: BorderSide(
                         color: i == 0
-                            ? kWhite.withOpacity(0.22)
-                            : kWhite.withOpacity(0.07),
+                            ? AppColors.text.withOpacity(0.22)
+                            : AppColors.text.withOpacity(0.07),
                         width: 0.5,
                       ),
                       left: BorderSide(
                         color: col == 0
-                            ? kWhite.withOpacity(0.12)
-                            : kWhite.withOpacity(0.06),
+                            ? AppColors.text.withOpacity(0.12)
+                            : AppColors.text.withOpacity(0.06),
                         width: 0.5,
                       ),
                     ),
@@ -1311,10 +1312,10 @@ class _WeeklyGridState extends State<_WeeklyGrid> {
           children: [
             Container(
               width: 7, height: 7,
-              decoration: const BoxDecoration(
-                  color: kTeal, shape: BoxShape.circle),
+              decoration: BoxDecoration(
+                  color: AppColors.accent, shape: BoxShape.circle),
             ),
-            Expanded(child: Container(height: 1.5, color: kTeal)),
+            Expanded(child: Container(height: 1.5, color: AppColors.accent)),
           ],
         ),
       ),
@@ -1346,7 +1347,7 @@ class _WeeklyGridState extends State<_WeeklyGrid> {
               hasAny ? 'ALL\nDAY' : '',
               textAlign: TextAlign.right,
               style: TextStyle(
-                color: kWhite.withOpacity(0.35),
+                color: AppColors.text.withOpacity(0.35),
                 fontSize: 7,
                 fontWeight: FontWeight.w700,
                 height: 1.2,
@@ -1460,7 +1461,7 @@ class _EventBlock extends StatelessWidget {
     switch (s) {
       case TaskStatus.completed:  return const Color(0xFF3BBFA3);
       case TaskStatus.inProgress: return const Color(0xFFE8D870);
-      case TaskStatus.notStarted: return const Color(0xFF4A5568);
+      case TaskStatus.notStarted: return AppColors.bgDeep;
     }
   }
 
@@ -1601,7 +1602,7 @@ class _StatusPill extends StatelessWidget {
     switch (status) {
       case TaskStatus.completed:  return const Color(0xFF3BBFA3);
       case TaskStatus.inProgress: return const Color(0xFFE8D870);
-      case TaskStatus.notStarted: return const Color(0xFF4A5568);
+      case TaskStatus.notStarted: return AppColors.bgDeep;
     }
   }
 

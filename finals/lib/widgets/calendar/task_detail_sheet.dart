@@ -5,6 +5,7 @@ import '../../models/event.dart';
 import '../../store/task_store.dart';
 import '../../store/wallet_store.dart';
 import '../wallet/wallet_sheet.dart';
+import '../../constants/app_colors.dart';
 
 /// Shows a modal bottom sheet with full task details.
 /// Returns false if the task no longer exists (caller can show a snackbar).
@@ -92,9 +93,9 @@ class _TaskDetailSheetState extends State<_TaskDetailSheet> {
       builder: (confirmCtx) => Container(
         margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
         decoration: BoxDecoration(
-          color: const Color(0xFF1B2D5B),
+          color: AppColors.bgDeep,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: kWhite.withOpacity(0.08)),
+          border: Border.all(color: AppColors.text.withOpacity(0.08)),
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 40, offset: const Offset(0, -4))],
         ),
         child: Column(
@@ -103,7 +104,7 @@ class _TaskDetailSheetState extends State<_TaskDetailSheet> {
             Container(
               width: 36, height: 4,
               margin: const EdgeInsets.only(top: 14, bottom: 20),
-              decoration: BoxDecoration(color: kWhite.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
+              decoration: BoxDecoration(color: AppColors.text.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
             ),
             // Icon
             Container(
@@ -116,11 +117,11 @@ class _TaskDetailSheetState extends State<_TaskDetailSheet> {
               child: const Icon(Icons.delete_outline_rounded, color: Color(0xFFE87070), size: 26),
             ),
             const SizedBox(height: 14),
-            const Text('Remove Task?',
-                style: TextStyle(color: kWhite, fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('Remove Task?',
+                style: TextStyle(color: AppColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 6),
             Text('This cannot be undone',
-                style: TextStyle(color: kWhite.withOpacity(0.4), fontSize: 13)),
+                style: TextStyle(color: AppColors.text.withOpacity(0.4), fontSize: 13)),
             const SizedBox(height: 24),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
@@ -131,13 +132,13 @@ class _TaskDetailSheetState extends State<_TaskDetailSheet> {
                     child: Container(
                       height: 46,
                       decoration: BoxDecoration(
-                        color: kWhite.withOpacity(0.07),
+                        color: AppColors.text.withOpacity(0.07),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: kWhite.withOpacity(0.1)),
+                        border: Border.all(color: AppColors.text.withOpacity(0.1)),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text('Cancel',
-                            style: TextStyle(color: kWhite, fontWeight: FontWeight.w600)),
+                            style: TextStyle(color: AppColors.text, fontWeight: FontWeight.w600)),
                       ),
                     ),
                   ),
@@ -183,8 +184,8 @@ class _TaskDetailSheetState extends State<_TaskDetailSheet> {
 
   Color get _statusColor {
     switch (_status) {
-      case TaskStatus.notStarted: return const Color(0xFFB0BAD3);
-      case TaskStatus.inProgress: return const Color(0xFF4A90D9);
+      case TaskStatus.notStarted: return AppColors.subtitle;
+      case TaskStatus.inProgress: return AppColors.link;
       case TaskStatus.completed:  return const Color(0xFF3BBFA3);
     }
   }
@@ -219,7 +220,7 @@ class _TaskDetailSheetState extends State<_TaskDetailSheet> {
     return Container(
       margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A2C5B),
+        color: AppColors.bgDeep,
         borderRadius: BorderRadius.circular(26),
         border: Border.all(color: _catColor.withOpacity(0.25), width: 1),
         boxShadow: [
@@ -234,7 +235,7 @@ class _TaskDetailSheetState extends State<_TaskDetailSheet> {
           Center(
             child: Container(
               width: 38, height: 4,
-              decoration: BoxDecoration(color: kWhite.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
+              decoration: BoxDecoration(color: AppColors.text.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
             ),
           ),
           const SizedBox(height: 18),
@@ -268,14 +269,14 @@ class _TaskDetailSheetState extends State<_TaskDetailSheet> {
                   ),
                   const SizedBox(height: 16),
                   Text(widget.task.name,
-                      style: const TextStyle(color: kWhite, fontSize: 22, fontWeight: FontWeight.w800, height: 1.2)),
+                      style: TextStyle(color: AppColors.text, fontSize: 22, fontWeight: FontWeight.w800, height: 1.2)),
                   if (widget.task.spaceName != null) ...[
                     const SizedBox(height: 6),
                     Row(children: [
-                      Icon(Icons.folder_outlined, size: 13, color: kSubtitle),
+                      Icon(Icons.folder_outlined, size: 13, color: AppColors.subtitle),
                       const SizedBox(width: 5),
                       Text(widget.task.spaceName!,
-                          style: const TextStyle(color: kSubtitle, fontSize: 12.5, fontWeight: FontWeight.w500)),
+                          style: TextStyle(color: AppColors.subtitle, fontSize: 12.5, fontWeight: FontWeight.w500)),
                     ]),
                   ],
                   const SizedBox(height: 20),
@@ -300,12 +301,12 @@ class _TaskDetailSheetState extends State<_TaskDetailSheet> {
                         value: widget.task.endTime != null
                             ? '${_formatTime(widget.task.dueTime!)} – ${_formatTime(widget.task.endTime!)}'
                             : _formatTime(widget.task.dueTime!),
-                        color: kTeal,
+                        color: AppColors.accent,
                       ),
                     _InfoTile(icon: Icons.flag_rounded, label: 'Priority',
                         value: _priorityLabel, color: _priorityColor),
                     _InfoTile(icon: Icons.repeat_rounded, label: 'Repeat',
-                        value: widget.task.repeat.label, color: kSubtitle),
+                        value: widget.task.repeat.label, color: AppColors.subtitle),
                   ]),
                   if (widget.task.notes != null && widget.task.notes!.isNotEmpty) ...[
                     const SizedBox(height: 18),
@@ -322,7 +323,7 @@ class _TaskDetailSheetState extends State<_TaskDetailSheet> {
                   const SizedBox(height: 20),
                   Center(
                     child: Text('Created ${_formatDate(widget.task.createdAt)}',
-                        style: TextStyle(color: kWhite.withOpacity(0.22), fontSize: 11)),
+                        style: TextStyle(color: AppColors.text.withOpacity(0.22), fontSize: 11)),
                   ),
                 ],
               ),
@@ -348,9 +349,9 @@ class _StatusPickerSheet extends StatelessWidget {
     TaskStatus.inProgress: 'In Progress',
     TaskStatus.completed:  'Completed',
   };
-  static const _color = {
-    TaskStatus.notStarted: Color(0xFF8FA6C8),
-    TaskStatus.inProgress: Color(0xFF4A90D9),
+  static final _color = {
+    TaskStatus.notStarted: AppColors.subtitle,
+    TaskStatus.inProgress: AppColors.link,
     TaskStatus.completed:  Color(0xFF3BBFA3),
   };
   static const _icon = {
@@ -369,9 +370,9 @@ class _StatusPickerSheet extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
       decoration: BoxDecoration(
-        color: const Color(0xFF1B2D5B),
+        color: AppColors.bgDeep,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: kWhite.withOpacity(0.08)),
+        border: Border.all(color: AppColors.text.withOpacity(0.08)),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 40, offset: const Offset(0, -4))],
       ),
       child: Column(
@@ -380,7 +381,7 @@ class _StatusPickerSheet extends StatelessWidget {
           Container(
             width: 36, height: 4,
             margin: const EdgeInsets.only(top: 14, bottom: 18),
-            decoration: BoxDecoration(color: kWhite.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
+            decoration: BoxDecoration(color: AppColors.text.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 22),
@@ -389,27 +390,27 @@ class _StatusPickerSheet extends StatelessWidget {
                 Container(
                   width: 42, height: 42,
                   decoration: BoxDecoration(
-                    color: kTeal.withOpacity(0.14),
+                    color: AppColors.accent.withOpacity(0.14),
                     shape: BoxShape.circle,
-                    border: Border.all(color: kTeal.withOpacity(0.3), width: 1.5),
+                    border: Border.all(color: AppColors.accent.withOpacity(0.3), width: 1.5),
                   ),
-                  child: const Icon(Icons.swap_horiz_rounded, color: kTeal, size: 22),
+                  child: Icon(Icons.swap_horiz_rounded, color: AppColors.accent, size: 22),
                 ),
                 const SizedBox(width: 13),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Update Status',
-                        style: TextStyle(color: kWhite, fontSize: 17, fontWeight: FontWeight.bold)),
+                    Text('Update Status',
+                        style: TextStyle(color: AppColors.text, fontSize: 17, fontWeight: FontWeight.bold)),
                     Text('Tap to change task progress',
-                        style: TextStyle(color: kWhite.withOpacity(0.4), fontSize: 12)),
+                        style: TextStyle(color: AppColors.text.withOpacity(0.4), fontSize: 12)),
                   ],
                 ),
               ],
             ),
           ),
           const SizedBox(height: 16),
-          Divider(color: kWhite.withOpacity(0.07), thickness: 1, indent: 22, endIndent: 22),
+          Divider(color: AppColors.text.withOpacity(0.07), thickness: 1, indent: 22, endIndent: 22),
           const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 0, 14, 22),
@@ -466,10 +467,10 @@ class _StatusCardState extends State<_StatusCard> {
         margin: const EdgeInsets.only(bottom: 9),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: (_pressed || widget.selected) ? c.withOpacity(0.12) : kWhite.withOpacity(0.04),
+          color: (_pressed || widget.selected) ? c.withOpacity(0.12) : AppColors.text.withOpacity(0.04),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: (_pressed || widget.selected) ? c.withOpacity(0.55) : kWhite.withOpacity(0.08),
+            color: (_pressed || widget.selected) ? c.withOpacity(0.55) : AppColors.text.withOpacity(0.08),
             width: 1.3,
           ),
         ),
@@ -490,10 +491,10 @@ class _StatusCardState extends State<_StatusCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(widget.label,
-                      style: const TextStyle(color: kWhite, fontSize: 15, fontWeight: FontWeight.w600)),
+                      style: TextStyle(color: AppColors.text, fontSize: 15, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 3),
                   Text(widget.description,
-                      style: TextStyle(color: kWhite.withOpacity(0.37), fontSize: 12)),
+                      style: TextStyle(color: AppColors.text.withOpacity(0.37), fontSize: 12)),
                 ],
               ),
             ),
@@ -502,10 +503,10 @@ class _StatusCardState extends State<_StatusCard> {
               Container(
                 width: 22, height: 22,
                 decoration: BoxDecoration(color: c, shape: BoxShape.circle),
-                child: const Icon(Icons.check_rounded, color: kWhite, size: 14),
+                child: Icon(Icons.check_rounded, color: AppColors.text, size: 14),
               )
             else
-              Icon(Icons.chevron_right_rounded, color: kWhite.withOpacity(0.2), size: 20),
+              Icon(Icons.chevron_right_rounded, color: AppColors.text.withOpacity(0.2), size: 20),
           ],
         ),
       ),
@@ -527,9 +528,9 @@ class _EventDetailSheet extends StatelessWidget {
       builder: (confirmCtx) => Container(
         margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
         decoration: BoxDecoration(
-          color: const Color(0xFF1B2D5B),
+          color: AppColors.bgDeep,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: kWhite.withOpacity(0.08)),
+          border: Border.all(color: AppColors.text.withOpacity(0.08)),
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 40, offset: const Offset(0, -4))],
         ),
         child: Column(
@@ -538,7 +539,7 @@ class _EventDetailSheet extends StatelessWidget {
             Container(
               width: 36, height: 4,
               margin: const EdgeInsets.only(top: 14, bottom: 20),
-              decoration: BoxDecoration(color: kWhite.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
+              decoration: BoxDecoration(color: AppColors.text.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
             ),
             Container(
               width: 52, height: 52,
@@ -550,11 +551,11 @@ class _EventDetailSheet extends StatelessWidget {
               child: const Icon(Icons.delete_outline_rounded, color: Color(0xFFE87070), size: 26),
             ),
             const SizedBox(height: 14),
-            const Text('Remove Event?',
-                style: TextStyle(color: kWhite, fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('Remove Event?',
+                style: TextStyle(color: AppColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 6),
             Text('This cannot be undone',
-                style: TextStyle(color: kWhite.withOpacity(0.4), fontSize: 13)),
+                style: TextStyle(color: AppColors.text.withOpacity(0.4), fontSize: 13)),
             const SizedBox(height: 24),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
@@ -565,13 +566,13 @@ class _EventDetailSheet extends StatelessWidget {
                     child: Container(
                       height: 46,
                       decoration: BoxDecoration(
-                        color: kWhite.withOpacity(0.07),
+                        color: AppColors.text.withOpacity(0.07),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: kWhite.withOpacity(0.1)),
+                        border: Border.all(color: AppColors.text.withOpacity(0.1)),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text('Cancel',
-                            style: TextStyle(color: kWhite, fontWeight: FontWeight.w600)),
+                            style: TextStyle(color: AppColors.text, fontWeight: FontWeight.w600)),
                       ),
                     ),
                   ),
@@ -631,7 +632,7 @@ class _EventDetailSheet extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A2C5B),
+        color: AppColors.bgDeep,
         borderRadius: BorderRadius.circular(26),
         border: Border.all(color: _catColor.withOpacity(0.25), width: 1),
         boxShadow: [
@@ -646,7 +647,7 @@ class _EventDetailSheet extends StatelessWidget {
           Center(
             child: Container(
               width: 38, height: 4,
-              decoration: BoxDecoration(color: kWhite.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
+              decoration: BoxDecoration(color: AppColors.text.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
             ),
           ),
           const SizedBox(height: 18),
@@ -703,16 +704,16 @@ class _EventDetailSheet extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   Text(event.title,
-                      style: const TextStyle(color: kWhite, fontSize: 22, fontWeight: FontWeight.w800, height: 1.2)),
+                      style: TextStyle(color: AppColors.text, fontSize: 22, fontWeight: FontWeight.w800, height: 1.2)),
 
                   if (event.location != null && event.location!.isNotEmpty) ...[
                     const SizedBox(height: 6),
                     Row(children: [
-                      Icon(Icons.location_on_outlined, size: 13, color: kSubtitle),
+                      Icon(Icons.location_on_outlined, size: 13, color: AppColors.subtitle),
                       const SizedBox(width: 5),
                       Expanded(
                         child: Text(event.location!,
-                            style: const TextStyle(color: kSubtitle, fontSize: 12.5, fontWeight: FontWeight.w500)),
+                            style: TextStyle(color: AppColors.subtitle, fontSize: 12.5, fontWeight: FontWeight.w500)),
                       ),
                     ]),
                   ],
@@ -736,7 +737,7 @@ class _EventDetailSheet extends StatelessWidget {
                         value: event.endTime != null
                             ? '${_formatTime(event.startTime!)} – ${_formatTime(event.endTime!)}'
                             : _formatTime(event.startTime!),
-                        color: kTeal,
+                        color: AppColors.accent,
                       ),
                     _InfoTile(
                       icon: event.category.icon,
@@ -762,7 +763,7 @@ class _EventDetailSheet extends StatelessWidget {
                   const SizedBox(height: 20),
                   Center(
                     child: Text('Created ${_formatDate(event.createdAt)}',
-                        style: TextStyle(color: kWhite.withOpacity(0.22), fontSize: 11)),
+                        style: TextStyle(color: AppColors.text.withOpacity(0.22), fontSize: 11)),
                   ),
                 ],
               ),
@@ -820,11 +821,11 @@ class _CloseButton extends StatelessWidget {
       child: Container(
         width: 30, height: 30,
         decoration: BoxDecoration(
-          color: kWhite.withOpacity(0.08),
+          color: AppColors.text.withOpacity(0.08),
           shape: BoxShape.circle,
-          border: Border.all(color: kWhite.withOpacity(0.1)),
+          border: Border.all(color: AppColors.text.withOpacity(0.1)),
         ),
-        child: Icon(Icons.close_rounded, size: 16, color: kWhite.withOpacity(0.55)),
+        child: Icon(Icons.close_rounded, size: 16, color: AppColors.text.withOpacity(0.55)),
       ),
     );
   }
@@ -900,9 +901,9 @@ class _InfoTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: kWhite.withOpacity(0.05),
+        color: AppColors.text.withOpacity(0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: kWhite.withOpacity(0.08), width: 0.5),
+        border: Border.all(color: AppColors.text.withOpacity(0.08), width: 0.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -916,7 +917,7 @@ class _InfoTile extends StatelessWidget {
           ]),
           const SizedBox(height: 5),
           Text(value,
-              style: const TextStyle(color: kWhite, fontSize: 12.5, fontWeight: FontWeight.w600, height: 1.3)),
+              style: TextStyle(color: AppColors.text, fontSize: 12.5, fontWeight: FontWeight.w600, height: 1.3)),
         ],
       ),
     );
@@ -933,23 +934,23 @@ class _NotesCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: kWhite.withOpacity(0.05),
+        color: AppColors.text.withOpacity(0.05),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: kWhite.withOpacity(0.1), width: 0.5),
+        border: Border.all(color: AppColors.text.withOpacity(0.1), width: 0.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(children: [
-            Icon(Icons.notes_rounded, size: 13, color: kTeal.withOpacity(0.75)),
+            Icon(Icons.notes_rounded, size: 13, color: AppColors.accent.withOpacity(0.75)),
             const SizedBox(width: 6),
             Text('NOTES',
-                style: TextStyle(color: kTeal.withOpacity(0.65), fontSize: 9,
+                style: TextStyle(color: AppColors.accent.withOpacity(0.65), fontSize: 9,
                     fontWeight: FontWeight.w800, letterSpacing: 0.8)),
           ]),
           const SizedBox(height: 10),
           Text(notes,
-              style: TextStyle(color: kWhite.withOpacity(0.8), fontSize: 13, height: 1.55)),
+              style: TextStyle(color: AppColors.text.withOpacity(0.8), fontSize: 13, height: 1.55)),
         ],
       ),
     );
@@ -1015,7 +1016,7 @@ class _LinkedExpenseCardState extends State<_LinkedExpenseCard> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: kWhite.withOpacity(0.05),
+        color: AppColors.text.withOpacity(0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: statusColor.withOpacity(0.25), width: 1.2),
       ),
@@ -1042,21 +1043,21 @@ class _LinkedExpenseCardState extends State<_LinkedExpenseCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(e.name,
-                      style: const TextStyle(
-                          color: kWhite,
+                      style: TextStyle(
+                          color: AppColors.text,
                           fontSize: 14,
                           fontWeight: FontWeight.w600)),
                   const SizedBox(height: 2),
                   Text(e.category.label,
                       style: TextStyle(
-                          color: kWhite.withOpacity(0.4), fontSize: 12)),
+                          color: AppColors.text.withOpacity(0.4), fontSize: 12)),
                 ],
               ),
             ),
             Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
               Text('₱${e.amount.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                      color: kWhite,
+                  style: TextStyle(
+                      color: AppColors.text,
                       fontSize: 15,
                       fontWeight: FontWeight.w700)),
               const SizedBox(height: 2),
@@ -1169,7 +1170,7 @@ class _LinkedEventExpenseCardState extends State<_LinkedEventExpenseCard> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: kWhite.withOpacity(0.05),
+        color: AppColors.text.withOpacity(0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: statusColor.withOpacity(0.25), width: 1.2),
       ),
@@ -1196,21 +1197,21 @@ class _LinkedEventExpenseCardState extends State<_LinkedEventExpenseCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(e.name,
-                      style: const TextStyle(
-                          color: kWhite,
+                      style: TextStyle(
+                          color: AppColors.text,
                           fontSize: 14,
                           fontWeight: FontWeight.w600)),
                   const SizedBox(height: 2),
                   Text(e.category.label,
                       style: TextStyle(
-                          color: kWhite.withOpacity(0.4), fontSize: 12)),
+                          color: AppColors.text.withOpacity(0.4), fontSize: 12)),
                 ],
               ),
             ),
             Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
               Text('₱${e.amount.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                      color: kWhite,
+                  style: TextStyle(
+                      color: AppColors.text,
                       fontSize: 15,
                       fontWeight: FontWeight.w700)),
               const SizedBox(height: 2),

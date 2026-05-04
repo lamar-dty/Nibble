@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
 import '../store/auth_store.dart';
+import '../constants/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Preset avatar definitions
@@ -14,19 +15,19 @@ class _AvatarDef {
   const _AvatarDef(this.seed, this.icon, this.bg, this.fg);
 }
 
-const List<_AvatarDef> kAvatarPresets = [
-  _AvatarDef('bunny',   Icons.cruelty_free_outlined,      Color(0xFF5B8EE6), kWhite),
-  _AvatarDef('fox',     Icons.pets_outlined,               Color(0xFFE07B43), kWhite),
-  _AvatarDef('wave',    Icons.water_outlined,              Color(0xFF3ABFBF), kWhite),
-  _AvatarDef('star',    Icons.star_outline_rounded,        Color(0xFFF4C542), kNavyDark),
-  _AvatarDef('moon',    Icons.nightlight_round_outlined,   Color(0xFF7B6EE8), kWhite),
-  _AvatarDef('leaf',    Icons.eco_outlined,                Color(0xFF45A86E), kWhite),
-  _AvatarDef('bolt',    Icons.bolt_outlined,               Color(0xFFE8A020), kWhite),
-  _AvatarDef('gem',     Icons.diamond_outlined,            Color(0xFFD64FA0), kWhite),
-  _AvatarDef('rocket',  Icons.rocket_launch_outlined,      Color(0xFF3D6CB5), kWhite),
-  _AvatarDef('fire',    Icons.local_fire_department_outlined, Color(0xFFE05C3A), kWhite),
-  _AvatarDef('flower',  Icons.local_florist_outlined,      Color(0xFFE878B4), kWhite),
-  _AvatarDef('snow',    Icons.ac_unit_outlined,            Color(0xFF55B8E8), kWhite),
+final List<_AvatarDef> kAvatarPresets = [
+  _AvatarDef('bunny',   Icons.cruelty_free_outlined,      AppColors.link, AppColors.text),
+  _AvatarDef('fox',     Icons.pets_outlined,               Color(0xFFE07B43), AppColors.text),
+  _AvatarDef('wave',    Icons.water_outlined,              Color(0xFF3ABFBF), AppColors.text),
+  _AvatarDef('star',    Icons.star_outline_rounded,        Color(0xFFF4C542), AppColors.bg),
+  _AvatarDef('moon',    Icons.nightlight_round_outlined,   Color(0xFF7B6EE8), AppColors.text),
+  _AvatarDef('leaf',    Icons.eco_outlined,                Color(0xFF45A86E), AppColors.text),
+  _AvatarDef('bolt',    Icons.bolt_outlined,               Color(0xFFE8A020), AppColors.text),
+  _AvatarDef('gem',     Icons.diamond_outlined,            Color(0xFFD64FA0), AppColors.text),
+  _AvatarDef('rocket',  Icons.rocket_launch_outlined,      Color(0xFF3D6CB5), AppColors.text),
+  _AvatarDef('fire',    Icons.local_fire_department_outlined, Color(0xFFE05C3A), AppColors.text),
+  _AvatarDef('flower',  Icons.local_florist_outlined,      Color(0xFFE878B4), AppColors.text),
+  _AvatarDef('snow',    Icons.ac_unit_outlined,            Color(0xFF55B8E8), AppColors.text),
 ];
 
 /// Looks up the [_AvatarDef] for [seed]; falls back to the first preset.
@@ -65,7 +66,7 @@ class AppAvatar extends StatelessWidget {
         shape: BoxShape.circle,
         color: def.bg,
         border: showBorder
-            ? Border.all(color: kWhite, width: size * 0.04)
+            ? Border.all(color: AppColors.text, width: size * 0.04)
             : null,
       ),
       child: Icon(def.icon, color: def.fg, size: size * 0.52),
@@ -116,8 +117,8 @@ class _ManageAccountSheetState extends State<_ManageAccountSheet> {
 
     return Container(
       margin: EdgeInsets.only(bottom: bottomInset),
-      decoration: const BoxDecoration(
-        color: kNavyDark,
+      decoration: BoxDecoration(
+        color: AppColors.bg,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SafeArea(
@@ -135,7 +136,7 @@ class _ManageAccountSheetState extends State<_ManageAccountSheet> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: kWhite.withOpacity(0.25),
+                    color: AppColors.text.withOpacity(0.25),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -144,13 +145,13 @@ class _ManageAccountSheetState extends State<_ManageAccountSheet> {
               // Title row
               Row(
                 children: [
-                  const Icon(Icons.manage_accounts_outlined,
-                      color: kTeal, size: 22),
+                  Icon(Icons.manage_accounts_outlined,
+                      color: AppColors.accent, size: 22),
                   const SizedBox(width: 10),
-                  const Text(
+                  Text(
                     'Manage Account',
                     style: TextStyle(
-                      color: kWhite,
+                      color: AppColors.text,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -160,10 +161,10 @@ class _ManageAccountSheetState extends State<_ManageAccountSheet> {
               const SizedBox(height: 24),
 
               // ── Avatar section ────────────────────────
-              const Text(
+              Text(
                 'Choose Avatar',
                 style: TextStyle(
-                  color: kTeal,
+                  color: AppColors.accent,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.5,
@@ -209,13 +210,13 @@ class _ManageAccountSheetState extends State<_ManageAccountSheet> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: selected ? kTeal : Colors.transparent,
+                          color: selected ? AppColors.accent : Colors.transparent,
                           width: 2.5,
                         ),
                         boxShadow: selected
                             ? [
                                 BoxShadow(
-                                  color: kTeal.withOpacity(0.45),
+                                  color: AppColors.accent.withOpacity(0.45),
                                   blurRadius: 8,
                                   spreadRadius: 1,
                                 )
@@ -236,21 +237,21 @@ class _ManageAccountSheetState extends State<_ManageAccountSheet> {
                 child: ElevatedButton(
                   onPressed: _saving ? null : _save,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: kTeal,
-                    foregroundColor: kNavyDark,
-                    disabledBackgroundColor: kTeal.withOpacity(0.5),
+                    backgroundColor: AppColors.accent,
+                    foregroundColor: AppColors.bg,
+                    disabledBackgroundColor: AppColors.accent.withOpacity(0.5),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
                     elevation: 0,
                   ),
                   child: _saving
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 22,
                           height: 22,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.5,
-                            color: kNavyDark,
+                            color: AppColors.bg,
                           ),
                         )
                       : const Text(

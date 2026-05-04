@@ -5,6 +5,7 @@ import 'create_task_sheet.dart';
 import 'create_event_sheet.dart';
 import 'create_space_sheet.dart';
 import 'create_wallet_entry_sheet.dart';
+import '../constants/app_colors.dart';
 
 class DashboardBottomNav extends StatelessWidget {
   final int selectedIndex;
@@ -24,7 +25,7 @@ class DashboardBottomNav extends StatelessWidget {
       onTap: () {},
       behavior: HitTestBehavior.opaque,
       child: BottomAppBar(
-      color: kTeal,
+      color: AppColors.accent,
       shape: const CircularNotchedRectangle(),
       notchMargin: 10,
       elevation: 0,
@@ -83,13 +84,13 @@ class _NavItem extends StatelessWidget {
                 Container(
                   width: 48, height: 48,
                   decoration: BoxDecoration(
-                    color: selected ? kWhite : Colors.transparent,
+                    color: selected ? AppColors.text : Colors.transparent,
                     shape: BoxShape.circle,
                     boxShadow: selected
                         ? [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 12, spreadRadius: 1, offset: const Offset(0, 4))]
                         : [],
                   ),
-                  child: Icon(icon, size: 30, color: selected ? kTeal : kNavyDark.withOpacity(0.7)),
+                  child: Icon(icon, size: 30, color: selected ? AppColors.accent : AppColors.bg.withOpacity(0.7)),
                 ),
                 if (hasNotif)
                   Positioned(
@@ -101,7 +102,7 @@ class _NavItem extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: const Color(0xFFE87070),
                         shape: BoxShape.circle,
-                        border: Border.all(color: kTeal, width: 1.5),
+                        border: Border.all(color: AppColors.accent, width: 1.5),
                       ),
                     ),
                   ),
@@ -130,8 +131,8 @@ class DashboardFAB extends StatelessWidget {
       width: 64, height: 64,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: kNavyDark,
-        boxShadow: [BoxShadow(color: kNavyDark.withOpacity(0.4), blurRadius: 12, offset: const Offset(0, 4))],
+        color: AppColors.bg,
+        boxShadow: [BoxShadow(color: AppColors.bg.withOpacity(0.4), blurRadius: 12, offset: const Offset(0, 4))],
       ),
       child: FloatingActionButton(
         onPressed: () {
@@ -144,8 +145,8 @@ class DashboardFAB extends StatelessWidget {
         },
         backgroundColor: Colors.transparent,
         elevation: 0,
-        shape: const CircleBorder(side: BorderSide(color: kWhite, width: 3)),
-        child: const Icon(Icons.add_rounded, color: kWhite, size: 32),
+        shape: CircleBorder(side: BorderSide(color: AppColors.text, width: 3)),
+        child: Icon(Icons.add_rounded, color: AppColors.text, size: 32),
       ),
     );
   }
@@ -170,7 +171,7 @@ class _AddMenuSheetState extends State<_AddMenuSheet>
   late List<Animation<double>> _cardSlides;
   late List<Animation<double>> _cardFades;
 
-  static const _items = [
+  static final _items = [
     _AddItem(
       icon: Icons.task_alt_rounded,
       iconColor: Color(0xFF9B88E8),
@@ -181,11 +182,11 @@ class _AddMenuSheetState extends State<_AddMenuSheet>
     ),
     _AddItem(
       icon: Icons.event_rounded,
-      iconColor: Color(0xFF4A90D9),
+      iconColor: AppColors.link,
       label: 'Add Event',
       description: 'Academic or personal event',
       tag: 'CALENDAR',
-      tagColor: Color(0xFF4A90D9),
+      tagColor: AppColors.link,
     ),
     _AddItem(
       icon: Icons.group_rounded,
@@ -238,9 +239,9 @@ class _AddMenuSheetState extends State<_AddMenuSheet>
         child: Container(
           margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
           decoration: BoxDecoration(
-            color: const Color(0xFF1B2D5B),
+            color: AppColors.bgDeep,
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: kWhite.withOpacity(0.08)),
+            border: Border.all(color: AppColors.text.withOpacity(0.08)),
             boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 40, offset: const Offset(0, -4))],
           ),
           child: Column(
@@ -250,7 +251,7 @@ class _AddMenuSheetState extends State<_AddMenuSheet>
               Container(
                 width: 36, height: 4,
                 margin: const EdgeInsets.only(top: 14, bottom: 18),
-                decoration: BoxDecoration(color: kWhite.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
+                decoration: BoxDecoration(color: AppColors.text.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
               ),
 
               // Header
@@ -261,20 +262,20 @@ class _AddMenuSheetState extends State<_AddMenuSheet>
                     Container(
                       width: 42, height: 42,
                       decoration: BoxDecoration(
-                        color: kTeal.withOpacity(0.14),
+                        color: AppColors.accent.withOpacity(0.14),
                         shape: BoxShape.circle,
-                        border: Border.all(color: kTeal.withOpacity(0.3), width: 1.5),
+                        border: Border.all(color: AppColors.accent.withOpacity(0.3), width: 1.5),
                       ),
-                      child: const Icon(Icons.add_rounded, color: kTeal, size: 22),
+                      child: Icon(Icons.add_rounded, color: AppColors.accent, size: 22),
                     ),
                     const SizedBox(width: 13),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('What are we adding?',
-                            style: TextStyle(color: kWhite, fontSize: 17, fontWeight: FontWeight.bold)),
+                        Text('What are we adding?',
+                            style: TextStyle(color: AppColors.text, fontSize: 17, fontWeight: FontWeight.bold)),
                         Text('Pick a category to get started',
-                            style: TextStyle(color: kWhite.withOpacity(0.4), fontSize: 12)),
+                            style: TextStyle(color: AppColors.text.withOpacity(0.4), fontSize: 12)),
                       ],
                     ),
                   ],
@@ -282,7 +283,7 @@ class _AddMenuSheetState extends State<_AddMenuSheet>
               ),
 
               const SizedBox(height: 16),
-              Divider(color: kWhite.withOpacity(0.07), thickness: 1, indent: 22, endIndent: 22),
+              Divider(color: AppColors.text.withOpacity(0.07), thickness: 1, indent: 22, endIndent: 22),
               const SizedBox(height: 6),
 
               // Cards
@@ -370,10 +371,10 @@ class _AddCardState extends State<_AddCard> {
         margin: const EdgeInsets.only(bottom: 9),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: _pressed ? item.iconColor.withOpacity(0.10) : kWhite.withOpacity(0.04),
+          color: _pressed ? item.iconColor.withOpacity(0.10) : AppColors.text.withOpacity(0.04),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: _pressed ? item.iconColor.withOpacity(0.6) : kWhite.withOpacity(0.08),
+            color: _pressed ? item.iconColor.withOpacity(0.6) : AppColors.text.withOpacity(0.08),
             width: 1.3,
           ),
         ),
@@ -399,7 +400,7 @@ class _AddCardState extends State<_AddCard> {
                   Row(
                     children: [
                       Text(item.label,
-                          style: const TextStyle(color: kWhite, fontSize: 15, fontWeight: FontWeight.w600)),
+                          style: TextStyle(color: AppColors.text, fontSize: 15, fontWeight: FontWeight.w600)),
                       const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -415,13 +416,13 @@ class _AddCardState extends State<_AddCard> {
                   ),
                   const SizedBox(height: 3),
                   Text(item.description,
-                      style: TextStyle(color: kWhite.withOpacity(0.37), fontSize: 12)),
+                      style: TextStyle(color: AppColors.text.withOpacity(0.37), fontSize: 12)),
                 ],
               ),
             ),
 
             const SizedBox(width: 6),
-            Icon(Icons.chevron_right_rounded, color: kWhite.withOpacity(0.2), size: 20),
+            Icon(Icons.chevron_right_rounded, color: AppColors.text.withOpacity(0.2), size: 20),
           ],
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants/app_colors.dart';
 
 enum EventCategory {
   academic,
@@ -31,11 +32,11 @@ extension EventCategoryExt on EventCategory {
 
   Color get color {
     switch (this) {
-      case EventCategory.academic:     return const Color(0xFF4A90D9);
+      case EventCategory.academic:     return AppColors.link;
       case EventCategory.organization: return const Color(0xFFE8A870);
       case EventCategory.social:       return const Color(0xFFD96B8A);
       case EventCategory.health:       return const Color(0xFF3BBFA3);
-      case EventCategory.other:        return const Color(0xFFB0BAD3);
+      case EventCategory.other:        return AppColors.subtitle;
     }
   }
 

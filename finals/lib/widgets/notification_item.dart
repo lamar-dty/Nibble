@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
 import '../models/task.dart';
+import '../constants/app_colors.dart';
 
 class NotificationItem extends StatelessWidget {
   final IconData icon;
@@ -84,7 +85,7 @@ class NotificationItem extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: priority!.color,
                               shape: BoxShape.circle,
-                              border: Border.all(color: kWhite, width: 2),
+                              border: Border.all(color: AppColors.text, width: 2),
                             ),
                           ),
                         ),
@@ -113,8 +114,8 @@ class NotificationItem extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(subtitle,
-                              style: const TextStyle(
-                                  color: Color(0xFF6B7A99), fontSize: 13)),
+                              style: TextStyle(
+                                  color: AppColors.icon, fontSize: 13)),
                         ),
                         if (priority != null)
                           Container(
@@ -139,14 +140,14 @@ class NotificationItem extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(title,
-                        style: const TextStyle(
-                            color: Color(0xFF1A2A5E),
+                        style: TextStyle(
+                            color: AppColors.bgDeep,
                             fontSize: 16,
                             fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
                     Text(detail,
-                        style: const TextStyle(
-                            color: Color(0xFF6B7A99), fontSize: 12)),
+                        style: TextStyle(
+                            color: AppColors.icon, fontSize: 12)),
                     // Tap hint for tappable notifications
                     if (onTap != null) ...[
                       const SizedBox(height: 6),

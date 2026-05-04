@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants/app_colors.dart';
 
 enum TaskCategory {
   assignment,
@@ -29,7 +30,7 @@ extension TaskCategoryExt on TaskCategory {
     switch (this) {
       case TaskCategory.assignment:   return const Color(0xFF9B88E8);
       case TaskCategory.project:      return const Color(0xFFE8D870);
-      case TaskCategory.assessment:   return const Color(0xFF90D0CB);
+      case TaskCategory.assessment:   return AppColors.accent;
       case TaskCategory.personalTask: return const Color(0xFFE8A870);
     }
   }

@@ -15,6 +15,7 @@ import '../widgets/spaces/space_chat_sheet.dart';
 import '../store/space_store.dart';
 import '../store/auth_store.dart';
 import '../services/notification_router.dart';
+import '../constants/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Screen
@@ -272,7 +273,7 @@ class SpacesScreenState extends State<SpacesScreen>
       title: title,
       description: note,
       status: 'Not Started',
-      statusColor: const Color(0xFFB0BAD3),
+      statusColor: AppColors.subtitle,
     );
     setState(() {
       space.tasks.add(task);
@@ -598,7 +599,7 @@ class SpacesScreenState extends State<SpacesScreen>
       isCreator: true,
       creatorName: AuthStore.instance.displayName,
       status: 'Not Started',
-      statusColor: const Color(0xFFB0BAD3),
+      statusColor: AppColors.subtitle,
       accentColor: r.accentColor,
       progress: 0.0,
       completedTasks: 0,
@@ -697,7 +698,7 @@ class SpacesScreenState extends State<SpacesScreen>
                   topRight: Radius.circular(28),
                 ),
                 child: ColoredBox(
-                  color: kWhite,
+                  color: AppColors.text,
                   child: SpacesSheet(
                     key: const ValueKey('spacesSheet'),
                     scrollController: scrollController,

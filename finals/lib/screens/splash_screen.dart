@@ -3,6 +3,7 @@ import '../constants/colors.dart';
 import '../store/auth_store.dart';
 import 'login_screen.dart';
 import '../main.dart';
+import '../constants/app_colors.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -105,7 +106,7 @@ class _SplashScreenState extends State<SplashScreen>
         child: child,
       ),
       child: Scaffold(
-        backgroundColor: kNavyDark,
+        backgroundColor: AppColors.bg,
         body: Stack(
           children: [
             // ── White arc bubble (bottom half) ──────────────
@@ -147,17 +148,17 @@ class _SplashScreenState extends State<SplashScreen>
                           fontStyle: FontStyle.italic,
                           fontSize: 52,
                           fontWeight: FontWeight.bold,
-                          color: kTeal,
+                          color: AppColors.accent,
                           letterSpacing: 1.5,
                         ),
                       ),
                       const SizedBox(height: 6),
-                      const Text(
+                      Text(
                         'A student life management app.',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: kNavyDark,
+                          color: AppColors.icon,
                         ),
                       ),
                     ],
@@ -200,7 +201,7 @@ class _SplashScreenState extends State<SplashScreen>
 class _ArcPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = const Color(0xFFF5F7FA);
+    final paint = Paint()..color = AppColors.lightFill;
     final path = Path();
     path.moveTo(0, size.height * 0.25);
     path.quadraticBezierTo(size.width / 2, -size.height * 0.05, size.width, size.height * 0.25);
@@ -211,5 +212,5 @@ class _ArcPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter _) => false;
+  bool shouldRepaint(covariant CustomPainter _) => true;
 }

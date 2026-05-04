@@ -4,6 +4,7 @@ import '../constants/colors.dart';
 import '../widgets/wallet/wallet_sheet.dart';
 import '../store/wallet_store.dart'; // also imports SavingsPoint
 import '../widgets/create_wallet_entry_sheet.dart';
+import '../constants/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Re-export public types so call-sites that imported them from
@@ -215,7 +216,7 @@ class _WalletScreenState extends State<WalletScreen> {
                   topRight: Radius.circular(28),
                 ),
                 child: ColoredBox(
-                  color: kWhite,
+                  color: AppColors.text,
                   child: WalletSheet(
                     scrollController: scrollController,
                     dailyAllowance: wallet.dailyAllowance,
@@ -314,7 +315,7 @@ class _WalletBackground extends StatelessWidget {
               Expanded(
                 child: _SummaryCard(
                   icon: Icons.credit_card_rounded,
-                  iconColor: const Color(0xFF4A90D9),
+                  iconColor: AppColors.link,
                   title: 'Daily Allowance',
                   value: '₱${dailyAllowance.toStringAsFixed(2)}',
                   subtitle: dailyRemaining >= 0
@@ -436,9 +437,9 @@ class _SummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: kNavyMid,
+        color: AppColors.bgMid,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: kWhite.withOpacity(0.12)),
+        border: Border.all(color: AppColors.text.withOpacity(0.12)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,7 +452,7 @@ class _SummaryCard extends StatelessWidget {
                 child: Text(
                   title,
                   style: TextStyle(
-                    color: kWhite.withOpacity(0.7),
+                    color: AppColors.text.withOpacity(0.7),
                     fontSize: 10,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -462,8 +463,8 @@ class _SummaryCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             value,
-            style: const TextStyle(
-              color: kWhite,
+            style: TextStyle(
+              color: AppColors.text,
               fontSize: 15,
               fontWeight: FontWeight.bold,
             ),
@@ -482,7 +483,7 @@ class _SummaryCard extends StatelessWidget {
                         child: LinearProgressIndicator(
                           value: progressValue,
                           minHeight: 4,
-                          backgroundColor: kWhite.withOpacity(0.12),
+                          backgroundColor: AppColors.text.withOpacity(0.12),
                           valueColor: AlwaysStoppedAnimation<Color>(
                               progressColor ?? const Color(0xFFE87070)),
                         ),
@@ -491,7 +492,7 @@ class _SummaryCard extends StatelessWidget {
                       Text(
                         progressLabel ?? '',
                         style: TextStyle(
-                          color: kWhite.withOpacity(0.5),
+                          color: AppColors.text.withOpacity(0.5),
                           fontSize: 9,
                         ),
                       ),
@@ -502,7 +503,7 @@ class _SummaryCard extends StatelessWidget {
                     child: Text(
                       subtitle ?? '',
                       style: TextStyle(
-                        color: kWhite.withOpacity(0.5),
+                        color: AppColors.text.withOpacity(0.5),
                         fontSize: 10,
                       ),
                     ),
@@ -536,9 +537,9 @@ class _SectionCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: kNavyMid,
+        color: AppColors.bgMid,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: kWhite.withOpacity(0.08)),
+        border: Border.all(color: AppColors.text.withOpacity(0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -548,8 +549,8 @@ class _SectionCard extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(
-                  color: kWhite,
+                style: TextStyle(
+                  color: AppColors.text,
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
@@ -559,11 +560,11 @@ class _SectionCard extends StatelessWidget {
                   onTap: onAction,
                   child: Text(
                     action!,
-                    style: const TextStyle(
-                      color: kTeal,
+                    style: TextStyle(
+                      color: AppColors.accent,
                       fontSize: 12,
                       decoration: TextDecoration.underline,
-                      decorationColor: kTeal,
+                      decorationColor: AppColors.accent,
                     ),
                   ),
                 ),
@@ -629,11 +630,11 @@ class _MonthlySpendLinePainter extends CustomPainter {
         : leftPad + (i / (points.length - 1)) * chartW;
 
     final gridPaint = Paint()
-      ..color = kWhite.withOpacity(0.08)
+      ..color = AppColors.text.withOpacity(0.08)
       ..strokeWidth = 1;
 
     final labelStyle = TextStyle(
-      color: kWhite.withOpacity(0.35),
+      color: AppColors.text.withOpacity(0.35),
       fontSize: 8,
     );
 
@@ -728,25 +729,25 @@ class _MonthlySpendLinePainter extends CustomPainter {
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [kTeal.withOpacity(0.30), kTeal.withOpacity(0.0)],
+          colors: [AppColors.accent.withOpacity(0.30), AppColors.accent.withOpacity(0.0)],
         ).createShader(Rect.fromLTWH(0, 0, size.width, size.height)),
     );
     canvas.drawPath(
       linePath,
       Paint()
-        ..color = kTeal
+        ..color = AppColors.accent
         ..strokeWidth = 2.5
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round,
     );
     for (final pt in spentPts) {
-      canvas.drawCircle(pt, 3, Paint()..color = kTeal);
+      canvas.drawCircle(pt, 3, Paint()..color = AppColors.accent);
       canvas.drawCircle(
           pt,
           3,
           Paint()
-            ..color = kWhite
+            ..color = AppColors.text
             ..style = PaintingStyle.stroke
             ..strokeWidth = 1.5);
     }
@@ -828,9 +829,9 @@ class _BalanceCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
-        color: kNavyDark.withOpacity(0.35),
+        color: AppColors.bg.withOpacity(0.35),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: kWhite.withOpacity(0.10)),
+        border: Border.all(color: AppColors.text.withOpacity(0.10)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -853,7 +854,7 @@ class _BalanceCard extends StatelessWidget {
           Text(
             isEmpty ? '—' : '₱${total!.toStringAsFixed(2)}',
             style: TextStyle(
-              color: isEmpty ? kWhite.withOpacity(0.25) : kWhite,
+              color: isEmpty ? AppColors.text.withOpacity(0.25) : AppColors.text,
               fontSize: 14,
               fontWeight: FontWeight.bold,
             ),
@@ -862,7 +863,7 @@ class _BalanceCard extends StatelessWidget {
           Text(
             'Total spent',
             style: TextStyle(
-              color: kWhite.withOpacity(0.4),
+              color: AppColors.text.withOpacity(0.4),
               fontSize: 10,
             ),
           ),
@@ -899,8 +900,8 @@ class _HighPriorityDonut extends StatelessWidget {
                 children: [
                   Text(
                     isEmpty ? '₱0' : '₱${total.toStringAsFixed(0)}',
-                    style: const TextStyle(
-                      color: kWhite,
+                    style: TextStyle(
+                      color: AppColors.text,
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                     ),
@@ -908,7 +909,7 @@ class _HighPriorityDonut extends StatelessWidget {
                   Text(
                     'Total',
                     style: TextStyle(
-                      color: kWhite.withOpacity(0.6),
+                      color: AppColors.text.withOpacity(0.6),
                       fontSize: 9,
                     ),
                   ),
@@ -925,7 +926,7 @@ class _HighPriorityDonut extends StatelessWidget {
               ? Text(
                   'No expenses\nadded yet',
                   style: TextStyle(
-                    color: kWhite.withOpacity(0.3),
+                    color: AppColors.text.withOpacity(0.3),
                     fontSize: 12,
                   ),
                 )
@@ -952,8 +953,8 @@ class _HighPriorityDonut extends StatelessWidget {
                                       Text(
                                         item.label,
                                         overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          color: kWhite,
+                                        style: TextStyle(
+                                          color: AppColors.text,
                                           fontSize: 12,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -962,7 +963,7 @@ class _HighPriorityDonut extends StatelessWidget {
                                         '₱${item.amount.toStringAsFixed(0)}  ·  ${(item.amount / total * 100).round()}%',
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
-                                          color: kWhite.withOpacity(0.5),
+                                          color: AppColors.text.withOpacity(0.5),
                                           fontSize: 11,
                                         ),
                                       ),
@@ -998,7 +999,7 @@ class _HighPriorityDonutPainter extends CustomPainter {
         Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = stroke
-          ..color = kWhite.withOpacity(0.12));
+          ..color = AppColors.text.withOpacity(0.12));
 
     if (total == 0) return;
 
@@ -1017,7 +1018,7 @@ class _HighPriorityDonutPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter _) => false;
+  bool shouldRepaint(covariant CustomPainter _) => true;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -1064,11 +1065,11 @@ class _SavingsLinePainter extends CustomPainter {
     }
 
     final gridPaint = Paint()
-      ..color = kWhite.withOpacity(0.08)
+      ..color = AppColors.text.withOpacity(0.08)
       ..strokeWidth = 1;
 
     final labelStyle = TextStyle(
-      color: kWhite.withOpacity(0.35),
+      color: AppColors.text.withOpacity(0.35),
       fontSize: 8,
     );
 
@@ -1130,8 +1131,8 @@ class _SavingsLinePainter extends CustomPainter {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            kTeal.withOpacity(0.35),
-            kTeal.withOpacity(0.0),
+            AppColors.accent.withOpacity(0.35),
+            AppColors.accent.withOpacity(0.0),
           ],
         ).createShader(Rect.fromLTWH(0, 0, size.width, size.height)),
     );
@@ -1139,7 +1140,7 @@ class _SavingsLinePainter extends CustomPainter {
     canvas.drawPath(
       path,
       Paint()
-        ..color = kTeal
+        ..color = AppColors.accent
         ..strokeWidth = 2.5
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round
@@ -1147,19 +1148,19 @@ class _SavingsLinePainter extends CustomPainter {
     );
 
     for (final pt in pts) {
-      canvas.drawCircle(pt, 3, Paint()..color = kTeal);
+      canvas.drawCircle(pt, 3, Paint()..color = AppColors.accent);
       canvas.drawCircle(
           pt,
           3,
           Paint()
-            ..color = kWhite
+            ..color = AppColors.text
             ..style = PaintingStyle.stroke
             ..strokeWidth = 1.5);
     }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter _) => false;
+  bool shouldRepaint(covariant CustomPainter _) => true;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -1179,11 +1180,11 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 40, color: kWhite.withOpacity(0.12)),
+            Icon(icon, size: 40, color: AppColors.text.withOpacity(0.12)),
             const SizedBox(height: 10),
             Text(
               message,
-              style: TextStyle(color: kWhite.withOpacity(0.3), fontSize: 13),
+              style: TextStyle(color: AppColors.text.withOpacity(0.3), fontSize: 13),
             ),
           ],
         ),

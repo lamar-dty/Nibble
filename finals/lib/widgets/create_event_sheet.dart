@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../constants/colors.dart';
-import '../../models/event.dart';
-import '../../store/task_store.dart';
-import '../../store/wallet_store.dart';
+import '../constants/colors.dart';
+import '../models/event.dart';
+import '../store/task_store.dart';
+import '../store/wallet_store.dart';
 import '../widgets/wallet/wallet_sheet.dart';
+import '../constants/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Entry point
@@ -219,8 +220,8 @@ class _CreateEventSheetState extends State<_CreateEventSheet>
       child: Container(
         margin: EdgeInsets.only(bottom: bottom),
         height: MediaQuery.of(context).size.height * 0.78,
-        decoration: const BoxDecoration(
-          color: Color(0xFF1A2D5A),
+        decoration: BoxDecoration(
+          color: AppColors.bgDeep,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: Column(
@@ -231,7 +232,7 @@ class _CreateEventSheetState extends State<_CreateEventSheet>
               width: 36, height: 4,
               margin: const EdgeInsets.only(top: 12),
               decoration: BoxDecoration(
-                  color: kWhite.withOpacity(0.18),
+                  color: AppColors.text.withOpacity(0.18),
                   borderRadius: BorderRadius.circular(2)),
             ),
 
@@ -255,14 +256,14 @@ class _CreateEventSheetState extends State<_CreateEventSheet>
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Add Event',
+                      Text('Add Event',
                           style: TextStyle(
-                              color: kWhite,
+                              color: AppColors.text,
                               fontSize: 17,
                               fontWeight: FontWeight.bold)),
                       Text('Schedule something on your calendar',
                           style: TextStyle(
-                              color: kWhite.withOpacity(0.4), fontSize: 12)),
+                              color: AppColors.text.withOpacity(0.4), fontSize: 12)),
                     ],
                   ),
                   const Spacer(),
@@ -271,10 +272,10 @@ class _CreateEventSheetState extends State<_CreateEventSheet>
                     child: Container(
                       width: 32, height: 32,
                       decoration: BoxDecoration(
-                          color: kWhite.withOpacity(0.07),
+                          color: AppColors.text.withOpacity(0.07),
                           shape: BoxShape.circle),
                       child: Icon(Icons.close_rounded,
-                          color: kWhite.withOpacity(0.5), size: 17),
+                          color: AppColors.text.withOpacity(0.5), size: 17),
                     ),
                   ),
                 ],
@@ -282,7 +283,7 @@ class _CreateEventSheetState extends State<_CreateEventSheet>
             ),
 
             const SizedBox(height: 16),
-            Divider(height: 1, color: kWhite.withOpacity(0.07)),
+            Divider(height: 1, color: AppColors.text.withOpacity(0.07)),
 
             // Body
             Expanded(
@@ -341,7 +342,7 @@ class _CreateEventSheetState extends State<_CreateEventSheet>
                           setState(() => _showOptional = !_showOptional),
                       child: Row(children: [
                         Expanded(
-                            child: Divider(color: kWhite.withOpacity(0.08))),
+                            child: Divider(color: AppColors.text.withOpacity(0.08))),
                         Padding(
                           padding:
                               const EdgeInsets.symmetric(horizontal: 10),
@@ -365,7 +366,7 @@ class _CreateEventSheetState extends State<_CreateEventSheet>
                           ]),
                         ),
                         Expanded(
-                            child: Divider(color: kWhite.withOpacity(0.08))),
+                            child: Divider(color: AppColors.text.withOpacity(0.08))),
                       ]),
                     ),
 
@@ -403,7 +404,7 @@ class _CreateEventSheetState extends State<_CreateEventSheet>
             Container(
               decoration: BoxDecoration(
                   border: Border(
-                      top: BorderSide(color: kWhite.withOpacity(0.07)))),
+                      top: BorderSide(color: AppColors.text.withOpacity(0.07)))),
               padding: EdgeInsets.fromLTRB(
                   20, 14, 20, 14 + mq.padding.bottom),
               child: SizedBox(
@@ -428,20 +429,20 @@ class _CreateEventSheetState extends State<_CreateEventSheet>
                       onTap: _saving ? null : _save,
                       child: Center(
                         child: _saving
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 20, height: 20,
                                 child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation(kWhite)))
-                            : const Row(
+                                    valueColor: AlwaysStoppedAnimation(AppColors.text)))
+                            : Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(Icons.check_rounded,
-                                      color: kNavyDark, size: 18),
+                                      color: AppColors.bg, size: 18),
                                   SizedBox(width: 7),
                                   Text('Save Event',
                                       style: TextStyle(
-                                          color: kNavyDark,
+                                          color: AppColors.bg,
                                           fontSize: 15,
                                           fontWeight: FontWeight.bold,
                                           letterSpacing: 0.3)),
@@ -494,9 +495,9 @@ class _EventDateTimeSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: kWhite.withOpacity(0.04),
+        color: AppColors.text.withOpacity(0.04),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: kWhite.withOpacity(0.09)),
+        border: Border.all(color: AppColors.text.withOpacity(0.09)),
       ),
       child: Column(
         children: [
@@ -536,7 +537,7 @@ class _EventDateTimeSection extends StatelessWidget {
           ),
 
           Divider(height: 1, indent: 14, endIndent: 14,
-              color: kWhite.withOpacity(0.07)),
+              color: AppColors.text.withOpacity(0.07)),
 
           // ── END ─────────────────────────────────────────
           _SectionLabel(
@@ -709,19 +710,19 @@ class _AddTimeChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
         decoration: BoxDecoration(
-          color: kWhite.withOpacity(0.03),
+          color: AppColors.text.withOpacity(0.03),
           borderRadius: BorderRadius.circular(12),
           border:
-              Border.all(color: kWhite.withOpacity(0.08)),
+              Border.all(color: AppColors.text.withOpacity(0.08)),
         ),
         child: Row(children: [
           Icon(Icons.add_circle_outline_rounded,
-              size: 13, color: kWhite.withOpacity(0.25)),
+              size: 13, color: AppColors.text.withOpacity(0.25)),
           const SizedBox(width: 5),
           Flexible(
             child: Text(label,
                 style: TextStyle(
-                    color: kWhite.withOpacity(0.3),
+                    color: AppColors.text.withOpacity(0.3),
                     fontSize: 11,
                     fontWeight: FontWeight.w600),
                 overflow: TextOverflow.ellipsis),
@@ -817,9 +818,9 @@ class _EventCategorySheet extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
         decoration: BoxDecoration(
-          color: const Color(0xFF1B2D5B),
+          color: AppColors.bgDeep,
           borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: kWhite.withOpacity(0.08)),
+          border: Border.all(color: AppColors.text.withOpacity(0.08)),
           boxShadow: [
             BoxShadow(
                 color: Colors.black.withOpacity(0.4),
@@ -836,7 +837,7 @@ class _EventCategorySheet extends StatelessWidget {
                 height: 4,
                 margin: const EdgeInsets.only(top: 14, bottom: 18),
                 decoration: BoxDecoration(
-                    color: kWhite.withOpacity(0.18),
+                    color: AppColors.text.withOpacity(0.18),
                     borderRadius: BorderRadius.circular(2)),
               ),
               Padding(
@@ -858,21 +859,21 @@ class _EventCategorySheet extends StatelessWidget {
                   Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Select Category',
+                        Text('Select Category',
                             style: TextStyle(
-                                color: kWhite,
+                                color: AppColors.text,
                                 fontSize: 17,
                                 fontWeight: FontWeight.bold)),
                         Text('What kind of event is this?',
                             style: TextStyle(
-                                color: kWhite.withOpacity(0.4),
+                                color: AppColors.text.withOpacity(0.4),
                                 fontSize: 12)),
                       ]),
                 ]),
               ),
               const SizedBox(height: 16),
               Divider(
-                  color: kWhite.withOpacity(0.07),
+                  color: AppColors.text.withOpacity(0.07),
                   thickness: 1,
                   indent: 22,
                   endIndent: 22),
@@ -915,12 +916,12 @@ class _EventCatCardState extends State<_EventCatCard> {
         margin: const EdgeInsets.fromLTRB(14, 0, 14, 9),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: (_pressed || sel) ? c.withOpacity(0.12) : kWhite.withOpacity(0.04),
+          color: (_pressed || sel) ? c.withOpacity(0.12) : AppColors.text.withOpacity(0.04),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
               color: (_pressed || sel)
                   ? c.withOpacity(0.55)
-                  : kWhite.withOpacity(0.08),
+                  : AppColors.text.withOpacity(0.08),
               width: 1.3),
         ),
         child: Row(children: [
@@ -939,14 +940,14 @@ class _EventCatCardState extends State<_EventCatCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(widget.cat.label,
-                      style: const TextStyle(
-                          color: kWhite,
+                      style: TextStyle(
+                          color: AppColors.text,
                           fontSize: 15,
                           fontWeight: FontWeight.w600)),
                   const SizedBox(height: 3),
                   Text(widget.cat.description,
                       style: TextStyle(
-                          color: kWhite.withOpacity(0.37), fontSize: 12)),
+                          color: AppColors.text.withOpacity(0.37), fontSize: 12)),
                 ]),
           ),
           const SizedBox(width: 6),
@@ -954,11 +955,11 @@ class _EventCatCardState extends State<_EventCatCard> {
             Container(
               width: 22, height: 22,
               decoration: BoxDecoration(color: c, shape: BoxShape.circle),
-              child: const Icon(Icons.check_rounded,
-                  color: kWhite, size: 14))
+              child: Icon(Icons.check_rounded,
+                  color: AppColors.text, size: 14))
           else
             Icon(Icons.chevron_right_rounded,
-                color: kWhite.withOpacity(0.2), size: 20),
+                color: AppColors.text.withOpacity(0.2), size: 20),
         ]),
       ),
     );
@@ -986,20 +987,20 @@ class _EventOptionalSection extends StatelessWidget {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: kWhite.withOpacity(0.05),
+            color: AppColors.text.withOpacity(0.05),
             borderRadius: BorderRadius.circular(13),
-            border: Border.all(color: kWhite.withOpacity(0.1)),
+            border: Border.all(color: AppColors.text.withOpacity(0.1)),
           ),
           padding:
               const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
           child: TextField(
             controller: locationCtrl,
-            style: const TextStyle(color: kWhite, fontSize: 14),
+            style: TextStyle(color: AppColors.text, fontSize: 14),
             textCapitalization: TextCapitalization.words,
             decoration: InputDecoration(
               hintText: 'Where is this event?',
               hintStyle: TextStyle(
-                  color: kWhite.withOpacity(0.22), fontSize: 14),
+                  color: AppColors.text.withOpacity(0.22), fontSize: 14),
               border: InputBorder.none,
               contentPadding:
                   const EdgeInsets.symmetric(vertical: 12),
@@ -1014,21 +1015,21 @@ class _EventOptionalSection extends StatelessWidget {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: kWhite.withOpacity(0.05),
+            color: AppColors.text.withOpacity(0.05),
             borderRadius: BorderRadius.circular(13),
-            border: Border.all(color: kWhite.withOpacity(0.1)),
+            border: Border.all(color: AppColors.text.withOpacity(0.1)),
           ),
           padding:
               const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           child: TextField(
             controller: notesCtrl,
-            style: const TextStyle(color: kWhite, fontSize: 13),
+            style: TextStyle(color: AppColors.text, fontSize: 13),
             maxLines: 3, minLines: 2,
             textCapitalization: TextCapitalization.sentences,
             decoration: InputDecoration(
               hintText: 'Add extra details or a note…',
               hintStyle: TextStyle(
-                  color: kWhite.withOpacity(0.22), fontSize: 13),
+                  color: AppColors.text.withOpacity(0.22), fontSize: 13),
               border: InputBorder.none,
               contentPadding:
                   const EdgeInsets.symmetric(vertical: 10),
@@ -1051,11 +1052,11 @@ class _FieldLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(children: [
-      Icon(icon, color: kSubtitle, size: 12),
+      Icon(icon, color: AppColors.subtitle, size: 12),
       const SizedBox(width: 5),
       Text(label,
-          style: const TextStyle(
-              color: kSubtitle,
+          style: TextStyle(
+              color: AppColors.subtitle,
               fontSize: 11,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.5)),
@@ -1076,22 +1077,22 @@ class _TitleField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: kWhite.withOpacity(0.05),
+        color: AppColors.text.withOpacity(0.05),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: kWhite.withOpacity(0.1)),
+        border: Border.all(color: AppColors.text.withOpacity(0.1)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
       child: TextField(
         controller: controller,
         focusNode: focusNode,
-        style: const TextStyle(
-            color: kWhite, fontSize: 17, fontWeight: FontWeight.w600),
+        style: TextStyle(
+            color: AppColors.text, fontSize: 17, fontWeight: FontWeight.w600),
         maxLines: 2, minLines: 1,
         textCapitalization: TextCapitalization.sentences,
         decoration: InputDecoration(
           hintText: 'What\'s the event?',
           hintStyle: TextStyle(
-              color: kWhite.withOpacity(0.22),
+              color: AppColors.text.withOpacity(0.22),
               fontSize: 17,
               fontWeight: FontWeight.w600),
           border: InputBorder.none,
@@ -1152,16 +1153,16 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
     return Container(
       margin: EdgeInsets.fromLTRB(12, 0, 12, 24 + mq.padding.bottom),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A2D5A),
+        color: AppColors.bgDeep,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: kWhite.withOpacity(0.08)),
+        border: Border.all(color: AppColors.text.withOpacity(0.08)),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.45), blurRadius: 40, offset: const Offset(0, -4))],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(width: 36, height: 4, margin: const EdgeInsets.only(top: 12),
-              decoration: BoxDecoration(color: kWhite.withOpacity(0.18), borderRadius: BorderRadius.circular(2))),
+              decoration: BoxDecoration(color: AppColors.text.withOpacity(0.18), borderRadius: BorderRadius.circular(2))),
           Padding(
             padding: const EdgeInsets.fromLTRB(22, 16, 22, 0),
             child: Row(children: [
@@ -1171,20 +1172,20 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
                 child: const Icon(Icons.access_time_rounded, color: Color(0xFF9B88E8), size: 18)),
               const SizedBox(width: 12),
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text('Set Time', style: TextStyle(color: kWhite, fontSize: 16, fontWeight: FontWeight.bold)),
-                Text('Scroll to choose', style: TextStyle(color: kWhite.withOpacity(0.38), fontSize: 12)),
+                Text('Set Time', style: TextStyle(color: AppColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
+                Text('Scroll to choose', style: TextStyle(color: AppColors.text.withOpacity(0.38), fontSize: 12)),
               ]),
               const Spacer(),
               GestureDetector(
                 onTap: () => Navigator.pop(context),
                 child: Container(width: 30, height: 30,
-                  decoration: BoxDecoration(color: kWhite.withOpacity(0.07), shape: BoxShape.circle),
-                  child: Icon(Icons.close_rounded, color: kWhite.withOpacity(0.45), size: 16)),
+                  decoration: BoxDecoration(color: AppColors.text.withOpacity(0.07), shape: BoxShape.circle),
+                  child: Icon(Icons.close_rounded, color: AppColors.text.withOpacity(0.45), size: 16)),
               ),
             ]),
           ),
           const SizedBox(height: 18),
-          Divider(height: 1, color: kWhite.withOpacity(0.07)),
+          Divider(height: 1, color: AppColors.text.withOpacity(0.07)),
           const SizedBox(height: 8),
           SizedBox(
             height: _listH,
@@ -1192,20 +1193,20 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
               Positioned(
                 top: _itemH * ((_visible - 1) / 2), left: 16, right: 16, height: _itemH,
                 child: Container(decoration: BoxDecoration(
-                    color: kWhite.withOpacity(0.07), borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: kWhite.withOpacity(0.1))))),
+                    color: AppColors.text.withOpacity(0.07), borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.text.withOpacity(0.1))))),
               Positioned(top: 0, left: 0, right: 0, height: _itemH * 1.5,
                 child: IgnorePointer(child: Container(decoration: BoxDecoration(gradient: LinearGradient(
                     begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                    colors: [const Color(0xFF1A2D5A), const Color(0xFF1A2D5A).withOpacity(0)]))))),
+                    colors: [AppColors.bgDeep, AppColors.bgDeep.withOpacity(0)]))))),
               Positioned(bottom: 0, left: 0, right: 0, height: _itemH * 1.5,
                 child: IgnorePointer(child: Container(decoration: BoxDecoration(gradient: LinearGradient(
                     begin: Alignment.bottomCenter, end: Alignment.topCenter,
-                    colors: [const Color(0xFF1A2D5A), const Color(0xFF1A2D5A).withOpacity(0)]))))),
+                    colors: [AppColors.bgDeep, AppColors.bgDeep.withOpacity(0)]))))),
               Row(children: [
                 Expanded(flex: 3, child: _Wheel(controller: _hourCtrl, itemCount: 12,
                     labelBuilder: (i) => '${(i % 12) + 1}', onChanged: (i) => setState(() => _hour12 = (i % 12) + 1))),
-                Text(':', style: TextStyle(color: kWhite.withOpacity(0.6), fontSize: 28, fontWeight: FontWeight.w300)),
+                Text(':', style: TextStyle(color: AppColors.text.withOpacity(0.6), fontSize: 28, fontWeight: FontWeight.w300)),
                 Expanded(flex: 3, child: _Wheel(controller: _minuteCtrl, itemCount: 60,
                     labelBuilder: (i) => (i % 60).toString().padLeft(2, '0'), onChanged: (i) => setState(() => _minute = i % 60))),
                 Expanded(flex: 2, child: _Wheel(controller: _amPmCtrl, itemCount: 2, looping: false,
@@ -1214,7 +1215,7 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
             ]),
           ),
           const SizedBox(height: 12),
-          Divider(height: 1, color: kWhite.withOpacity(0.07)),
+          Divider(height: 1, color: AppColors.text.withOpacity(0.07)),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
             child: SizedBox(
@@ -1229,10 +1230,10 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
                   borderRadius: BorderRadius.circular(14),
                   onTap: () => Navigator.pop(context, _result),
                   child: Center(child: Row(mainAxisSize: MainAxisSize.min, children: [
-                    const Icon(Icons.check_rounded, color: kWhite, size: 18),
+                    Icon(Icons.check_rounded, color: AppColors.text, size: 18),
                     const SizedBox(width: 7),
                     Text(_fmtPreview(_result),
-                        style: const TextStyle(color: kWhite, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.3)),
+                        style: TextStyle(color: AppColors.text, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.3)),
                   ])),
                 )),
               ),
@@ -1310,54 +1311,54 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
     return Container(
       margin: EdgeInsets.fromLTRB(12, 0, 12, 24 + mq.padding.bottom),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A2D5A),
+        color: AppColors.bgDeep,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: kWhite.withOpacity(0.08)),
+        border: Border.all(color: AppColors.text.withOpacity(0.08)),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.45), blurRadius: 40, offset: const Offset(0, -4))],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(width: 36, height: 4, margin: const EdgeInsets.only(top: 12),
-              decoration: BoxDecoration(color: kWhite.withOpacity(0.18), borderRadius: BorderRadius.circular(2))),
+              decoration: BoxDecoration(color: AppColors.text.withOpacity(0.18), borderRadius: BorderRadius.circular(2))),
           Padding(
             padding: const EdgeInsets.fromLTRB(22, 16, 22, 0),
             child: Row(children: [
               Container(width: 38, height: 38,
-                decoration: BoxDecoration(color: kTeal.withOpacity(0.14), shape: BoxShape.circle,
-                    border: Border.all(color: kTeal.withOpacity(0.3))),
-                child: const Icon(Icons.calendar_today_rounded, color: kTeal, size: 17)),
+                decoration: BoxDecoration(color: AppColors.accent.withOpacity(0.14), shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.accent.withOpacity(0.3))),
+                child: Icon(Icons.calendar_today_rounded, color: AppColors.accent, size: 17)),
               const SizedBox(width: 12),
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text('Set Date', style: TextStyle(color: kWhite, fontSize: 16, fontWeight: FontWeight.bold)),
-                Text('Scroll to choose', style: TextStyle(color: kWhite.withOpacity(0.38), fontSize: 12)),
+                Text('Set Date', style: TextStyle(color: AppColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
+                Text('Scroll to choose', style: TextStyle(color: AppColors.text.withOpacity(0.38), fontSize: 12)),
               ]),
               const Spacer(),
               GestureDetector(
                 onTap: () => Navigator.pop(context),
                 child: Container(width: 30, height: 30,
-                  decoration: BoxDecoration(color: kWhite.withOpacity(0.07), shape: BoxShape.circle),
-                  child: Icon(Icons.close_rounded, color: kWhite.withOpacity(0.45), size: 16)),
+                  decoration: BoxDecoration(color: AppColors.text.withOpacity(0.07), shape: BoxShape.circle),
+                  child: Icon(Icons.close_rounded, color: AppColors.text.withOpacity(0.45), size: 16)),
               ),
             ]),
           ),
           const SizedBox(height: 18),
-          Divider(height: 1, color: kWhite.withOpacity(0.07)),
+          Divider(height: 1, color: AppColors.text.withOpacity(0.07)),
           const SizedBox(height: 8),
           SizedBox(
             height: _listH,
             child: Stack(children: [
               Positioned(top: _itemH * ((_visible - 1) / 2), left: 16, right: 16, height: _itemH,
-                child: Container(decoration: BoxDecoration(color: kWhite.withOpacity(0.07),
-                    borderRadius: BorderRadius.circular(14), border: Border.all(color: kWhite.withOpacity(0.1))))),
+                child: Container(decoration: BoxDecoration(color: AppColors.text.withOpacity(0.07),
+                    borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.text.withOpacity(0.1))))),
               Positioned(top: 0, left: 0, right: 0, height: _itemH * 1.5,
                 child: IgnorePointer(child: Container(decoration: BoxDecoration(gradient: LinearGradient(
                     begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                    colors: [const Color(0xFF1A2D5A), const Color(0xFF1A2D5A).withOpacity(0)]))))),
+                    colors: [AppColors.bgDeep, AppColors.bgDeep.withOpacity(0)]))))),
               Positioned(bottom: 0, left: 0, right: 0, height: _itemH * 1.5,
                 child: IgnorePointer(child: Container(decoration: BoxDecoration(gradient: LinearGradient(
                     begin: Alignment.bottomCenter, end: Alignment.topCenter,
-                    colors: [const Color(0xFF1A2D5A), const Color(0xFF1A2D5A).withOpacity(0)]))))),
+                    colors: [AppColors.bgDeep, AppColors.bgDeep.withOpacity(0)]))))),
               Row(children: [
                 Expanded(flex: 3, child: _Wheel(controller: _monthCtrl, itemCount: 12,
                     labelBuilder: (i) => _months[i % 12], onChanged: (i) => setState(() => _month = (i % 12) + 1))),
@@ -1377,7 +1378,7 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
             ]),
           ),
           const SizedBox(height: 12),
-          Divider(height: 1, color: kWhite.withOpacity(0.07)),
+          Divider(height: 1, color: AppColors.text.withOpacity(0.07)),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
             child: SizedBox(
@@ -1385,17 +1386,17 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
-                  gradient: const LinearGradient(colors: [kTeal, Color(0xFF6AB8B3)]),
-                  boxShadow: [BoxShadow(color: kTeal.withOpacity(0.35), blurRadius: 16, offset: const Offset(0, 4))],
+                  gradient: LinearGradient(colors: [AppColors.accent, Color(0xFF6AB8B3)]),
+                  boxShadow: [BoxShadow(color: AppColors.accent.withOpacity(0.35), blurRadius: 16, offset: const Offset(0, 4))],
                 ),
                 child: Material(color: Colors.transparent, child: InkWell(
                   borderRadius: BorderRadius.circular(14),
                   onTap: () => Navigator.pop(context, _result),
                   child: Center(child: Row(mainAxisSize: MainAxisSize.min, children: [
-                    const Icon(Icons.check_rounded, color: kNavyDark, size: 18),
+                    Icon(Icons.check_rounded, color: AppColors.bg, size: 18),
                     const SizedBox(width: 7),
                     Text(_fmtResult(_result),
-                        style: const TextStyle(color: kNavyDark, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.3)),
+                        style: TextStyle(color: AppColors.bg, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.3)),
                   ])),
                 )),
               ),
@@ -1455,7 +1456,7 @@ class _WheelItem extends StatelessWidget {
     return Center(
       child: Text(label,
           style: TextStyle(
-              color: dimmed ? kWhite.withOpacity(0.18) : kWhite,
+              color: dimmed ? AppColors.text.withOpacity(0.18) : AppColors.text,
               fontSize: 26,
               fontWeight: FontWeight.w300,
               letterSpacing: 0.5)),
@@ -1492,18 +1493,18 @@ class _CostSection extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: kWhite.withOpacity(0.05),
+              color: AppColors.text.withOpacity(0.05),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
               children: [
                 Icon(Icons.account_balance_wallet_rounded,
-                    size: 18, color: kWhite.withOpacity(0.5)),
+                    size: 18, color: AppColors.text.withOpacity(0.5)),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text('Add cost to wallet',
                       style: TextStyle(
-                          color: kWhite.withOpacity(0.65),
+                          color: AppColors.text.withOpacity(0.65),
                           fontSize: 14,
                           fontWeight: FontWeight.w500)),
                 ),
@@ -1511,7 +1512,7 @@ class _CostSection extends StatelessWidget {
                   turns: addCost ? 0.5 : 0,
                   duration: const Duration(milliseconds: 220),
                   child: Icon(Icons.keyboard_arrow_down_rounded,
-                      color: kWhite.withOpacity(0.4), size: 20),
+                      color: AppColors.text.withOpacity(0.4), size: 20),
                 ),
               ],
             ),
@@ -1532,14 +1533,14 @@ class _CostSection extends StatelessWidget {
                 // Amount field
                 Container(
                   decoration: BoxDecoration(
-                    color: kWhite.withOpacity(0.06),
+                    color: AppColors.text.withOpacity(0.06),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
                   child: Row(children: [
                     Text('₱',
                         style: TextStyle(
-                            color: kWhite.withOpacity(0.6),
+                            color: AppColors.text.withOpacity(0.6),
                             fontSize: 15,
                             fontWeight: FontWeight.w600)),
                     const SizedBox(width: 6),
@@ -1548,11 +1549,11 @@ class _CostSection extends StatelessWidget {
                         controller: costCtrl,
                         keyboardType:
                             const TextInputType.numberWithOptions(decimal: true),
-                        style: const TextStyle(color: kWhite, fontSize: 15),
+                        style: TextStyle(color: AppColors.text, fontSize: 15),
                         decoration: InputDecoration(
                           hintText: 'Amount (e.g. 250.00)',
                           hintStyle:
-                              TextStyle(color: kWhite.withOpacity(0.3), fontSize: 14),
+                              TextStyle(color: AppColors.text.withOpacity(0.3), fontSize: 14),
                           border: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(vertical: 12),
                         ),
@@ -1576,7 +1577,7 @@ class _CostSection extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: selected
                               ? cat.color.withOpacity(0.2)
-                              : kWhite.withOpacity(0.06),
+                              : AppColors.text.withOpacity(0.06),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: selected ? cat.color : Colors.transparent,
@@ -1590,14 +1591,14 @@ class _CostSection extends StatelessWidget {
                                 size: 13,
                                 color: selected
                                     ? cat.color
-                                    : kWhite.withOpacity(0.45)),
+                                    : AppColors.text.withOpacity(0.45)),
                             const SizedBox(width: 5),
                             Text(cat.label,
                                 style: TextStyle(
                                     fontSize: 12,
                                     color: selected
                                         ? cat.color
-                                        : kWhite.withOpacity(0.55),
+                                        : AppColors.text.withOpacity(0.55),
                                     fontWeight: selected
                                         ? FontWeight.w600
                                         : FontWeight.w400)),

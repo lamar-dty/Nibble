@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'task.dart';
 import 'event.dart';
+import '../constants/app_colors.dart';
 
 enum NotificationType {
   // ── Task ──────────────────────────────
@@ -151,7 +152,7 @@ class AppNotification {
     if (eventCategory != null) return eventCategory!.color;
     switch (type) {
       case NotificationType.classReminder:
-        return const Color(0xFF90D0CB); // kTeal
+        return AppColors.accent; // AppColors.accent
       case NotificationType.walletExpenseAdded:
       case NotificationType.walletExpenseDueSoon:
       case NotificationType.walletExpensePaid:

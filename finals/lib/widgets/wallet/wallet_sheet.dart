@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/colors.dart';
 import '../../store/wallet_store.dart' show SavingsEntry;
+import '../../constants/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Data models (shared across wallet_screen.dart + wallet_sheet.dart)
@@ -34,10 +35,10 @@ enum WalletExpenseCategory {
   Color get color {
     switch (this) {
       case WalletExpenseCategory.food:      return const Color(0xFFE87070);
-      case WalletExpenseCategory.transport: return const Color(0xFF4A90D9);
+      case WalletExpenseCategory.transport: return AppColors.link;
       case WalletExpenseCategory.school:    return const Color(0xFF9B88E8);
       case WalletExpenseCategory.health:    return const Color(0xFF3BBFA3);
-      case WalletExpenseCategory.other:     return const Color(0xFF6B7A99);
+      case WalletExpenseCategory.other:     return AppColors.icon;
     }
   }
 
@@ -236,7 +237,7 @@ class WalletSheet extends StatefulWidget {
 }
 
 class _WalletSheetState extends State<WalletSheet> {
-  static const double _headerHeight = 147.0;
+  static const double _headerHeight = 148.0;
 
   _WalletSortBy _upcomingSort = _WalletSortBy.dueDate;
   _WalletSortBy _recentSort   = _WalletSortBy.dueDate;
@@ -310,7 +311,7 @@ class _WalletSheetState extends State<WalletSheet> {
         SliverAppBar(
           pinned: true,
           automaticallyImplyLeading: false,
-          backgroundColor: kWhite,
+          backgroundColor: AppColors.text,
           surfaceTintColor: Colors.transparent,
           shadowColor: Colors.black12,
           elevation: 0.5,
@@ -436,7 +437,7 @@ class _WalletSheetState extends State<WalletSheet> {
                             margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
                             padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1A2D5A),
+                              color: AppColors.bgDeep,
                               borderRadius: BorderRadius.circular(24),
                             ),
                             child: Column(
@@ -559,16 +560,16 @@ class _WalletSheetState extends State<WalletSheet> {
                         );
                         if (confirmed == true) widget.onClearSavingsLog!();
                       },
-                      child: const Row(
+                      child: Row(
                         children: [
                           Text('Clear',
                               style: TextStyle(
-                                  color: Color(0xFF6B7A99),
+                                  color: AppColors.icon,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500)),
                           SizedBox(width: 3),
                           Icon(Icons.delete_sweep_rounded,
-                              color: Color(0xFF6B7A99), size: 16),
+                              color: AppColors.icon, size: 16),
                         ],
                       ),
                     ),
@@ -713,10 +714,10 @@ class _WalletSheetHeader extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Wallet',
                 style: TextStyle(
-                  color: kNavyDark,
+                  color: AppColors.bg,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -726,13 +727,13 @@ class _WalletSheetHeader extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF4A90D9).withOpacity(0.1),
+                    color: AppColors.link.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     '$upcomingCount upcoming',
-                    style: const TextStyle(
-                      color: Color(0xFF4A90D9),
+                    style: TextStyle(
+                      color: AppColors.link,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -743,8 +744,8 @@ class _WalletSheetHeader extends StatelessWidget {
         ),
 
         const SizedBox(height: 4),
-        const Divider(height: 1, indent: 20, endIndent: 20,
-            color: Color(0xFFEEEEEE)),
+        Divider(height: 1, indent: 20, endIndent: 20,
+            color: AppColors.lightFill),
         const SizedBox(height: 8),
 
         Padding(
@@ -753,7 +754,7 @@ class _WalletSheetHeader extends StatelessWidget {
             children: [
               _CompactStat(
                 icon: Icons.credit_card_rounded,
-                iconColor: const Color(0xFF4A90D9),
+                iconColor: AppColors.link,
                 label: 'Daily Allowance',
                 value: '₱${dailyAllowance.toStringAsFixed(2)}',
               ),
@@ -787,6 +788,9 @@ class _WalletSheetHeader extends StatelessWidget {
 }
 
 // ── Compact stat chip ─────────────────────────────────────────────────────────
+// Fixed height (82px) ensures all three cards are identical regardless of
+// whether showProgress adds a progress bar or not. The progress card
+// previously expanded taller than the other two.
 class _CompactStat extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
@@ -808,66 +812,90 @@ class _CompactStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Derive a slightly more visible progress color based on budget usage.
+    final Color barColor = progressValue >= 1.0
+        ? const Color(0xFFE87070)
+        : progressValue >= 0.8
+            ? const Color(0xFFF5A623)
+            : const Color(0xFF9B88E8);
+
     return Expanded(
       child: Container(
+        width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF7F8FA),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFEEEEEE)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                Icon(icon, size: 11, color: iconColor),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: const TextStyle(
-                      color: Color(0xFF6B7A99),
-                      fontSize: 9,
+          decoration: BoxDecoration(
+            // AppColors.bg is navy in light mode, near-black in dark mode —
+            // both contrast well against the sheet's AppColors.text background.
+            color: AppColors.bg.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.bg.withOpacity(0.15)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // ── Label row ─────────────────────────────────
+              Row(
+                children: [
+                  Icon(icon, size: 11, color: iconColor),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        color: AppColors.bg.withOpacity(0.55),
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.1,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                if (onAction != null)
-                  GestureDetector(
-                    onTap: onAction,
-                    child: Icon(Icons.add_circle_rounded,
-                        size: 14, color: iconColor),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: const TextStyle(
-                color: kNavyDark,
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
+                  if (onAction != null)
+                    GestureDetector(
+                      onTap: onAction,
+                      child: Icon(Icons.add_circle_rounded,
+                          size: 14, color: iconColor),
+                    ),
+                ],
               ),
-              overflow: TextOverflow.ellipsis,
-            ),
-            if (showProgress) ...[
-              const SizedBox(height: 4),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(2),
-                child: LinearProgressIndicator(
-                  value: progressValue,
-                  minHeight: 3,
-                  backgroundColor: const Color(0xFFEEEEEE),
-                  valueColor: const AlwaysStoppedAnimation<Color>(
-                      Color(0xFFE87070)),
+
+              const SizedBox(height: 6),
+
+              // ── Value ──────────────────────────────────────
+              Text(
+                value,
+                style: TextStyle(
+                  color: AppColors.bg,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  height: 1.1,
                 ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+
+              const SizedBox(height: 6),
+
+              // ── Bottom slot: same height in all three cards ─
+              SizedBox(
+                height: 4,
+                child: showProgress
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(3),
+                        child: LinearProgressIndicator(
+                          value: progressValue.clamp(0.0, 1.0),
+                          minHeight: 4,
+                          backgroundColor: AppColors.bg.withOpacity(0.15),
+                          valueColor: AlwaysStoppedAnimation<Color>(barColor),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
               ),
             ],
-          ],
+          ),
         ),
-      ),
     );
   }
 }
@@ -892,8 +920,8 @@ class _SheetSectionHeader extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              color: kNavyDark,
+            style: TextStyle(
+              color: AppColors.bg,
               fontSize: 17,
               fontWeight: FontWeight.bold,
             ),
@@ -909,21 +937,21 @@ class _SheetSectionHeader extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF6B7A99).withOpacity(0.08),
+                    color: AppColors.icon.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFF6B7A99).withOpacity(0.18)),
+                    border: Border.all(color: AppColors.icon.withOpacity(0.18)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.sort_rounded, size: 12, color: Color(0xFF6B7A99)),
+                      Icon(Icons.sort_rounded, size: 12, color: AppColors.icon),
                       const SizedBox(width: 4),
                       Text(
                         sortLabel ?? 'Sort',
-                        style: const TextStyle(color: Color(0xFF6B7A99), fontSize: 11, fontWeight: FontWeight.w700),
+                        style: TextStyle(color: AppColors.icon, fontSize: 11, fontWeight: FontWeight.w700),
                       ),
                       const SizedBox(width: 3),
-                      const Icon(Icons.keyboard_arrow_down_rounded, size: 12, color: Color(0xFF6B7A99)),
+                      Icon(Icons.keyboard_arrow_down_rounded, size: 12, color: AppColors.icon),
                     ],
                   ),
                 ),
@@ -961,7 +989,7 @@ class _WalletSortSheet extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
       constraints: BoxConstraints(maxHeight: maxH),
       decoration: BoxDecoration(
-        color: const Color(0xFF1B2D5B),
+        color: AppColors.bgDeep,
         borderRadius: BorderRadius.circular(28),
         border: Border.all(color: Colors.white.withOpacity(0.08)),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 40, offset: const Offset(0, -4))],
@@ -1136,12 +1164,12 @@ class _SheetEmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 36, color: kNavyDark.withOpacity(0.1)),
+            Icon(icon, size: 36, color: AppColors.bg.withOpacity(0.1)),
             const SizedBox(height: 8),
             Text(
               message,
               style: TextStyle(
-                  color: kNavyDark.withOpacity(0.3), fontSize: 13),
+                  color: AppColors.bg.withOpacity(0.3), fontSize: 13),
             ),
           ],
         ),
@@ -1178,7 +1206,7 @@ class _ExpenseItemState extends State<_ExpenseItem> {
   Color get _badgeColor {
     switch (widget.expense.status) {
       case WalletExpenseStatus.overdue: return const Color(0xFFE87070);
-      case WalletExpenseStatus.unpaid:  return const Color(0xFF4A90D9);
+      case WalletExpenseStatus.unpaid:  return AppColors.link;
       case WalletExpenseStatus.paid:    return const Color(0xFF3BBFA3);
     }
   }
@@ -1214,7 +1242,7 @@ class _ExpenseItemState extends State<_ExpenseItem> {
       onTapCancel: () => setState(() => _pressed = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 120),
-        color: _pressed ? const Color(0xFF6B7A99).withOpacity(0.04) : Colors.transparent,
+        color: _pressed ? AppColors.icon.withOpacity(0.04) : Colors.transparent,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
           child: Row(
@@ -1241,8 +1269,8 @@ class _ExpenseItemState extends State<_ExpenseItem> {
                         Expanded(
                           child: Text(
                             e.name,
-                            style: const TextStyle(
-                              color: kNavyDark, fontSize: 14, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              color: AppColors.bg, fontSize: 14, fontWeight: FontWeight.bold),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -1267,30 +1295,30 @@ class _ExpenseItemState extends State<_ExpenseItem> {
                       children: [
                         Text(
                           '₱${e.amount.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            color: kNavyDark, fontSize: 13, fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                            color: AppColors.bg, fontSize: 13, fontWeight: FontWeight.w600),
                         ),
                         if (e.savingNote != null) ...[
-                          const Text(' – ',
-                              style: TextStyle(color: Color(0xFF6B7A99), fontSize: 12)),
+                          Text(' – ',
+                              style: TextStyle(color: AppColors.icon, fontSize: 12)),
                           Text(e.savingNote!,
-                              style: const TextStyle(
-                                color: Color(0xFF6B7A99), fontSize: 11)),
+                              style: TextStyle(
+                                color: AppColors.icon, fontSize: 11)),
                         ],
                       ],
                     ),
                     const SizedBox(height: 2),
                     Row(
                       children: [
-                        const Icon(Icons.access_time_rounded,
-                            size: 11, color: Color(0xFF6B7A99)),
+                        Icon(Icons.access_time_rounded,
+                            size: 11, color: AppColors.icon),
                         const SizedBox(width: 3),
                         Text(e.dateRange,
-                            style: const TextStyle(
-                                color: Color(0xFF6B7A99), fontSize: 11)),
+                            style: TextStyle(
+                                color: AppColors.icon, fontSize: 11)),
                       ],
                     ),
-                    const Divider(height: 16, color: Color(0xFFEEEEEE)),
+                    Divider(height: 16, color: AppColors.lightFill),
                   ],
                 ),
               ),
@@ -1334,7 +1362,7 @@ class _ExpenseDetailSheetState extends State<_ExpenseDetailSheet> {
   Color get _statusColor {
     switch (_status) {
       case WalletExpenseStatus.overdue: return const Color(0xFFE87070);
-      case WalletExpenseStatus.unpaid:  return const Color(0xFF4A90D9);
+      case WalletExpenseStatus.unpaid:  return AppColors.link;
       case WalletExpenseStatus.paid:    return const Color(0xFF3BBFA3);
     }
   }
@@ -1380,7 +1408,7 @@ class _ExpenseDetailSheetState extends State<_ExpenseDetailSheet> {
       builder: (confirmCtx) => Container(
         margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
         decoration: BoxDecoration(
-          color: const Color(0xFF1B2D5B),
+          color: AppColors.bgDeep,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: Colors.white.withOpacity(0.08)),
           boxShadow: [BoxShadow(
@@ -1480,7 +1508,7 @@ class _ExpenseDetailSheetState extends State<_ExpenseDetailSheet> {
     return Container(
       margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A2C5B),
+        color: AppColors.bgDeep,
         borderRadius: BorderRadius.circular(26),
         border: Border.all(color: _catColor.withOpacity(0.25), width: 1),
         boxShadow: [
@@ -1660,7 +1688,7 @@ class _ExpenseDetailSheetState extends State<_ExpenseDetailSheet> {
                       icon: Icons.access_time_rounded,
                       label: 'Date',
                       value: e.dateRange,
-                      color: const Color(0xFF6B7A99),
+                      color: AppColors.icon,
                     ),
                     if (e.paidAt != null)
                       _ExpenseInfoTile(
@@ -1698,8 +1726,8 @@ class _PaymentStatusPickerSheet extends StatelessWidget {
     WalletExpenseStatus.paid:    'Paid',
     WalletExpenseStatus.overdue: 'Overdue',
   };
-  static const _color = {
-    WalletExpenseStatus.unpaid:  Color(0xFF4A90D9),
+  static final _color = {
+    WalletExpenseStatus.unpaid:  AppColors.link,
     WalletExpenseStatus.paid:    Color(0xFF3BBFA3),
     WalletExpenseStatus.overdue: Color(0xFFE87070),
   };
@@ -1719,7 +1747,7 @@ class _PaymentStatusPickerSheet extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
       decoration: BoxDecoration(
-        color: const Color(0xFF1B2D5B),
+        color: AppColors.bgDeep,
         borderRadius: BorderRadius.circular(28),
         border: Border.all(color: Colors.white.withOpacity(0.08)),
         boxShadow: [
@@ -1781,7 +1809,7 @@ class _PaymentStatusPickerSheet extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 0, 14, 22),
             child: Column(
-              children: const [WalletExpenseStatus.unpaid, WalletExpenseStatus.paid].map((s) {
+              children: [WalletExpenseStatus.unpaid, WalletExpenseStatus.paid].map((s) {
                 final isCurrent = s == current;
                 final c = _color[s]!;
                 return _PaymentStatusCard(
@@ -2014,8 +2042,8 @@ class _SavingsLogItem extends StatelessWidget {
                   children: [
                     Text(
                       entry.note ?? (isWithdrawal ? 'Withdrawal' : 'Savings'),
-                      style: const TextStyle(
-                        color: kNavyDark,
+                      style: TextStyle(
+                        color: AppColors.bg,
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
@@ -2035,17 +2063,17 @@ class _SavingsLogItem extends StatelessWidget {
                 const SizedBox(height: 2),
                 Row(
                   children: [
-                    const Icon(Icons.access_time_rounded,
-                        size: 11, color: Color(0xFF6B7A99)),
+                    Icon(Icons.access_time_rounded,
+                        size: 11, color: AppColors.icon),
                     const SizedBox(width: 3),
                     Text(
                       dateStr,
-                      style: const TextStyle(
-                          color: Color(0xFF6B7A99), fontSize: 11),
+                      style: TextStyle(
+                          color: AppColors.icon, fontSize: 11),
                     ),
                   ],
                 ),
-                const Divider(height: 16, color: Color(0xFFEEEEEE)),
+                Divider(height: 16, color: AppColors.lightFill),
               ],
             ),
           ),
@@ -2136,9 +2164,9 @@ class _AddSavingsSheetState extends State<_AddSavingsSheet> {
       child: Container(
         margin: EdgeInsets.fromLTRB(12, 0, 12, 24 + mq.padding.bottom),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A2D5A),
+          color: AppColors.bgDeep,
           borderRadius: BorderRadius.circular(26),
-          border: Border.all(color: kWhite.withOpacity(0.08)),
+          border: Border.all(color: AppColors.text.withOpacity(0.08)),
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.45), blurRadius: 40, offset: const Offset(0, -4))],
         ),
         child: Column(
@@ -2148,7 +2176,7 @@ class _AddSavingsSheetState extends State<_AddSavingsSheet> {
             Container(
               width: 36, height: 4,
               margin: const EdgeInsets.only(top: 12),
-              decoration: BoxDecoration(color: kWhite.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
+              decoration: BoxDecoration(color: AppColors.text.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
             ),
 
             // Header
@@ -2169,10 +2197,10 @@ class _AddSavingsSheetState extends State<_AddSavingsSheet> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Add to Savings',
-                          style: TextStyle(color: kWhite, fontSize: 17, fontWeight: FontWeight.bold)),
+                      Text('Add to Savings',
+                          style: TextStyle(color: AppColors.text, fontSize: 17, fontWeight: FontWeight.bold)),
                       Text('Set aside money for later',
-                          style: TextStyle(color: kWhite.withOpacity(0.4), fontSize: 12)),
+                          style: TextStyle(color: AppColors.text.withOpacity(0.4), fontSize: 12)),
                     ],
                   ),
                   const Spacer(),
@@ -2180,8 +2208,8 @@ class _AddSavingsSheetState extends State<_AddSavingsSheet> {
                     onTap: () => Navigator.pop(context),
                     child: Container(
                       width: 32, height: 32,
-                      decoration: BoxDecoration(color: kWhite.withOpacity(0.07), shape: BoxShape.circle),
-                      child: Icon(Icons.close_rounded, color: kWhite.withOpacity(0.5), size: 17),
+                      decoration: BoxDecoration(color: AppColors.text.withOpacity(0.07), shape: BoxShape.circle),
+                      child: Icon(Icons.close_rounded, color: AppColors.text.withOpacity(0.5), size: 17),
                     ),
                   ),
                 ],
@@ -2189,7 +2217,7 @@ class _AddSavingsSheetState extends State<_AddSavingsSheet> {
             ),
 
             const SizedBox(height: 16),
-            Divider(height: 1, color: kWhite.withOpacity(0.07)),
+            Divider(height: 1, color: AppColors.text.withOpacity(0.07)),
 
             // Fields
             Padding(
@@ -2199,19 +2227,19 @@ class _AddSavingsSheetState extends State<_AddSavingsSheet> {
                 children: [
                   // Amount
                   Row(children: [
-                    Icon(Icons.attach_money_rounded, color: kSubtitle, size: 12),
+                    Icon(Icons.attach_money_rounded, color: AppColors.subtitle, size: 12),
                     const SizedBox(width: 5),
-                    Text('Amount', style: const TextStyle(color: kSubtitle, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+                    Text('Amount', style: TextStyle(color: AppColors.subtitle, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
                   ]),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _amountController,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    style: const TextStyle(color: kWhite, fontSize: 15, fontWeight: FontWeight.w600),
+                    style: TextStyle(color: AppColors.text, fontSize: 15, fontWeight: FontWeight.w600),
                     onChanged: (_) { if (_amountError != null) setState(() => _amountError = null); },
                     decoration: InputDecoration(
                       hintText: 'e.g. 250.00',
-                      hintStyle: TextStyle(color: kWhite.withOpacity(0.22), fontSize: 15, fontWeight: FontWeight.w500),
+                      hintStyle: TextStyle(color: AppColors.text.withOpacity(0.22), fontSize: 15, fontWeight: FontWeight.w500),
                       prefixIcon: Padding(
                         padding: const EdgeInsets.only(left: 14, right: 8),
                         child: Text('₱', style: TextStyle(color: const Color(0xFF3BBFA3), fontSize: 16, fontWeight: FontWeight.bold)),
@@ -2220,7 +2248,7 @@ class _AddSavingsSheetState extends State<_AddSavingsSheet> {
                       errorText: _amountError,
                       errorStyle: const TextStyle(color: Color(0xFFE87070), fontSize: 11),
                       filled: true,
-                      fillColor: kWhite.withOpacity(0.05),
+                      fillColor: AppColors.text.withOpacity(0.05),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(13), borderSide: BorderSide.none),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(13),
@@ -2236,22 +2264,22 @@ class _AddSavingsSheetState extends State<_AddSavingsSheet> {
 
                   // Note
                   Row(children: [
-                    Icon(Icons.notes_rounded, color: kSubtitle, size: 12),
+                    Icon(Icons.notes_rounded, color: AppColors.subtitle, size: 12),
                     const SizedBox(width: 5),
-                    Text('Note', style: const TextStyle(color: kSubtitle, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+                    Text('Note', style: TextStyle(color: AppColors.subtitle, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
                     const SizedBox(width: 6),
-                    Text('optional', style: TextStyle(color: kWhite.withOpacity(0.25), fontSize: 10, fontStyle: FontStyle.italic)),
+                    Text('optional', style: TextStyle(color: AppColors.text.withOpacity(0.25), fontSize: 10, fontStyle: FontStyle.italic)),
                   ]),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _noteController,
-                    style: const TextStyle(color: kWhite, fontSize: 14),
+                    style: TextStyle(color: AppColors.text, fontSize: 14),
                     textCapitalization: TextCapitalization.sentences,
                     decoration: InputDecoration(
                       hintText: 'e.g. Weekly allowance savings',
-                      hintStyle: TextStyle(color: kWhite.withOpacity(0.22), fontSize: 14),
+                      hintStyle: TextStyle(color: AppColors.text.withOpacity(0.22), fontSize: 14),
                       filled: true,
-                      fillColor: kWhite.withOpacity(0.05),
+                      fillColor: AppColors.text.withOpacity(0.05),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(13), borderSide: BorderSide.none),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(13),
@@ -2266,7 +2294,7 @@ class _AddSavingsSheetState extends State<_AddSavingsSheet> {
 
             // Save button
             Container(
-              decoration: BoxDecoration(border: Border(top: BorderSide(color: kWhite.withOpacity(0.07)))),
+              decoration: BoxDecoration(border: Border(top: BorderSide(color: AppColors.text.withOpacity(0.07)))),
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
               child: SizedBox(
                 width: double.infinity, height: 50,
@@ -2281,13 +2309,13 @@ class _AddSavingsSheetState extends State<_AddSavingsSheet> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(14),
                       onTap: _submit,
-                      child: const Center(
+                      child: Center(
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.savings_rounded, color: kNavyDark, size: 18),
+                            Icon(Icons.savings_rounded, color: AppColors.bg, size: 18),
                             SizedBox(width: 7),
-                            Text('Add to Savings', style: TextStyle(color: kNavyDark, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.3)),
+                            Text('Add to Savings', style: TextStyle(color: AppColors.bg, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.3)),
                           ],
                         ),
                       ),
@@ -2354,9 +2382,9 @@ class _WithdrawSheetState extends State<_WithdrawSheet> {
       child: Container(
         margin: EdgeInsets.fromLTRB(12, 0, 12, 24 + mq.padding.bottom),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A2D5A),
+          color: AppColors.bgDeep,
           borderRadius: BorderRadius.circular(26),
-          border: Border.all(color: kWhite.withOpacity(0.08)),
+          border: Border.all(color: AppColors.text.withOpacity(0.08)),
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.45), blurRadius: 40, offset: const Offset(0, -4))],
         ),
         child: Column(
@@ -2366,7 +2394,7 @@ class _WithdrawSheetState extends State<_WithdrawSheet> {
             Container(
               width: 36, height: 4,
               margin: const EdgeInsets.only(top: 12),
-              decoration: BoxDecoration(color: kWhite.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
+              decoration: BoxDecoration(color: AppColors.text.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
             ),
 
             // Header
@@ -2387,10 +2415,10 @@ class _WithdrawSheetState extends State<_WithdrawSheet> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Withdraw Savings',
-                          style: TextStyle(color: kWhite, fontSize: 17, fontWeight: FontWeight.bold)),
+                      Text('Withdraw Savings',
+                          style: TextStyle(color: AppColors.text, fontSize: 17, fontWeight: FontWeight.bold)),
                       Text('Available: ₱${widget.savings.toStringAsFixed(2)}',
-                          style: TextStyle(color: kWhite.withOpacity(0.4), fontSize: 12)),
+                          style: TextStyle(color: AppColors.text.withOpacity(0.4), fontSize: 12)),
                     ],
                   ),
                   const Spacer(),
@@ -2398,8 +2426,8 @@ class _WithdrawSheetState extends State<_WithdrawSheet> {
                     onTap: () => Navigator.pop(context),
                     child: Container(
                       width: 32, height: 32,
-                      decoration: BoxDecoration(color: kWhite.withOpacity(0.07), shape: BoxShape.circle),
-                      child: Icon(Icons.close_rounded, color: kWhite.withOpacity(0.5), size: 17),
+                      decoration: BoxDecoration(color: AppColors.text.withOpacity(0.07), shape: BoxShape.circle),
+                      child: Icon(Icons.close_rounded, color: AppColors.text.withOpacity(0.5), size: 17),
                     ),
                   ),
                 ],
@@ -2407,7 +2435,7 @@ class _WithdrawSheetState extends State<_WithdrawSheet> {
             ),
 
             const SizedBox(height: 16),
-            Divider(height: 1, color: kWhite.withOpacity(0.07)),
+            Divider(height: 1, color: AppColors.text.withOpacity(0.07)),
 
             // Fields
             Padding(
@@ -2417,19 +2445,19 @@ class _WithdrawSheetState extends State<_WithdrawSheet> {
                 children: [
                   // Amount
                   Row(children: [
-                    Icon(Icons.attach_money_rounded, color: kSubtitle, size: 12),
+                    Icon(Icons.attach_money_rounded, color: AppColors.subtitle, size: 12),
                     const SizedBox(width: 5),
-                    Text('Amount', style: const TextStyle(color: kSubtitle, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+                    Text('Amount', style: TextStyle(color: AppColors.subtitle, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
                   ]),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _amountController,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    style: const TextStyle(color: kWhite, fontSize: 15, fontWeight: FontWeight.w600),
+                    style: TextStyle(color: AppColors.text, fontSize: 15, fontWeight: FontWeight.w600),
                     onChanged: (_) { if (_amountError != null) setState(() => _amountError = null); },
                     decoration: InputDecoration(
                       hintText: 'e.g. 100.00',
-                      hintStyle: TextStyle(color: kWhite.withOpacity(0.22), fontSize: 15, fontWeight: FontWeight.w500),
+                      hintStyle: TextStyle(color: AppColors.text.withOpacity(0.22), fontSize: 15, fontWeight: FontWeight.w500),
                       prefixIcon: Padding(
                         padding: const EdgeInsets.only(left: 14, right: 8),
                         child: Text('₱', style: TextStyle(color: const Color(0xFF9B88E8), fontSize: 16, fontWeight: FontWeight.bold)),
@@ -2438,7 +2466,7 @@ class _WithdrawSheetState extends State<_WithdrawSheet> {
                       errorText: _amountError,
                       errorStyle: const TextStyle(color: Color(0xFFE87070), fontSize: 11),
                       filled: true,
-                      fillColor: kWhite.withOpacity(0.05),
+                      fillColor: AppColors.text.withOpacity(0.05),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(13), borderSide: BorderSide.none),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(13),
@@ -2454,22 +2482,22 @@ class _WithdrawSheetState extends State<_WithdrawSheet> {
 
                   // Note
                   Row(children: [
-                    Icon(Icons.notes_rounded, color: kSubtitle, size: 12),
+                    Icon(Icons.notes_rounded, color: AppColors.subtitle, size: 12),
                     const SizedBox(width: 5),
-                    Text('Note', style: const TextStyle(color: kSubtitle, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+                    Text('Note', style: TextStyle(color: AppColors.subtitle, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
                     const SizedBox(width: 6),
-                    Text('optional', style: TextStyle(color: kWhite.withOpacity(0.25), fontSize: 10, fontStyle: FontStyle.italic)),
+                    Text('optional', style: TextStyle(color: AppColors.text.withOpacity(0.25), fontSize: 10, fontStyle: FontStyle.italic)),
                   ]),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _noteController,
-                    style: const TextStyle(color: kWhite, fontSize: 14),
+                    style: TextStyle(color: AppColors.text, fontSize: 14),
                     textCapitalization: TextCapitalization.sentences,
                     decoration: InputDecoration(
                       hintText: 'e.g. Grocery run',
-                      hintStyle: TextStyle(color: kWhite.withOpacity(0.22), fontSize: 14),
+                      hintStyle: TextStyle(color: AppColors.text.withOpacity(0.22), fontSize: 14),
                       filled: true,
-                      fillColor: kWhite.withOpacity(0.05),
+                      fillColor: AppColors.text.withOpacity(0.05),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(13), borderSide: BorderSide.none),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(13),
@@ -2484,7 +2512,7 @@ class _WithdrawSheetState extends State<_WithdrawSheet> {
 
             // Withdraw button
             Container(
-              decoration: BoxDecoration(border: Border(top: BorderSide(color: kWhite.withOpacity(0.07)))),
+              decoration: BoxDecoration(border: Border(top: BorderSide(color: AppColors.text.withOpacity(0.07)))),
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
               child: SizedBox(
                 width: double.infinity, height: 50,
@@ -2499,13 +2527,13 @@ class _WithdrawSheetState extends State<_WithdrawSheet> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(14),
                       onTap: _submit,
-                      child: const Center(
+                      child: Center(
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.arrow_circle_down_rounded, color: kWhite, size: 18),
+                            Icon(Icons.arrow_circle_down_rounded, color: AppColors.text, size: 18),
                             SizedBox(width: 7),
-                            Text('Withdraw', style: TextStyle(color: kWhite, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.3)),
+                            Text('Withdraw', style: TextStyle(color: AppColors.text, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.3)),
                           ],
                         ),
                       ),

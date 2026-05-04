@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
+import '../constants/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Entry point
@@ -208,8 +209,8 @@ class _FaqSheetState extends State<FaqSheet>
       opacity: _fadeAnim,
       child: Container(
         height: mq.size.height * 0.82,
-        decoration: const BoxDecoration(
-          color: Color(0xFF1A2D5A),
+        decoration: BoxDecoration(
+          color: AppColors.bgDeep,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: Column(
@@ -220,7 +221,7 @@ class _FaqSheetState extends State<FaqSheet>
               height: 4,
               margin: const EdgeInsets.only(top: 12),
               decoration: BoxDecoration(
-                color: kWhite.withOpacity(0.18),
+                color: AppColors.text.withOpacity(0.18),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -234,25 +235,25 @@ class _FaqSheetState extends State<FaqSheet>
                     width: 42,
                     height: 42,
                     decoration: BoxDecoration(
-                      color: kTeal.withOpacity(0.14),
+                      color: AppColors.accent.withOpacity(0.14),
                       shape: BoxShape.circle,
-                      border: Border.all(color: kTeal.withOpacity(0.3), width: 1.5),
+                      border: Border.all(color: AppColors.accent.withOpacity(0.3), width: 1.5),
                     ),
-                    child: const Icon(Icons.help_outline_rounded,
-                        color: kTeal, size: 21),
+                    child: Icon(Icons.help_outline_rounded,
+                        color: AppColors.accent, size: 21),
                   ),
                   const SizedBox(width: 13),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('FAQ',
+                      Text('FAQ',
                           style: TextStyle(
-                              color: kWhite,
+                              color: AppColors.text,
                               fontSize: 17,
                               fontWeight: FontWeight.bold)),
                       Text('Frequently asked questions',
                           style: TextStyle(
-                              color: kWhite.withOpacity(0.4), fontSize: 12)),
+                              color: AppColors.text.withOpacity(0.4), fontSize: 12)),
                     ],
                   ),
                   const Spacer(),
@@ -262,11 +263,11 @@ class _FaqSheetState extends State<FaqSheet>
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
-                        color: kWhite.withOpacity(0.07),
+                        color: AppColors.text.withOpacity(0.07),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(Icons.close_rounded,
-                          color: kWhite.withOpacity(0.5), size: 17),
+                          color: AppColors.text.withOpacity(0.5), size: 17),
                     ),
                   ),
                 ],
@@ -274,7 +275,7 @@ class _FaqSheetState extends State<FaqSheet>
             ),
 
             const SizedBox(height: 16),
-            Divider(height: 1, color: kWhite.withOpacity(0.07)),
+            Divider(height: 1, color: AppColors.text.withOpacity(0.07)),
 
             // FAQ list
             Expanded(
@@ -317,13 +318,13 @@ class _FaqTile extends StatelessWidget {
       duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
         color: isExpanded
-            ? kTeal.withOpacity(0.07)
-            : kWhite.withOpacity(0.04),
+            ? AppColors.accent.withOpacity(0.07)
+            : AppColors.text.withOpacity(0.04),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isExpanded
-              ? kTeal.withOpacity(0.3)
-              : kWhite.withOpacity(0.08),
+              ? AppColors.accent.withOpacity(0.3)
+              : AppColors.text.withOpacity(0.08),
         ),
       ),
       child: Material(
@@ -343,22 +344,22 @@ class _FaqTile extends StatelessWidget {
                       height: 32,
                       decoration: BoxDecoration(
                         color: isExpanded
-                            ? kTeal.withOpacity(0.18)
-                            : kWhite.withOpacity(0.07),
+                            ? AppColors.accent.withOpacity(0.18)
+                            : AppColors.text.withOpacity(0.07),
                         borderRadius: BorderRadius.circular(9),
                       ),
                       child: Icon(item.icon,
                           size: 16,
                           color: isExpanded
-                              ? kTeal
-                              : kWhite.withOpacity(0.45)),
+                              ? AppColors.accent
+                              : AppColors.text.withOpacity(0.45)),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         item.question,
                         style: TextStyle(
-                          color: isExpanded ? kWhite : kWhite.withOpacity(0.85),
+                          color: isExpanded ? AppColors.text : AppColors.text.withOpacity(0.85),
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
@@ -371,8 +372,8 @@ class _FaqTile extends StatelessWidget {
                       child: Icon(
                         Icons.keyboard_arrow_down_rounded,
                         color: isExpanded
-                            ? kTeal
-                            : kWhite.withOpacity(0.3),
+                            ? AppColors.accent
+                            : AppColors.text.withOpacity(0.3),
                         size: 20,
                       ),
                     ),
@@ -385,7 +386,7 @@ class _FaqTile extends StatelessWidget {
                     child: Text(
                       item.answer,
                       style: TextStyle(
-                        color: kWhite.withOpacity(0.6),
+                        color: AppColors.text.withOpacity(0.6),
                         fontSize: 13,
                         height: 1.5,
                       ),

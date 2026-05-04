@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
 import '../store/auth_store.dart';
+import '../constants/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Entry point  (matches the pattern used by language_sheet,
@@ -82,9 +83,9 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet>
 
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      SnackBar(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: Color(0xFF1A2A5E),
+        backgroundColor: AppColors.bgDeep,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(12))),
         duration: Duration(seconds: 3),
@@ -107,8 +108,8 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet>
         // Slide up when the keyboard appears
         padding: EdgeInsets.only(bottom: mq.viewInsets.bottom),
         child: Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFF1A2D5A),
+          decoration: BoxDecoration(
+            color: AppColors.bgDeep,
             borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
           ),
           padding: EdgeInsets.fromLTRB(24, 20, 24, mq.padding.bottom + 24),
@@ -124,7 +125,7 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet>
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: kWhite.withOpacity(0.25),
+                      color: AppColors.text.withOpacity(0.25),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -132,10 +133,10 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet>
                 const SizedBox(height: 20),
 
                 // ── title ────────────────────────────────
-                const Text(
+                Text(
                   'Change Password',
                   style: TextStyle(
-                    color: kWhite,
+                    color: AppColors.text,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -143,7 +144,7 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet>
                 const SizedBox(height: 4),
                 Text(
                   'Enter your current password, then choose a new one.',
-                  style: TextStyle(color: kWhite.withOpacity(0.55), fontSize: 13),
+                  style: TextStyle(color: AppColors.text.withOpacity(0.55), fontSize: 13),
                 ),
                 const SizedBox(height: 24),
 
@@ -218,21 +219,21 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet>
                   child: ElevatedButton(
                     onPressed: _saving ? null : _submit,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: kTeal,
-                      foregroundColor: kNavyDark,
-                      disabledBackgroundColor: kTeal.withOpacity(0.4),
+                      backgroundColor: AppColors.accent,
+                      foregroundColor: AppColors.bg,
+                      disabledBackgroundColor: AppColors.accent.withOpacity(0.4),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
                       elevation: 0,
                     ),
                     child: _saving
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.5,
-                              color: kNavyDark,
+                              color: AppColors.bg,
                             ),
                           )
                         : const Text(
@@ -283,23 +284,23 @@ class _PasswordField extends StatelessWidget {
       textInputAction: textInputAction,
       onFieldSubmitted: onFieldSubmitted,
       validator: validator,
-      style: const TextStyle(color: kWhite, fontSize: 14),
+      style: TextStyle(color: AppColors.text, fontSize: 14),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: kWhite.withOpacity(0.55), fontSize: 13),
+        labelStyle: TextStyle(color: AppColors.text.withOpacity(0.55), fontSize: 13),
         filled: true,
-        fillColor: kNavyDark.withOpacity(0.55),
+        fillColor: AppColors.bg.withOpacity(0.55),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: kCardBorder.withOpacity(0.6)),
+          borderSide: BorderSide(color: AppColors.border.withOpacity(0.6)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: kCardBorder.withOpacity(0.6)),
+          borderSide: BorderSide(color: AppColors.border.withOpacity(0.6)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: kTeal, width: 1.5),
+          borderSide: BorderSide(color: AppColors.accent, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -315,7 +316,7 @@ class _PasswordField extends StatelessWidget {
         suffixIcon: IconButton(
           icon: Icon(
             visible ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-            color: kWhite.withOpacity(0.45),
+            color: AppColors.text.withOpacity(0.45),
             size: 20,
           ),
           onPressed: onToggle,

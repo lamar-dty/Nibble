@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/colors.dart';
 import 'space_painters.dart'; // DonutPainter
+import '../../constants/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Summary background (no space selected)
@@ -29,9 +30,9 @@ class SummaryBackground extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Title
-          const Text('Overview',
+          Text('Overview',
               style: TextStyle(
-                  color: kWhite,
+                  color: AppColors.text,
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                   letterSpacing: 0.5)),
@@ -40,7 +41,7 @@ class SummaryBackground extends StatelessWidget {
             totalSpaces == 0
                 ? 'No active projects'
                 : '$totalSpaces active projects',
-            style: const TextStyle(color: kSubtitle, fontSize: 13),
+            style: TextStyle(color: AppColors.subtitle, fontSize: 13),
           ),
 
           const SizedBox(height: 20),
@@ -65,13 +66,13 @@ class SummaryBackground extends StatelessWidget {
                       children: [
                         Text(
                           '${(overallProgress * 100).round()}%',
-                          style: const TextStyle(
-                              color: kWhite,
+                          style: TextStyle(
+                              color: AppColors.text,
                               fontSize: 22,
                               fontWeight: FontWeight.bold),
                         ),
-                        const Text('overall',
-                            style: TextStyle(color: kSubtitle, fontSize: 10)),
+                        Text('overall',
+                            style: TextStyle(color: AppColors.subtitle, fontSize: 10)),
                       ],
                     ),
                   ),
@@ -86,14 +87,14 @@ class SummaryBackground extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     StatRow(
-                      color: const Color(0xFF4A90D9),
+                      color: AppColors.link,
                       label: 'In Progress',
                       count: inProgress,
                       total: totalSpaces,
                     ),
                     const SizedBox(height: 14),
                     StatRow(
-                      color: const Color(0xFFB0BAD3),
+                      color: AppColors.subtitle,
                       label: 'Not Started',
                       count: notStarted,
                       total: totalSpaces,
@@ -150,12 +151,12 @@ class StatRow extends StatelessWidget {
                         BoxDecoration(color: color, shape: BoxShape.circle)),
                 const SizedBox(width: 6),
                 Text(label,
-                    style: const TextStyle(color: kSubtitle, fontSize: 11)),
+                    style: TextStyle(color: AppColors.subtitle, fontSize: 11)),
               ],
             ),
             Text('$count/$total',
-                style: const TextStyle(
-                    color: kWhite,
+                style: TextStyle(
+                    color: AppColors.text,
                     fontSize: 11,
                     fontWeight: FontWeight.bold)),
           ],
@@ -166,7 +167,7 @@ class StatRow extends StatelessWidget {
           child: LinearProgressIndicator(
             value: total > 0 ? count / total : 0,
             minHeight: 4,
-            backgroundColor: kWhite.withOpacity(0.1),
+            backgroundColor: AppColors.text.withOpacity(0.1),
             valueColor: AlwaysStoppedAnimation<Color>(color),
           ),
         ),

@@ -3,6 +3,7 @@ import '../constants/colors.dart';
 import '../widgets/calendar/weekly_planner_calendar.dart';
 import '../widgets/calendar/task_home_sheet.dart';
 import '../store/task_store.dart';
+import '../constants/app_colors.dart';
 
 class CalendarScreen extends StatefulWidget {
   final int calStartHour;
@@ -148,7 +149,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   topRight: Radius.circular(28),
                 ),
                 child: ColoredBox(
-                  color: kWhite,
+                  color: AppColors.text,
                   child: TaskHomeSheet(
                     scrollController: scrollController,
                   ),

@@ -3,6 +3,7 @@ import '../constants/colors.dart';
 import '../store/auth_store.dart';
 import '../store/space_chat_store.dart';
 import '../store/space_store.dart';
+import '../constants/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Entry point
@@ -140,7 +141,7 @@ class _EditProfileSheetState extends State<EditProfileSheet>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: const Color(0xFF1A2A5E),
+        backgroundColor: AppColors.bgDeep,
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(12))),
         duration: const Duration(seconds: 3),
@@ -165,8 +166,8 @@ class _EditProfileSheetState extends State<EditProfileSheet>
       child: Padding(
         padding: EdgeInsets.only(bottom: mq.viewInsets.bottom),
         child: Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFF1A2D5A),
+          decoration: BoxDecoration(
+            color: AppColors.bgDeep,
             borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
           ),
           padding: EdgeInsets.fromLTRB(24, 20, 24, mq.padding.bottom + 24),
@@ -182,16 +183,16 @@ class _EditProfileSheetState extends State<EditProfileSheet>
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: kWhite.withOpacity(0.25),
+                      color: AppColors.text.withOpacity(0.25),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                 ),
                 const SizedBox(height: 20),
-                const Text(
+                Text(
                   'Edit Profile',
                   style: TextStyle(
-                    color: kWhite,
+                    color: AppColors.text,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -199,7 +200,7 @@ class _EditProfileSheetState extends State<EditProfileSheet>
                 const SizedBox(height: 4),
                 Text(
                   'Your username is your public identity across spaces and tasks.',
-                  style: TextStyle(color: kWhite.withOpacity(0.55), fontSize: 13),
+                  style: TextStyle(color: AppColors.text.withOpacity(0.55), fontSize: 13),
                 ),
                 const SizedBox(height: 24),
 
@@ -215,7 +216,7 @@ class _EditProfileSheetState extends State<EditProfileSheet>
                     controller: _emailCtrl,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
-                    style: const TextStyle(color: kWhite, fontSize: 14),
+                    style: TextStyle(color: AppColors.text, fontSize: 14),
                     autocorrect: false,
                     enableSuggestions: false,
                     decoration: _inputDecoration(
@@ -241,10 +242,10 @@ class _EditProfileSheetState extends State<EditProfileSheet>
                     child: Text(
                       'Cancel email change',
                       style: TextStyle(
-                        color: kTeal.withOpacity(0.8),
+                        color: AppColors.accent.withOpacity(0.8),
                         fontSize: 12,
                         decoration: TextDecoration.underline,
-                        decorationColor: kTeal.withOpacity(0.5),
+                        decorationColor: AppColors.accent.withOpacity(0.5),
                       ),
                     ),
                   ),
@@ -280,7 +281,7 @@ class _EditProfileSheetState extends State<EditProfileSheet>
                       _hasChanges ? TextInputAction.next : TextInputAction.done,
                   onFieldSubmitted: (_) =>
                       _hasChanges ? FocusScope.of(context).nextFocus() : _submit(),
-                  style: const TextStyle(color: kWhite, fontSize: 14),
+                  style: TextStyle(color: AppColors.text, fontSize: 14),
                   autocorrect: false,
                   enableSuggestions: false,
                   decoration: _inputDecoration(
@@ -294,7 +295,7 @@ class _EditProfileSheetState extends State<EditProfileSheet>
                 Text(
                   '3–20 characters. Lowercase letters, numbers, underscores only.',
                   style: TextStyle(
-                      color: kWhite.withOpacity(0.35), fontSize: 11),
+                      color: AppColors.text.withOpacity(0.35), fontSize: 11),
                 ),
                 const SizedBox(height: 14),
 
@@ -305,7 +306,7 @@ class _EditProfileSheetState extends State<EditProfileSheet>
                     obscureText: _obscurePassword,
                     textInputAction: TextInputAction.done,
                     onFieldSubmitted: (_) => _submit(),
-                    style: const TextStyle(color: kWhite, fontSize: 14),
+                    style: TextStyle(color: AppColors.text, fontSize: 14),
                     decoration: _inputDecoration(
                       label: 'Current Password',
                       hint: 'Required to save changes',
@@ -315,7 +316,7 @@ class _EditProfileSheetState extends State<EditProfileSheet>
                           _obscurePassword
                               ? Icons.visibility_off_outlined
                               : Icons.visibility_outlined,
-                          color: kWhite.withOpacity(0.45),
+                          color: AppColors.text.withOpacity(0.45),
                           size: 20,
                         ),
                         onPressed: () => setState(
@@ -341,21 +342,21 @@ class _EditProfileSheetState extends State<EditProfileSheet>
                   child: ElevatedButton(
                     onPressed: _saving ? null : _submit,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: kTeal,
-                      foregroundColor: kNavyDark,
-                      disabledBackgroundColor: kTeal.withOpacity(0.4),
+                      backgroundColor: AppColors.accent,
+                      foregroundColor: AppColors.bg,
+                      disabledBackgroundColor: AppColors.accent.withOpacity(0.4),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
                       elevation: 0,
                     ),
                     child: _saving
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.5,
-                              color: kNavyDark,
+                              color: AppColors.bg,
                             ),
                           )
                         : const Text(
@@ -380,23 +381,23 @@ class _EditProfileSheetState extends State<EditProfileSheet>
     return InputDecoration(
       labelText: label,
       labelStyle:
-          TextStyle(color: kWhite.withOpacity(0.55), fontSize: 13),
+          TextStyle(color: AppColors.text.withOpacity(0.55), fontSize: 13),
       hintText: hint,
       hintStyle:
-          TextStyle(color: kWhite.withOpacity(0.25), fontSize: 12),
+          TextStyle(color: AppColors.text.withOpacity(0.25), fontSize: 12),
       filled: true,
-      fillColor: kNavyDark.withOpacity(0.55),
+      fillColor: AppColors.bg.withOpacity(0.55),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: kCardBorder.withOpacity(0.6)),
+        borderSide: BorderSide(color: AppColors.border.withOpacity(0.6)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: kCardBorder.withOpacity(0.6)),
+        borderSide: BorderSide(color: AppColors.border.withOpacity(0.6)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: kTeal, width: 1.5),
+        borderSide: BorderSide(color: AppColors.accent, width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -435,9 +436,9 @@ class _ReadOnlyField extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: kNavyDark.withOpacity(0.35),
+        color: AppColors.bg.withOpacity(0.35),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: kCardBorder.withOpacity(0.4)),
+        border: Border.all(color: AppColors.border.withOpacity(0.4)),
       ),
       child: Row(
         children: [
@@ -447,11 +448,11 @@ class _ReadOnlyField extends StatelessWidget {
               children: [
                 Text(label,
                     style: TextStyle(
-                        color: kWhite.withOpacity(0.45), fontSize: 11)),
+                        color: AppColors.text.withOpacity(0.45), fontSize: 11)),
                 const SizedBox(height: 3),
                 Text(value,
                     style: TextStyle(
-                        color: kWhite.withOpacity(0.55), fontSize: 14)),
+                        color: AppColors.text.withOpacity(0.55), fontSize: 14)),
               ],
             ),
           ),
@@ -462,14 +463,14 @@ class _ReadOnlyField extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: kTeal.withOpacity(0.12),
+                  color: AppColors.accent.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: kTeal.withOpacity(0.35)),
+                  border: Border.all(color: AppColors.accent.withOpacity(0.35)),
                 ),
                 child: Text(
                   'Change',
                   style: TextStyle(
-                    color: kTeal.withOpacity(0.9),
+                    color: AppColors.accent.withOpacity(0.9),
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),

@@ -4,6 +4,7 @@ import '../store/task_store.dart';
 import '../store/space_store.dart';
 import '../store/wallet_store.dart';
 import '../widgets/class_alerts_sheet.dart';
+import '../constants/app_colors.dart';
 
 /// Callback signature that MainScaffold registers so the router can
 /// switch tabs without knowing about the scaffold's internals.
@@ -363,7 +364,7 @@ class NotificationRouter extends ChangeNotifier {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: const Color(0xFF1A2A5E),
+        backgroundColor: AppColors.bgDeep,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         content: Row(
           children: [

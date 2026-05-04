@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../constants/colors.dart';
-import '../../models/task.dart';
-import '../../store/task_store.dart';
-import '../../store/wallet_store.dart';
+import '../constants/colors.dart';
+import '../models/task.dart';
+import '../store/task_store.dart';
+import '../store/wallet_store.dart';
 import '../widgets/wallet/wallet_sheet.dart';
+import '../constants/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Entry point
@@ -167,11 +168,11 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet>
 
   Widget _pickerTheme(BuildContext ctx, Widget child) => Theme(
     data: ThemeData.dark().copyWith(
-      colorScheme: const ColorScheme.dark(
-        primary: kTeal, onPrimary: kNavyDark,
-        surface: Color(0xFF1B2D5B), onSurface: kWhite,
+      colorScheme: ColorScheme.dark(
+        primary: AppColors.accent, onPrimary: AppColors.bg,
+        surface: AppColors.bgDeep, onSurface: AppColors.text,
       ),
-      dialogBackgroundColor: const Color(0xFF1B2D5B),
+      dialogBackgroundColor: AppColors.bgDeep,
     ),
     child: child,
   );
@@ -205,8 +206,8 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet>
       child: Container(
         margin: EdgeInsets.only(bottom: bottom),
         height: mq.size.height * 0.78,
-        decoration: const BoxDecoration(
-          color: Color(0xFF1A2D5A),
+        decoration: BoxDecoration(
+          color: AppColors.bgDeep,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: Column(
@@ -216,7 +217,7 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet>
             Container(
               width: 36, height: 4,
               margin: const EdgeInsets.only(top: 12),
-              decoration: BoxDecoration(color: kWhite.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
+              decoration: BoxDecoration(color: AppColors.text.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
             ),
 
             // Header
@@ -237,10 +238,10 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet>
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Create Task',
-                          style: TextStyle(color: kWhite, fontSize: 17, fontWeight: FontWeight.bold)),
+                      Text('Create Task',
+                          style: TextStyle(color: AppColors.text, fontSize: 17, fontWeight: FontWeight.bold)),
                       Text('Fill in the details below',
-                          style: TextStyle(color: kWhite.withOpacity(0.4), fontSize: 12)),
+                          style: TextStyle(color: AppColors.text.withOpacity(0.4), fontSize: 12)),
                     ],
                   ),
                   const Spacer(),
@@ -248,8 +249,8 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet>
                     onTap: () => Navigator.pop(context),
                     child: Container(
                       width: 32, height: 32,
-                      decoration: BoxDecoration(color: kWhite.withOpacity(0.07), shape: BoxShape.circle),
-                      child: Icon(Icons.close_rounded, color: kWhite.withOpacity(0.5), size: 17),
+                      decoration: BoxDecoration(color: AppColors.text.withOpacity(0.07), shape: BoxShape.circle),
+                      child: Icon(Icons.close_rounded, color: AppColors.text.withOpacity(0.5), size: 17),
                     ),
                   ),
                 ],
@@ -257,7 +258,7 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet>
             ),
 
             const SizedBox(height: 16),
-            Divider(height: 1, color: kWhite.withOpacity(0.07)),
+            Divider(height: 1, color: AppColors.text.withOpacity(0.07)),
 
             // Body
             Expanded(
@@ -310,23 +311,23 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet>
                     GestureDetector(
                       onTap: () => setState(() => _showOptional = !_showOptional),
                       child: Row(children: [
-                        Expanded(child: Divider(color: kWhite.withOpacity(0.08))),
+                        Expanded(child: Divider(color: AppColors.text.withOpacity(0.08))),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 10),
                           child: Row(children: [
                             Text(
                               _showOptional ? 'Less options' : 'More options',
-                              style: TextStyle(color: kTeal.withOpacity(0.8), fontSize: 12, fontWeight: FontWeight.w700),
+                              style: TextStyle(color: AppColors.accent.withOpacity(0.8), fontSize: 12, fontWeight: FontWeight.w700),
                             ),
                             const SizedBox(width: 4),
                             AnimatedRotation(
                               turns: _showOptional ? 0.5 : 0,
                               duration: const Duration(milliseconds: 200),
-                              child: Icon(Icons.keyboard_arrow_down_rounded, color: kTeal.withOpacity(0.8), size: 17),
+                              child: Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.accent.withOpacity(0.8), size: 17),
                             ),
                           ]),
                         ),
-                        Expanded(child: Divider(color: kWhite.withOpacity(0.08))),
+                        Expanded(child: Divider(color: AppColors.text.withOpacity(0.08))),
                       ]),
                     ),
 
@@ -362,7 +363,7 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet>
 
             // ── Save button ────────────────────────────────────
             Container(
-              decoration: BoxDecoration(border: Border(top: BorderSide(color: kWhite.withOpacity(0.07)))),
+              decoration: BoxDecoration(border: Border(top: BorderSide(color: AppColors.text.withOpacity(0.07)))),
               padding: EdgeInsets.fromLTRB(20, 14, 20, 14 + mq.padding.bottom),
               child: SizedBox(
                 width: double.infinity, height: 50,
@@ -379,14 +380,14 @@ class _CreateTaskSheetState extends State<_CreateTaskSheet>
                       onTap: _saving ? null : _save,
                       child: Center(
                         child: _saving
-                            ? const SizedBox(width: 20, height: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation(kWhite)))
-                            : const Row(
+                            ? SizedBox(width: 20, height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation(AppColors.text)))
+                            : Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.check_rounded, color: kWhite, size: 18),
+                                  Icon(Icons.check_rounded, color: AppColors.text, size: 18),
                                   SizedBox(width: 7),
-                                  Text('Save Task', style: TextStyle(color: kWhite, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.3)),
+                                  Text('Save Task', style: TextStyle(color: AppColors.text, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.3)),
                                 ],
                               ),
                       ),
@@ -572,7 +573,7 @@ class _PriorityHintCard extends StatelessWidget {
             Text(
               hint.message,
               style: TextStyle(
-                color: kWhite.withOpacity(0.65),
+                color: AppColors.text.withOpacity(0.65),
                 fontSize: 12,
                 height: 1.4,
               ),
@@ -588,7 +589,7 @@ class _PriorityHintCard extends StatelessWidget {
                   child: Text(
                     hint.notifNote,
                     style: TextStyle(
-                      color: kWhite.withOpacity(0.35),
+                      color: AppColors.text.withOpacity(0.35),
                       fontSize: 10,
                       fontStyle: FontStyle.italic,
                     ),
@@ -647,9 +648,9 @@ class _DeadlineSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: kWhite.withOpacity(0.04),
+        color: AppColors.text.withOpacity(0.04),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: kWhite.withOpacity(0.09)),
+        border: Border.all(color: AppColors.text.withOpacity(0.09)),
       ),
       child: Column(
         children: [
@@ -658,9 +659,9 @@ class _DeadlineSection extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
             child: Row(
               children: [
-                Icon(Icons.event_rounded, color: kTeal, size: 14),
+                Icon(Icons.event_rounded, color: AppColors.accent, size: 14),
                 const SizedBox(width: 7),
-                Text('Due Date', style: TextStyle(color: kWhite.withOpacity(0.45), fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.4)),
+                Text('Due Date', style: TextStyle(color: AppColors.text.withOpacity(0.45), fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.4)),
               ],
             ),
           ),
@@ -671,14 +672,14 @@ class _DeadlineSection extends StatelessWidget {
               label: 'Deadline',
               value: fmtDate(deadlineDate),
               onTap: onPickDate,
-              accent: kTeal,
+              accent: AppColors.accent,
             ),
           ),
 
           // ── DIVIDER ───────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 12, 14, 0),
-            child: Divider(height: 1, color: kWhite.withOpacity(0.07)),
+            child: Divider(height: 1, color: AppColors.text.withOpacity(0.07)),
           ),
 
           // ── TIME ROW (optional) ───────────────────────────
@@ -688,9 +689,9 @@ class _DeadlineSection extends StatelessWidget {
               children: [
                 Icon(Icons.access_time_rounded, color: const Color(0xFF9B88E8), size: 14),
                 const SizedBox(width: 7),
-                Text('Deadline Time', style: TextStyle(color: kWhite.withOpacity(0.45), fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.4)),
+                Text('Deadline Time', style: TextStyle(color: AppColors.text.withOpacity(0.45), fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.4)),
                 const Spacer(),
-                Text('optional', style: TextStyle(color: kWhite.withOpacity(0.25), fontSize: 10, fontStyle: FontStyle.italic)),
+                Text('optional', style: TextStyle(color: AppColors.text.withOpacity(0.25), fontSize: 10, fontStyle: FontStyle.italic)),
                 if (_hasTime) ...[ 
                   const SizedBox(width: 8),
                   GestureDetector(
@@ -698,13 +699,13 @@ class _DeadlineSection extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: kWhite.withOpacity(0.06),
+                        color: AppColors.text.withOpacity(0.06),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(mainAxisSize: MainAxisSize.min, children: [
-                        Icon(Icons.close_rounded, size: 11, color: kWhite.withOpacity(0.35)),
+                        Icon(Icons.close_rounded, size: 11, color: AppColors.text.withOpacity(0.35)),
                         const SizedBox(width: 3),
-                        Text('Clear', style: TextStyle(color: kWhite.withOpacity(0.35), fontSize: 10, fontWeight: FontWeight.w600)),
+                        Text('Clear', style: TextStyle(color: AppColors.text.withOpacity(0.35), fontSize: 10, fontWeight: FontWeight.w600)),
                       ]),
                     ),
                   ),
@@ -798,18 +799,18 @@ class _AddTimeChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
         decoration: BoxDecoration(
-          color: kWhite.withOpacity(0.03),
+          color: AppColors.text.withOpacity(0.03),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: kWhite.withOpacity(0.08), style: BorderStyle.solid),
+          border: Border.all(color: AppColors.text.withOpacity(0.08), style: BorderStyle.solid),
         ),
         child: Row(
           children: [
-            Icon(Icons.add_circle_outline_rounded, size: 14, color: kWhite.withOpacity(0.25)),
+            Icon(Icons.add_circle_outline_rounded, size: 14, color: AppColors.text.withOpacity(0.25)),
             const SizedBox(width: 6),
             Flexible(
               child: Text(
                 label,
-                style: TextStyle(color: kWhite.withOpacity(0.3), fontSize: 11, fontWeight: FontWeight.w600),
+                style: TextStyle(color: AppColors.text.withOpacity(0.3), fontSize: 11, fontWeight: FontWeight.w600),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -831,9 +832,9 @@ class _FieldLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(children: [
-      Icon(icon, color: kSubtitle, size: 12),
+      Icon(icon, color: AppColors.subtitle, size: 12),
       const SizedBox(width: 5),
-      Text(label, style: const TextStyle(color: kSubtitle, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+      Text(label, style: TextStyle(color: AppColors.subtitle, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
     ]);
   }
 }
@@ -850,20 +851,20 @@ class _NameField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: kWhite.withOpacity(0.05),
+        color: AppColors.text.withOpacity(0.05),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: kWhite.withOpacity(0.1)),
+        border: Border.all(color: AppColors.text.withOpacity(0.1)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
       child: TextField(
         controller: controller,
         focusNode: focusNode,
-        style: const TextStyle(color: kWhite, fontSize: 17, fontWeight: FontWeight.w600),
+        style: TextStyle(color: AppColors.text, fontSize: 17, fontWeight: FontWeight.w600),
         maxLines: 2, minLines: 1,
         textCapitalization: TextCapitalization.sentences,
         decoration: InputDecoration(
           hintText: 'What needs to be done?',
-          hintStyle: TextStyle(color: kWhite.withOpacity(0.22), fontSize: 17, fontWeight: FontWeight.w600),
+          hintStyle: TextStyle(color: AppColors.text.withOpacity(0.22), fontSize: 17, fontWeight: FontWeight.w600),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 12),
         ),
@@ -935,9 +936,9 @@ class _CategorySheet extends StatelessWidget {
       child: Container(
       margin: const EdgeInsets.fromLTRB(12, 0, 12, 28),
       decoration: BoxDecoration(
-        color: const Color(0xFF1B2D5B),
+        color: AppColors.bgDeep,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: kWhite.withOpacity(0.08)),
+        border: Border.all(color: AppColors.text.withOpacity(0.08)),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 40, offset: const Offset(0, -4))],
       ),
       child: SingleChildScrollView(
@@ -945,24 +946,24 @@ class _CategorySheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(width: 36, height: 4, margin: const EdgeInsets.only(top: 14, bottom: 18),
-                decoration: BoxDecoration(color: kWhite.withOpacity(0.18), borderRadius: BorderRadius.circular(2))),
+                decoration: BoxDecoration(color: AppColors.text.withOpacity(0.18), borderRadius: BorderRadius.circular(2))),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 22),
               child: Row(children: [
                 Container(width: 42, height: 42,
-                  decoration: BoxDecoration(color: kTeal.withOpacity(0.14), shape: BoxShape.circle, border: Border.all(color: kTeal.withOpacity(0.3), width: 1.5)),
-                  child: const Icon(Icons.label_rounded, color: kTeal, size: 21)),
+                  decoration: BoxDecoration(color: AppColors.accent.withOpacity(0.14), shape: BoxShape.circle, border: Border.all(color: AppColors.accent.withOpacity(0.3), width: 1.5)),
+                  child: Icon(Icons.label_rounded, color: AppColors.accent, size: 21)),
                 const SizedBox(width: 13),
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text('Select Category', style: TextStyle(color: kWhite, fontSize: 17, fontWeight: FontWeight.bold)),
-                  Text('Choose what kind of task this is', style: TextStyle(color: kWhite.withOpacity(0.4), fontSize: 12)),
+                  Text('Select Category', style: TextStyle(color: AppColors.text, fontSize: 17, fontWeight: FontWeight.bold)),
+                  Text('Choose what kind of task this is', style: TextStyle(color: AppColors.text.withOpacity(0.4), fontSize: 12)),
                 ]),
               ]),
             ),
 
             const SizedBox(height: 16),
-            Divider(color: kWhite.withOpacity(0.07), thickness: 1, indent: 22, endIndent: 22),
+            Divider(color: AppColors.text.withOpacity(0.07), thickness: 1, indent: 22, endIndent: 22),
             const SizedBox(height: 6),
 
             Padding(
@@ -991,7 +992,7 @@ class _GroupHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Align(
     alignment: Alignment.centerLeft,
-    child: Text(label, style: TextStyle(color: kWhite.withOpacity(0.28), fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.2)),
+    child: Text(label, style: TextStyle(color: AppColors.text.withOpacity(0.28), fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.2)),
   );
 }
 
@@ -1017,9 +1018,9 @@ class _CatCardState extends State<_CatCard> {
         margin: const EdgeInsets.fromLTRB(14, 0, 14, 9),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: (_pressed || sel) ? c.withOpacity(0.12) : kWhite.withOpacity(0.04),
+          color: (_pressed || sel) ? c.withOpacity(0.12) : AppColors.text.withOpacity(0.04),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: (_pressed || sel) ? c.withOpacity(0.55) : kWhite.withOpacity(0.08), width: 1.3),
+          border: Border.all(color: (_pressed || sel) ? c.withOpacity(0.55) : AppColors.text.withOpacity(0.08), width: 1.3),
         ),
         child: Row(children: [
           Container(width: 46, height: 46,
@@ -1027,16 +1028,16 @@ class _CatCardState extends State<_CatCard> {
             child: Icon(Icons.label_rounded, color: c, size: 22)),
           const SizedBox(width: 13),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(widget.cat.label, style: const TextStyle(color: kWhite, fontSize: 15, fontWeight: FontWeight.w600)),
+            Text(widget.cat.label, style: TextStyle(color: AppColors.text, fontSize: 15, fontWeight: FontWeight.w600)),
             const SizedBox(height: 3),
-            Text(_catDesc(widget.cat), style: TextStyle(color: kWhite.withOpacity(0.37), fontSize: 12)),
+            Text(_catDesc(widget.cat), style: TextStyle(color: AppColors.text.withOpacity(0.37), fontSize: 12)),
           ])),
           const SizedBox(width: 6),
           if (sel)
             Container(width: 22, height: 22, decoration: BoxDecoration(color: c, shape: BoxShape.circle),
-                child: const Icon(Icons.check_rounded, color: kWhite, size: 14))
+                child: Icon(Icons.check_rounded, color: AppColors.text, size: 14))
           else
-            Icon(Icons.chevron_right_rounded, color: kWhite.withOpacity(0.2), size: 20),
+            Icon(Icons.chevron_right_rounded, color: AppColors.text.withOpacity(0.2), size: 20),
         ]),
       ),
     );
@@ -1074,16 +1075,16 @@ class _PriorityChips extends StatelessWidget {
               margin: EdgeInsets.only(right: isLast ? 0 : 8),
               height: 46,
               decoration: BoxDecoration(
-                color: sel ? p.color.withOpacity(0.16) : kWhite.withOpacity(0.04),
+                color: sel ? p.color.withOpacity(0.16) : AppColors.text.withOpacity(0.04),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: sel ? p.color.withOpacity(0.55) : kWhite.withOpacity(0.08), width: sel ? 1.5 : 1),
+                border: Border.all(color: sel ? p.color.withOpacity(0.55) : AppColors.text.withOpacity(0.08), width: sel ? 1.5 : 1),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(_priorityIcon(p), color: sel ? p.color : kWhite.withOpacity(0.3), size: 15),
+                  Icon(_priorityIcon(p), color: sel ? p.color : AppColors.text.withOpacity(0.3), size: 15),
                   const SizedBox(height: 3),
-                  Text(p.label, style: TextStyle(color: sel ? p.color : kWhite.withOpacity(0.35), fontSize: 11, fontWeight: FontWeight.w700)),
+                  Text(p.label, style: TextStyle(color: sel ? p.color : AppColors.text.withOpacity(0.35), fontSize: 11, fontWeight: FontWeight.w700)),
                 ],
               ),
             ),
@@ -1136,16 +1137,16 @@ class _OptionalSection extends StatelessWidget {
                   margin: EdgeInsets.only(right: isLast ? 0 : 8),
                   height: 42,
                   decoration: BoxDecoration(
-                    color: sel ? kTeal.withOpacity(0.13) : kWhite.withOpacity(0.04),
+                    color: sel ? AppColors.accent.withOpacity(0.13) : AppColors.text.withOpacity(0.04),
                     borderRadius: BorderRadius.circular(11),
-                    border: Border.all(color: sel ? kTeal.withOpacity(0.5) : kWhite.withOpacity(0.08), width: sel ? 1.5 : 1),
+                    border: Border.all(color: sel ? AppColors.accent.withOpacity(0.5) : AppColors.text.withOpacity(0.08), width: sel ? 1.5 : 1),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(_repeatIcon(r), color: sel ? kTeal : kWhite.withOpacity(0.3), size: 13),
+                      Icon(_repeatIcon(r), color: sel ? AppColors.accent : AppColors.text.withOpacity(0.3), size: 13),
                       const SizedBox(width: 5),
-                      Text(r.label, style: TextStyle(color: sel ? kTeal : kWhite.withOpacity(0.35), fontSize: 12, fontWeight: FontWeight.w700)),
+                      Text(r.label, style: TextStyle(color: sel ? AppColors.accent : AppColors.text.withOpacity(0.35), fontSize: 12, fontWeight: FontWeight.w700)),
                     ],
                   ),
                 ),
@@ -1160,19 +1161,19 @@ class _OptionalSection extends StatelessWidget {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: kWhite.withOpacity(0.05),
+            color: AppColors.text.withOpacity(0.05),
             borderRadius: BorderRadius.circular(13),
-            border: Border.all(color: kWhite.withOpacity(0.1)),
+            border: Border.all(color: AppColors.text.withOpacity(0.1)),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           child: TextField(
             controller: notesCtrl,
-            style: const TextStyle(color: kWhite, fontSize: 13),
+            style: TextStyle(color: AppColors.text, fontSize: 13),
             maxLines: 3, minLines: 2,
             textCapitalization: TextCapitalization.sentences,
             decoration: InputDecoration(
               hintText: 'Add a reminder or extra context…',
-              hintStyle: TextStyle(color: kWhite.withOpacity(0.22), fontSize: 13),
+              hintStyle: TextStyle(color: AppColors.text.withOpacity(0.22), fontSize: 13),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(vertical: 10),
             ),
@@ -1204,9 +1205,9 @@ class _StatusChips extends StatelessWidget {
     TaskStatus.inProgress: 'In Progress',
     TaskStatus.completed:  'Completed',
   };
-  static const _colors = {
-    TaskStatus.notStarted: Color(0xFF8FA6C8),
-    TaskStatus.inProgress: Color(0xFF4A90D9),
+  static final _colors = {
+    TaskStatus.notStarted: AppColors.subtitle,
+    TaskStatus.inProgress: AppColors.link,
     TaskStatus.completed:  Color(0xFF3BBFA3),
   };
   static const _icons = {
@@ -1230,18 +1231,18 @@ class _StatusChips extends StatelessWidget {
               margin: EdgeInsets.only(right: isLast ? 0 : 8),
               height: 48,
               decoration: BoxDecoration(
-                color: sel ? c.withOpacity(0.14) : kWhite.withOpacity(0.04),
+                color: sel ? c.withOpacity(0.14) : AppColors.text.withOpacity(0.04),
                 borderRadius: BorderRadius.circular(11),
-                border: Border.all(color: sel ? c.withOpacity(0.55) : kWhite.withOpacity(0.08), width: sel ? 1.5 : 1),
+                border: Border.all(color: sel ? c.withOpacity(0.55) : AppColors.text.withOpacity(0.08), width: sel ? 1.5 : 1),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(_icons[s]!, color: sel ? c : kWhite.withOpacity(0.3), size: 14),
+                  Icon(_icons[s]!, color: sel ? c : AppColors.text.withOpacity(0.3), size: 14),
                   const SizedBox(height: 3),
                   Text(
                     s == TaskStatus.notStarted ? 'Pending' : _labels[s]!.split(' ').first,
-                    style: TextStyle(color: sel ? c : kWhite.withOpacity(0.3), fontSize: 10, fontWeight: FontWeight.w800),
+                    style: TextStyle(color: sel ? c : AppColors.text.withOpacity(0.3), fontSize: 10, fontWeight: FontWeight.w800),
                   ),
                 ],
               ),
@@ -1309,9 +1310,9 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
     return Container(
       margin: EdgeInsets.fromLTRB(12, 0, 12, 24 + mq.padding.bottom),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A2D5A),
+        color: AppColors.bgDeep,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: kWhite.withOpacity(0.08)),
+        border: Border.all(color: AppColors.text.withOpacity(0.08)),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.45), blurRadius: 40, offset: const Offset(0, -4))],
       ),
       child: Column(
@@ -1321,7 +1322,7 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
           Container(
             width: 36, height: 4,
             margin: const EdgeInsets.only(top: 12),
-            decoration: BoxDecoration(color: kWhite.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
+            decoration: BoxDecoration(color: AppColors.text.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
           ),
 
           // Header
@@ -1342,8 +1343,8 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Set Time', style: TextStyle(color: kWhite, fontSize: 16, fontWeight: FontWeight.bold)),
-                    Text('Scroll to choose', style: TextStyle(color: kWhite.withOpacity(0.38), fontSize: 12)),
+                    Text('Set Time', style: TextStyle(color: AppColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
+                    Text('Scroll to choose', style: TextStyle(color: AppColors.text.withOpacity(0.38), fontSize: 12)),
                   ],
                 ),
                 const Spacer(),
@@ -1351,8 +1352,8 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
                   onTap: () => Navigator.pop(context),
                   child: Container(
                     width: 30, height: 30,
-                    decoration: BoxDecoration(color: kWhite.withOpacity(0.07), shape: BoxShape.circle),
-                    child: Icon(Icons.close_rounded, color: kWhite.withOpacity(0.45), size: 16),
+                    decoration: BoxDecoration(color: AppColors.text.withOpacity(0.07), shape: BoxShape.circle),
+                    child: Icon(Icons.close_rounded, color: AppColors.text.withOpacity(0.45), size: 16),
                   ),
                 ),
               ],
@@ -1360,7 +1361,7 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
           ),
 
           const SizedBox(height: 18),
-          Divider(height: 1, color: kWhite.withOpacity(0.07)),
+          Divider(height: 1, color: AppColors.text.withOpacity(0.07)),
           const SizedBox(height: 8),
 
           // ── Drum rolls ────────────────────────────────────
@@ -1375,9 +1376,9 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
                   height: _itemH,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: kWhite.withOpacity(0.07),
+                      color: AppColors.text.withOpacity(0.07),
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: kWhite.withOpacity(0.1)),
+                      border: Border.all(color: AppColors.text.withOpacity(0.1)),
                     ),
                   ),
                 ),
@@ -1391,7 +1392,7 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                          colors: [const Color(0xFF1A2D5A), const Color(0xFF1A2D5A).withOpacity(0)],
+                          colors: [AppColors.bgDeep, AppColors.bgDeep.withOpacity(0)],
                         ),
                       ),
                     ),
@@ -1406,7 +1407,7 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.bottomCenter, end: Alignment.topCenter,
-                          colors: [const Color(0xFF1A2D5A), const Color(0xFF1A2D5A).withOpacity(0)],
+                          colors: [AppColors.bgDeep, AppColors.bgDeep.withOpacity(0)],
                         ),
                       ),
                     ),
@@ -1427,7 +1428,7 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
                       ),
                     ),
                     // Colon
-                    Text(':', style: TextStyle(color: kWhite.withOpacity(0.6), fontSize: 28, fontWeight: FontWeight.w300)),
+                    Text(':', style: TextStyle(color: AppColors.text.withOpacity(0.6), fontSize: 28, fontWeight: FontWeight.w300)),
                     // Minute wheel
                     Expanded(
                       flex: 3,
@@ -1456,7 +1457,7 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
           ),
 
           const SizedBox(height: 12),
-          Divider(height: 1, color: kWhite.withOpacity(0.07)),
+          Divider(height: 1, color: AppColors.text.withOpacity(0.07)),
 
           // ── Confirm button ────────────────────────────────
           Padding(
@@ -1478,11 +1479,11 @@ class _IosTimePickerSheetState extends State<_IosTimePickerSheet> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.check_rounded, color: kWhite, size: 18),
+                          Icon(Icons.check_rounded, color: AppColors.text, size: 18),
                           const SizedBox(width: 7),
                           Text(
                             _formatPreview(_result),
-                            style: const TextStyle(color: kWhite, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.3),
+                            style: TextStyle(color: AppColors.text, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.3),
                           ),
                         ],
                       ),
@@ -1557,7 +1558,7 @@ class _WheelItem extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-          color: dimmed ? kWhite.withOpacity(0.18) : kWhite,
+          color: dimmed ? AppColors.text.withOpacity(0.18) : AppColors.text,
           fontSize: 26,
           fontWeight: FontWeight.w300,
           letterSpacing: 0.5,
@@ -1654,9 +1655,9 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
     return Container(
       margin: EdgeInsets.fromLTRB(12, 0, 12, 24 + mq.padding.bottom),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A2D5A),
+        color: AppColors.bgDeep,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: kWhite.withOpacity(0.08)),
+        border: Border.all(color: AppColors.text.withOpacity(0.08)),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.45), blurRadius: 40, offset: const Offset(0, -4))],
       ),
       child: Column(
@@ -1666,7 +1667,7 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
           Container(
             width: 36, height: 4,
             margin: const EdgeInsets.only(top: 12),
-            decoration: BoxDecoration(color: kWhite.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
+            decoration: BoxDecoration(color: AppColors.text.withOpacity(0.18), borderRadius: BorderRadius.circular(2)),
           ),
 
           // Header
@@ -1677,18 +1678,18 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
                 Container(
                   width: 38, height: 38,
                   decoration: BoxDecoration(
-                    color: kTeal.withOpacity(0.14),
+                    color: AppColors.accent.withOpacity(0.14),
                     shape: BoxShape.circle,
-                    border: Border.all(color: kTeal.withOpacity(0.3)),
+                    border: Border.all(color: AppColors.accent.withOpacity(0.3)),
                   ),
-                  child: const Icon(Icons.calendar_today_rounded, color: kTeal, size: 17),
+                  child: Icon(Icons.calendar_today_rounded, color: AppColors.accent, size: 17),
                 ),
                 const SizedBox(width: 12),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Set Date', style: TextStyle(color: kWhite, fontSize: 16, fontWeight: FontWeight.bold)),
-                    Text('Scroll to choose', style: TextStyle(color: kWhite.withOpacity(0.38), fontSize: 12)),
+                    Text('Set Date', style: TextStyle(color: AppColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
+                    Text('Scroll to choose', style: TextStyle(color: AppColors.text.withOpacity(0.38), fontSize: 12)),
                   ],
                 ),
                 const Spacer(),
@@ -1696,8 +1697,8 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
                   onTap: () => Navigator.pop(context),
                   child: Container(
                     width: 30, height: 30,
-                    decoration: BoxDecoration(color: kWhite.withOpacity(0.07), shape: BoxShape.circle),
-                    child: Icon(Icons.close_rounded, color: kWhite.withOpacity(0.45), size: 16),
+                    decoration: BoxDecoration(color: AppColors.text.withOpacity(0.07), shape: BoxShape.circle),
+                    child: Icon(Icons.close_rounded, color: AppColors.text.withOpacity(0.45), size: 16),
                   ),
                 ),
               ],
@@ -1705,7 +1706,7 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
           ),
 
           const SizedBox(height: 18),
-          Divider(height: 1, color: kWhite.withOpacity(0.07)),
+          Divider(height: 1, color: AppColors.text.withOpacity(0.07)),
           const SizedBox(height: 8),
 
           // ── Drum rolls ────────────────────────────────────
@@ -1720,9 +1721,9 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
                   height: _itemH,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: kWhite.withOpacity(0.07),
+                      color: AppColors.text.withOpacity(0.07),
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: kWhite.withOpacity(0.1)),
+                      border: Border.all(color: AppColors.text.withOpacity(0.1)),
                     ),
                   ),
                 ),
@@ -1736,7 +1737,7 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [const Color(0xFF1A2D5A), const Color(0xFF1A2D5A).withOpacity(0)],
+                          colors: [AppColors.bgDeep, AppColors.bgDeep.withOpacity(0)],
                         ),
                       ),
                     ),
@@ -1752,7 +1753,7 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
                         gradient: LinearGradient(
                           begin: Alignment.bottomCenter,
                           end: Alignment.topCenter,
-                          colors: [const Color(0xFF1A2D5A), const Color(0xFF1A2D5A).withOpacity(0)],
+                          colors: [AppColors.bgDeep, AppColors.bgDeep.withOpacity(0)],
                         ),
                       ),
                     ),
@@ -1809,7 +1810,7 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
           ),
 
           const SizedBox(height: 12),
-          Divider(height: 1, color: kWhite.withOpacity(0.07)),
+          Divider(height: 1, color: AppColors.text.withOpacity(0.07)),
 
           // ── Confirm button ────────────────────────────────
           Padding(
@@ -1819,8 +1820,8 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
-                  gradient: const LinearGradient(colors: [kTeal, Color(0xFF6AB8B3)]),
-                  boxShadow: [BoxShadow(color: kTeal.withOpacity(0.35), blurRadius: 16, offset: const Offset(0, 4))],
+                  gradient: LinearGradient(colors: [AppColors.accent, Color(0xFF6AB8B3)]),
+                  boxShadow: [BoxShadow(color: AppColors.accent.withOpacity(0.35), blurRadius: 16, offset: const Offset(0, 4))],
                 ),
                 child: Material(
                   color: Colors.transparent,
@@ -1831,11 +1832,11 @@ class _IosDatePickerSheetState extends State<_IosDatePickerSheet> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.check_rounded, color: kNavyDark, size: 18),
+                          Icon(Icons.check_rounded, color: AppColors.bg, size: 18),
                           const SizedBox(width: 7),
                           Text(
                             _fmtResult(_result),
-                            style: const TextStyle(color: kNavyDark, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.3),
+                            style: TextStyle(color: AppColors.bg, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.3),
                           ),
                         ],
                       ),
@@ -1880,18 +1881,18 @@ class _CostSection extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: kWhite.withOpacity(0.05),
+              color: AppColors.text.withOpacity(0.05),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
               children: [
                 Icon(Icons.account_balance_wallet_rounded,
-                    size: 18, color: kWhite.withOpacity(0.5)),
+                    size: 18, color: AppColors.text.withOpacity(0.5)),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text('Add cost to wallet',
                       style: TextStyle(
-                          color: kWhite.withOpacity(0.65),
+                          color: AppColors.text.withOpacity(0.65),
                           fontSize: 14,
                           fontWeight: FontWeight.w500)),
                 ),
@@ -1899,7 +1900,7 @@ class _CostSection extends StatelessWidget {
                   turns: addCost ? 0.5 : 0,
                   duration: const Duration(milliseconds: 220),
                   child: Icon(Icons.keyboard_arrow_down_rounded,
-                      color: kWhite.withOpacity(0.4), size: 20),
+                      color: AppColors.text.withOpacity(0.4), size: 20),
                 ),
               ],
             ),
@@ -1920,14 +1921,14 @@ class _CostSection extends StatelessWidget {
                 // Amount field
                 Container(
                   decoration: BoxDecoration(
-                    color: kWhite.withOpacity(0.06),
+                    color: AppColors.text.withOpacity(0.06),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
                   child: Row(children: [
                     Text('₱',
                         style: TextStyle(
-                            color: kWhite.withOpacity(0.6),
+                            color: AppColors.text.withOpacity(0.6),
                             fontSize: 15,
                             fontWeight: FontWeight.w600)),
                     const SizedBox(width: 6),
@@ -1936,11 +1937,11 @@ class _CostSection extends StatelessWidget {
                         controller: costCtrl,
                         keyboardType:
                             const TextInputType.numberWithOptions(decimal: true),
-                        style: const TextStyle(color: kWhite, fontSize: 15),
+                        style: TextStyle(color: AppColors.text, fontSize: 15),
                         decoration: InputDecoration(
                           hintText: 'Amount (e.g. 250.00)',
                           hintStyle:
-                              TextStyle(color: kWhite.withOpacity(0.3), fontSize: 14),
+                              TextStyle(color: AppColors.text.withOpacity(0.3), fontSize: 14),
                           border: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(vertical: 12),
                         ),
@@ -1964,7 +1965,7 @@ class _CostSection extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: selected
                               ? cat.color.withOpacity(0.2)
-                              : kWhite.withOpacity(0.06),
+                              : AppColors.text.withOpacity(0.06),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: selected ? cat.color : Colors.transparent,
@@ -1978,14 +1979,14 @@ class _CostSection extends StatelessWidget {
                                 size: 13,
                                 color: selected
                                     ? cat.color
-                                    : kWhite.withOpacity(0.45)),
+                                    : AppColors.text.withOpacity(0.45)),
                             const SizedBox(width: 5),
                             Text(cat.label,
                                 style: TextStyle(
                                     fontSize: 12,
                                     color: selected
                                         ? cat.color
-                                        : kWhite.withOpacity(0.55),
+                                        : AppColors.text.withOpacity(0.55),
                                     fontWeight: selected
                                         ? FontWeight.w600
                                         : FontWeight.w400)),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'constants/colors.dart';
+import 'constants/app_colors.dart';
 import 'screens/home_screen.dart';
 import 'screens/calendar_screen.dart';
 import 'screens/spaces_screen.dart';
@@ -9,6 +10,7 @@ import 'screens/login_screen.dart';
 import 'widgets/app_drawer.dart';
 import 'widgets/dashboard_appbar.dart';
 import 'widgets/dashboard_bottom_nav.dart';
+import 'store/theme_store.dart';
 import 'store/task_store.dart';
 import 'store/space_store.dart';
 import 'store/space_chat_store.dart';
@@ -66,6 +68,7 @@ void main() async {
   );
   await ClassScheduleStore.instance.load();
 
+  await ThemeStore.instance.load();
   runApp(const MyApp());
 }
 
@@ -74,20 +77,24 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Nibble',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        scaffoldBackgroundColor: kNavyDark,
-        fontFamily: 'SF Pro Display',
-        scrollbarTheme: const ScrollbarThemeData(),
+    return ListenableBuilder(
+      listenable: ThemeStore.instance,
+      builder: (context, _) => MaterialApp(
+        key: ValueKey(ThemeStore.instance.isDark),
+        title: 'Nibble',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          scaffoldBackgroundColor: AppColors.bg,
+          fontFamily: 'SF Pro Display',
+          scrollbarTheme: const ScrollbarThemeData(),
+        ),
+        scrollBehavior: const ScrollBehaviorNoGlow(),
+        home: const SplashScreen(),
+        routes: {
+          '/login': (_) => const LoginScreen(),
+          '/main': (_) => const MainScaffold(),
+        },
       ),
-      scrollBehavior: const ScrollBehaviorNoGlow(),
-      home: const SplashScreen(),
-      routes: {
-        '/login': (_) => const LoginScreen(),
-        '/main': (_) => const MainScaffold(),
-      },
     );
   }
 }
@@ -148,7 +155,7 @@ class _MainScaffoldState extends State<MainScaffold> {
     return Scaffold(
       key: _scaffoldKey,
       extendBody: true,
-      backgroundColor: kNavyDark,
+      backgroundColor: AppColors.bg,
       appBar: DashboardAppBar(
         onMenuTap: () => _scaffoldKey.currentState?.openDrawer(),
       ),

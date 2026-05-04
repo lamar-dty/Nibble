@@ -5,20 +5,21 @@ import '../../models/space_message.dart';
 import '../../store/space_chat_store.dart';
 import '../../store/auth_store.dart';
 import '../../store/task_store.dart';             // ← Step 3: clear chat notification on open
+import '../../constants/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────
 // Palette (matches the dark-navy app aesthetic)
 // ─────────────────────────────────────────────────────────────
 const _kBg = Color(0xFF0F1523);
-const _kSurface = Color(0xFF1A2235);
-const _kBubbleOwn = Color(0xFF3B6FD4);
-const _kBubbleOther = Color(0xFF1E2D45);
-const _kSystemBg = Color(0xFF1A2235);
-const _kText = Color(0xFFE8ECF4);
-const _kSubtext = Color(0xFF7A8BA8);
-const _kInputBg = Color(0xFF1E2D45);
+Color get _kSurface => AppColors.bgDeep;
+Color get _kBubbleOwn => AppColors.link;
+Color get _kBubbleOther => AppColors.bgDeep;
+Color get _kSystemBg => AppColors.bgDeep;
+Color get _kText => AppColors.lightFill;
+Color get _kSubtext => AppColors.icon;
+Color get _kInputBg => AppColors.bgDeep;
 const _kDivider = Color(0xFF243045);
-const _kSend = Color(0xFF3B6FD4);
+Color get _kSend => AppColors.link;
 
 // ─────────────────────────────────────────────────────────────
 // SpaceChatSheet — opened from SpaceChatFab
@@ -215,7 +216,7 @@ class _ChatHeader extends StatelessWidget {
               children: [
                 Text(
                   space.name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: _kText,
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
@@ -224,14 +225,14 @@ class _ChatHeader extends StatelessWidget {
                 ),
                 Text(
                   '${space.memberCount} members',
-                  style: const TextStyle(color: _kSubtext, fontSize: 12),
+                  style: TextStyle(color: _kSubtext, fontSize: 12),
                 ),
               ],
             ),
           ),
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(Icons.close_rounded, color: _kSubtext, size: 22),
+            icon: Icon(Icons.close_rounded, color: _kSubtext, size: 22),
             splashRadius: 20,
           ),
         ],
@@ -360,7 +361,7 @@ class _MessageBubble extends StatelessWidget {
                         child: Text(
                           _formatTime(message.timestamp),
                           style:
-                              const TextStyle(color: _kSubtext, fontSize: 10),
+                              TextStyle(color: _kSubtext, fontSize: 10),
                         ),
                       ),
                     Flexible(
@@ -385,7 +386,7 @@ class _MessageBubble extends StatelessWidget {
                         ),
                         child: Text(
                           message.text,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: _kText,
                             fontSize: 14.5,
                             height: 1.4,
@@ -399,7 +400,7 @@ class _MessageBubble extends StatelessWidget {
                         child: Text(
                           _formatTime(message.timestamp),
                           style:
-                              const TextStyle(color: _kSubtext, fontSize: 10),
+                              TextStyle(color: _kSubtext, fontSize: 10),
                         ),
                       ),
                   ],
@@ -423,8 +424,8 @@ class _Avatar extends StatelessWidget {
   const _Avatar({required this.name, required this.visible});
 
   Color _colorFor(String s) {
-    const palette = [
-      Color(0xFF3B6FD4),
+    final palette = [
+      AppColors.link,
       Color(0xFF6C63FF),
       Color(0xFF3BBFA3),
       Color(0xFFE87070),
@@ -475,7 +476,7 @@ class _SystemBubble extends StatelessWidget {
           ),
           child: Text(
             text,
-            style: const TextStyle(
+            style: TextStyle(
               color: _kSubtext,
               fontSize: 12,
               fontStyle: FontStyle.italic,
@@ -511,7 +512,7 @@ class _EmptyState extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: _kDivider),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.chat_bubble_outline_rounded,
                 color: _kSubtext,
                 size: 32,
@@ -520,7 +521,7 @@ class _EmptyState extends StatelessWidget {
             const SizedBox(height: 20),
             Text(
               'No messages yet',
-              style: const TextStyle(
+              style: TextStyle(
                 color: _kText,
                 fontWeight: FontWeight.w700,
                 fontSize: 18,
@@ -529,7 +530,7 @@ class _EmptyState extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               'Start the conversation in $spaceName.',
-              style: const TextStyle(color: _kSubtext, fontSize: 14),
+              style: TextStyle(color: _kSubtext, fontSize: 14),
               textAlign: TextAlign.center,
             ),
           ],
@@ -599,8 +600,8 @@ class _InputBarState extends State<_InputBar> {
                 maxLines: null,
                 keyboardType: TextInputType.multiline,
                 textInputAction: TextInputAction.newline,
-                style: const TextStyle(color: _kText, fontSize: 15),
-                decoration: const InputDecoration(
+                style: TextStyle(color: _kText, fontSize: 15),
+                decoration: InputDecoration(
                   hintText: 'Message...',
                   hintStyle: TextStyle(color: _kSubtext),
                   border: InputBorder.none,
