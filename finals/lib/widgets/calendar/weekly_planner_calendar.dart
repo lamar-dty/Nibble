@@ -1361,42 +1361,44 @@ class _WeeklyGridState extends State<_WeeklyGrid> {
             width: colW,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: events.take(2).map((e) {
-                return GestureDetector(
-                  onTap: () => widget.onEventTap(e.taskId, e.isEvent),
-                  child: Container(
-                  margin: const EdgeInsets.only(bottom: 2, right: 2),
-                  padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: e.color.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: e.color.withOpacity(0.5), width: 0.5),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 3, height: 3,
-                        margin: const EdgeInsets.only(right: 2),
-                        decoration: BoxDecoration(color: e.color, shape: BoxShape.circle),
-                      ),
-                      Expanded(
-                        child: Text(
-                          e.title,
-                          style: TextStyle(
-                            color: e.color.withOpacity(0.9),
-                            fontSize: 7,
-                            fontWeight: FontWeight.w700,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+              children: [
+                ...events.map((e) {
+                  return GestureDetector(
+                    onTap: () => widget.onEventTap(e.taskId, e.isEvent),
+                    child: Container(
+                    margin: const EdgeInsets.only(bottom: 2, right: 2),
+                    padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: e.color.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: e.color.withOpacity(0.5), width: 0.5),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 3, height: 3,
+                          margin: const EdgeInsets.only(right: 2),
+                          decoration: BoxDecoration(color: e.color, shape: BoxShape.circle),
                         ),
-                      ),
-                      _StatusPill(status: e.status),
-                    ],
-                  ),
-                  ),
-                );
-              }).toList(),
+                        Expanded(
+                          child: Text(
+                            e.title,
+                            style: TextStyle(
+                              color: e.color.withOpacity(0.9),
+                              fontSize: 7,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        _StatusPill(status: e.status),
+                      ],
+                    ),
+                    ),
+                  );
+                }),
+              ],
             ),
           );
         }),

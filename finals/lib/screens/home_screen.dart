@@ -466,9 +466,10 @@ class _NotificationSheetState extends State<_NotificationSheet> {
             case NotificationType.walletDailyWarning:      return 25;
             case NotificationType.walletExpenseAdded:      return 26;
             case NotificationType.walletExpensePaid:       return 27;
-            case NotificationType.walletLinkedExpensePaid: return 28;
+            case NotificationType.walletLinkedExpensePaid:         return 28;
+            case NotificationType.walletLinkedEventExpenseRemoved: return 29;
             // Class
-            case NotificationType.classReminder:           return 29;
+            case NotificationType.classReminder:                   return 30;
           }
         }
         list.sort((a, b) => rank(a.type).compareTo(rank(b.type)));

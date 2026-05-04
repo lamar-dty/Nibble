@@ -71,6 +71,9 @@ class Event {
 
   final DateTime createdAt;
 
+  /// ID of a linked [WalletExpense]. Null if no expense is attached.
+  String? linkedExpenseId;
+
   Event({
     required this.id,
     required this.title,
@@ -81,6 +84,7 @@ class Event {
     this.endTime,
     this.location,
     this.notes,
+    this.linkedExpenseId,
     DateTime? createdAt,
   })  : endDate = endDate ?? startDate,
         createdAt = createdAt ?? DateTime.now();
@@ -112,6 +116,7 @@ class Event {
         'location': location,
         'notes': notes,
         'createdAt': createdAt.millisecondsSinceEpoch,
+        if (linkedExpenseId != null) 'linkedExpenseId': linkedExpenseId,
       };
 
   factory Event.fromJson(Map<String, dynamic> j) => Event(
@@ -129,6 +134,7 @@ class Event {
             : null),
         location: j['location'] as String?,
         notes: j['notes'] as String?,
+        linkedExpenseId: j['linkedExpenseId'] as String?,
         createdAt:
             DateTime.fromMillisecondsSinceEpoch(j['createdAt'] as int),
       );

@@ -332,6 +332,7 @@ class NotificationRouter extends ChangeNotifier {
       case NotificationType.walletExpenseOverdue:
       case NotificationType.walletExpensePaid:
       case NotificationType.walletLinkedExpensePaid:
+      case NotificationType.walletLinkedEventExpenseRemoved:
       case NotificationType.walletBudgetWarning:
       case NotificationType.walletBudgetExceeded:
       case NotificationType.walletDailyWarning:

@@ -75,6 +75,9 @@ class WalletExpense {
   /// ID of a linked personal [Task]. Null if no task is attached.
   final String? taskId;
 
+  /// ID of a linked personal [Event]. Null if no event is attached.
+  final String? eventId;
+
   const WalletExpense({
     required this.id,
     required this.name,
@@ -88,6 +91,7 @@ class WalletExpense {
     this.paidAt,
     this.category = WalletExpenseCategory.other,
     this.taskId,
+    this.eventId,
   });
 
   WalletExpense copyWith({
@@ -105,6 +109,8 @@ class WalletExpense {
     WalletExpenseCategory? category,
     String? taskId,
     bool clearTaskId = false,
+    String? eventId,
+    bool clearEventId = false,
   }) {
     return WalletExpense(
       id:        id        ?? this.id,
@@ -119,6 +125,7 @@ class WalletExpense {
       savingNote: savingNote ?? this.savingNote,
       category:  category  ?? this.category,
       taskId:    clearTaskId ? null : (taskId ?? this.taskId),
+      eventId:   clearEventId ? null : (eventId ?? this.eventId),
     );
   }
 
@@ -136,6 +143,7 @@ class WalletExpense {
     if (savingNote != null) 'savingNote': savingNote,
     if (dueDate != null) 'dueDate': dueDate!.toIso8601String(),
     if (taskId != null) 'taskId': taskId,
+    if (eventId != null) 'eventId': eventId,
   };
 
   factory WalletExpense.fromJson(Map<String, dynamic> json) {
@@ -179,7 +187,8 @@ class WalletExpense {
       iconColor:  Color((json['iconColor'] as num).toInt()),
       savingNote: json['savingNote'] as String?,
       category:   category,
-      taskId:     json['taskId'] as String?,
+      taskId:     json['taskId']  as String?,
+      eventId:    json['eventId'] as String?,
     );
   }
 }
@@ -2077,6 +2086,7 @@ class IndexedExpense extends WalletExpense {
           savingNote: expense.savingNote,
           category:  expense.category,
           taskId:    expense.taskId,
+          eventId:   expense.eventId,
         );
 
   @override

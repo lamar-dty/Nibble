@@ -751,6 +751,14 @@ class _EventDetailSheet extends StatelessWidget {
                     _NotesCard(notes: event.notes!),
                   ],
 
+                  // ── Linked expense card ──────────────────────
+                  if (event.linkedExpenseId != null) ...[
+                    const SizedBox(height: 18),
+                    _LinkedEventExpenseCard(
+                      eventId: event.linkedExpenseId!,
+                    ),
+                  ],
+
                   const SizedBox(height: 20),
                   Center(
                     child: Text('Created ${_formatDate(event.createdAt)}',
@@ -1054,6 +1062,161 @@ class _LinkedExpenseCardState extends State<_LinkedExpenseCard> {
               const SizedBox(height: 2),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(statusLabel,
+                    style: TextStyle(
+                        color: statusColor,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700)),
+              ),
+            ]),
+          ]),
+          if (!isPaid) ...[
+            const SizedBox(height: 12),
+            GestureDetector(
+              onTap: _toggle,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF3BBFA3).withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                      color: const Color(0xFF3BBFA3).withOpacity(0.35),
+                      width: 1),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.check_circle_outline_rounded,
+                        size: 15, color: Color(0xFF3BBFA3)),
+                    SizedBox(width: 6),
+                    Text('Mark as Paid',
+                        style: TextStyle(
+                            color: Color(0xFF3BBFA3),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600)),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────────
+// Linked Event Expense Card
+// ─────────────────────────────────────────────────────────────────────────────
+class _LinkedEventExpenseCard extends StatefulWidget {
+  final String eventId;
+  const _LinkedEventExpenseCard({required this.eventId});
+
+  @override
+  State<_LinkedEventExpenseCard> createState() =>
+      _LinkedEventExpenseCardState();
+}
+
+class _LinkedEventExpenseCardState extends State<_LinkedEventExpenseCard> {
+  WalletExpense? _expense;
+  int _index = -1;
+
+  @override
+  void initState() {
+    super.initState();
+    _resolve();
+    WalletStore.instance.addListener(_resolve);
+  }
+
+  @override
+  void dispose() {
+    WalletStore.instance.removeListener(_resolve);
+    super.dispose();
+  }
+
+  void _resolve() {
+    final idx =
+        WalletStore.instance.findExpenseIndexByEventId(widget.eventId);
+    setState(() {
+      _index   = idx;
+      _expense = idx == -1 ? null : WalletStore.instance.expenses[idx];
+    });
+  }
+
+  Future<void> _toggle() async {
+    if (_index == -1) return;
+    await WalletStore.instance.toggleExpensePaidUnpaid(_index);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_expense == null) return const SizedBox.shrink();
+
+    final e           = _expense!;
+    final isPaid      = e.status == WalletExpenseStatus.paid;
+    final isOverdue   = e.status == WalletExpenseStatus.overdue;
+    final statusColor = isPaid
+        ? const Color(0xFF3BBFA3)
+        : isOverdue
+            ? const Color(0xFFE87070)
+            : const Color(0xFFE8D870);
+    final statusLabel = isPaid ? 'Paid' : isOverdue ? 'Overdue' : 'Unpaid';
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: kWhite.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: statusColor.withOpacity(0.25), width: 1.2),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            Icon(Icons.account_balance_wallet_rounded,
+                size: 13, color: statusColor.withOpacity(0.75)),
+            const SizedBox(width: 6),
+            Text('LINKED EXPENSE',
+                style: TextStyle(
+                    color: statusColor.withOpacity(0.65),
+                    fontSize: 9,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.8)),
+          ]),
+          const SizedBox(height: 10),
+          Row(children: [
+            Icon(e.icon, size: 20, color: e.iconColor),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(e.name,
+                      style: const TextStyle(
+                          color: kWhite,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 2),
+                  Text(e.category.label,
+                      style: TextStyle(
+                          color: kWhite.withOpacity(0.4), fontSize: 12)),
+                ],
+              ),
+            ),
+            Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+              Text('₱${e.amount.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                      color: kWhite,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700)),
+              const SizedBox(height: 2),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: statusColor.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(20),

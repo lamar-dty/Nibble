@@ -648,6 +648,11 @@ class WalletStore extends ChangeNotifier {
   int findExpenseIndexByTaskId(String taskId) =>
       _expenses.indexWhere((e) => e.taskId == taskId);
 
+  /// Returns the index of the first expense whose [eventId] matches,
+  /// or -1 if none found. Used by TaskStore to remove event-linked expenses.
+  int findExpenseIndexByEventId(String eventId) =>
+      _expenses.indexWhere((e) => e.eventId == eventId);
+
   Future<void> withdrawFromSavings(double amount, {String? note}) async {
     _savings = (_savings - amount).clamp(0.0, double.infinity);
     _savingsLog.add(SavingsEntry(

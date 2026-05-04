@@ -34,7 +34,8 @@ enum NotificationType {
   walletExpenseDueSoon,      // unpaid expense due tomorrow
   walletExpenseOverdue,      // unpaid expense passed due date
   walletExpensePaid,         // expense manually marked paid
-  walletLinkedExpensePaid,   // expense auto-paid via linked task completion
+  walletLinkedExpensePaid,       // expense auto-paid via linked task completion
+  walletLinkedEventExpenseRemoved, // expense removed because linked event was deleted
   walletBudgetWarning,       // monthly spend crossed 80 % of budget
   walletBudgetExceeded,      // monthly spend crossed 100 % of budget
   walletDailyWarning,        // today's spend crossed 80 % of daily allowance
@@ -134,6 +135,7 @@ class AppNotification {
       case NotificationType.walletExpenseOverdue:    return Icons.warning_amber_rounded;
       case NotificationType.walletExpensePaid:       return Icons.check_circle_rounded;
       case NotificationType.walletLinkedExpensePaid: return Icons.task_alt_rounded;
+      case NotificationType.walletLinkedEventExpenseRemoved: return Icons.event_busy_rounded;
       case NotificationType.walletBudgetWarning:     return Icons.account_balance_wallet_rounded;
       case NotificationType.walletBudgetExceeded:    return Icons.account_balance_wallet_rounded;
       case NotificationType.walletDailyWarning:      return Icons.credit_card_rounded;
@@ -154,6 +156,7 @@ class AppNotification {
       case NotificationType.walletExpenseDueSoon:
       case NotificationType.walletExpensePaid:
       case NotificationType.walletLinkedExpensePaid:
+      case NotificationType.walletLinkedEventExpenseRemoved:
         return const Color(0xFF3BBFA3); // teal
       case NotificationType.walletExpenseOverdue:
       case NotificationType.walletBudgetExceeded:

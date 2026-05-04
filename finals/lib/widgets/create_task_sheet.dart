@@ -1918,26 +1918,35 @@ class _CostSection extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Amount field
-                TextField(
-                  controller: costCtrl,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  style: const TextStyle(color: kWhite, fontSize: 15),
-                  decoration: InputDecoration(
-                    hintText: 'Amount (e.g. 250.00)',
-                    hintStyle:
-                        TextStyle(color: kWhite.withOpacity(0.3), fontSize: 14),
-                    prefixIcon: Icon(Icons.attach_money_rounded,
-                        color: kWhite.withOpacity(0.4), size: 18),
-                    filled: true,
-                    fillColor: kWhite.withOpacity(0.06),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    color: kWhite.withOpacity(0.06),
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+                  child: Row(children: [
+                    Text('₱',
+                        style: TextStyle(
+                            color: kWhite.withOpacity(0.6),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600)),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: TextField(
+                        controller: costCtrl,
+                        keyboardType:
+                            const TextInputType.numberWithOptions(decimal: true),
+                        style: const TextStyle(color: kWhite, fontSize: 15),
+                        decoration: InputDecoration(
+                          hintText: 'Amount (e.g. 250.00)',
+                          hintStyle:
+                              TextStyle(color: kWhite.withOpacity(0.3), fontSize: 14),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                      ),
+                    ),
+                  ]),
                 ),
                 const SizedBox(height: 10),
                 // Category chips

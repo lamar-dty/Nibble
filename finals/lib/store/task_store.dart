@@ -295,6 +295,15 @@ class TaskStore extends ChangeNotifier with WidgetsBindingObserver {
   void updateEvent(Event updated) {
     final idx = _events.indexWhere((e) => e.id == updated.id);
     if (idx == -1) return; // defensive
+    final old = _events[idx];
+    // If the old event had a linked expense and the new one doesn't (or has a
+    // different one), remove the stale expense from the wallet.
+    if (old.linkedExpenseId != null &&
+        old.linkedExpenseId != updated.linkedExpenseId) {
+      final expIdx = WalletStore.instance
+          .findExpenseIndexByEventId(old.linkedExpenseId!);
+      if (expIdx != -1) WalletStore.instance.removeExpense(expIdx);
+    }
     _events[idx] = updated;
     _notifications.removeWhere((n) => n.sourceId == updated.id);
     _generateEventNotifications(updated);
@@ -304,6 +313,24 @@ class TaskStore extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   void deleteEvent(String id) {
+    // Remove linked wallet expense before removing the event.
+    final event = _events.firstWhere((e) => e.id == id, orElse: () => _events.first);
+    if (event.id == id && event.linkedExpenseId != null) {
+      final idx = WalletStore.instance
+          .findExpenseIndexByEventId(event.linkedExpenseId!);
+      if (idx != -1) {
+        final expense = WalletStore.instance.expenses[idx];
+        WalletStore.instance.removeExpense(idx);
+        addWalletNotification(AppNotification(
+          id:       'wallet_event_expense_removed_${expense.id}',
+          type:     NotificationType.walletLinkedEventExpenseRemoved,
+          sourceId: expense.id,
+          title:    'Expense Removed',
+          subtitle: expense.name,
+          detail:   'Removed because linked event "${event.title}" was deleted.',
+        ));
+      }
+    }
     _events.removeWhere((e) => e.id == id);
     _notifications.removeWhere((n) => n.sourceId == id);
     notifyListeners();
