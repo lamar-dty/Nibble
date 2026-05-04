@@ -87,6 +87,16 @@ class MyApp extends StatelessWidget {
           scaffoldBackgroundColor: AppColors.bg,
           fontFamily: 'SF Pro Display',
           scrollbarTheme: const ScrollbarThemeData(),
+          colorScheme: ColorScheme.dark(
+            surface: AppColors.bg,
+            background: AppColors.bg,
+          ),
+          appBarTheme: AppBarTheme(
+            backgroundColor: AppColors.bg,
+            surfaceTintColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            elevation: 0,
+          ),
         ),
         scrollBehavior: const ScrollBehaviorNoGlow(),
         home: const SplashScreen(),
